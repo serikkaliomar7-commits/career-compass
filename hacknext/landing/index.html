@@ -53,10 +53,16 @@
   }
   .logo { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; text-decoration: none; color: #fff; }
   .logo span { color: var(--lime); }
+  .top-right { display: flex; align-items: center; gap: 8px; }
   .btn-top {
     background: var(--lime); color: var(--ink); text-decoration: none;
-    font-weight: 700; font-size: 15px; padding: 10px 16px; border-radius: 999px;
+    font-weight: 700; font-size: 14px; padding: 9px 13px; border-radius: 999px;
     white-space: nowrap;
+  }
+  .lang {
+    font: inherit; font-size: 13px; font-weight: 700; color: #fff; cursor: pointer;
+    background: rgba(255,255,255,0.16); border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 999px; padding: 8px 11px; white-space: nowrap;
   }
 
   /* Первый экран */
@@ -197,21 +203,24 @@
 <header>
   <div class="topbar">
     <a class="logo" href="#top" aria-label="Ventorme">ventorme<span>✦</span></a>
-    <a class="btn-top js-reg" href="https://ventorme.ai/register?utm_source=hacknext&utm_campaign=team-058">Регистрация</a>
+    <div class="top-right">
+      <button class="lang" id="langBtn" type="button" aria-label="Тілді ауыстыру / Сменить язык">ҚАЗ</button>
+      <a class="btn-top js-reg" href="https://ventorme.ai/register?utm_source=hacknext&amp;utm_campaign=team-058" data-i18n="reg">Регистрация</a>
+    </div>
   </div>
 
   <div class="wrap hero" id="top">
-    <h1>Не знаешь, <em>кем стать</em> и куда поступать?</h1>
-    <p>Ventorme подберёт профессию и вузы под тебя и покажет, хватит ли баллов ЕНТ на грант.</p>
+    <h1 data-i18n-html="h1">Не знаешь, <em>кем стать</em> и куда поступать?</h1>
+    <p data-i18n="lead">Ventorme подберёт профессию и вузы под тебя и покажет, хватит ли баллов ЕНТ на грант.</p>
     <div class="chips">
-      <span class="chip">⏱ 1 минута</span>
-      <span class="chip">Без регистрации</span>
-      <span class="chip">Бесплатно</span>
+      <span class="chip" data-i18n="chip1">⏱ 1 минута</span>
+      <span class="chip" data-i18n="chip2">Без регистрации</span>
+      <span class="chip" data-i18n="chip3">Бесплатно</span>
     </div>
 
     <div id="heroStart">
-      <button class="btn btn-lime" id="startQuiz" type="button">Ответить на 4 вопроса →</button>
-      <a class="btn btn-ghost js-reg" href="https://ventorme.ai/register?utm_source=hacknext&utm_campaign=team-058">или сразу зарегистрироваться</a>
+      <button class="btn btn-lime" id="startQuiz" type="button" data-i18n="start">Ответить на 4 вопроса →</button>
+      <a class="btn btn-ghost js-reg" href="https://ventorme.ai/register?utm_source=hacknext&amp;utm_campaign=team-058" data-i18n="regNow">или сразу зарегистрироваться</a>
     </div>
 
     <div class="quiz" id="quiz" aria-live="polite"></div>
@@ -221,130 +230,238 @@
 <main class="wrap">
 
   <section>
-    <h2>Что внутри Ventorme</h2>
+    <h2 data-i18n="featTitle">Что внутри Ventorme</h2>
     <div class="cards">
-      <div class="card"><div class="ico">🧭</div><div><b>Профтест</b><p>Поймёшь, какие профессии подходят именно тебе</p></div></div>
-      <div class="card"><div class="ico">🎓</div><div><b>Подбор вузов</b><p>Вузы в Казахстане и за рубежом под твои интересы</p></div></div>
-      <div class="card"><div class="ico">🧮</div><div><b>Калькулятор гранта по ЕНТ</b><p>Сколько баллов нужно, чтобы пройти на грант</p></div></div>
-      <div class="card"><div class="ico">📚</div><div><b>Подготовка к IELTS и SAT</b><p>Если хочешь учиться за границей</p></div></div>
-      <div class="card"><div class="ico">✍️</div><div><b>Помощь с эссе</b><p>Для поступления в зарубежные вузы</p></div></div>
-      <div class="card"><div class="ico">🤖</div><div><b>ИИ-помощник Venti</b><p>Отвечает на вопросы о поступлении в любое время</p></div></div>
+      <div class="card"><div class="ico">🧭</div><div><b data-i18n="f1t">Профтест</b><p data-i18n="f1d">Поймёшь, какие профессии подходят именно тебе</p></div></div>
+      <div class="card"><div class="ico">🎓</div><div><b data-i18n="f2t">Подбор вузов</b><p data-i18n="f2d">Вузы в Казахстане и за рубежом под твои интересы</p></div></div>
+      <div class="card"><div class="ico">🧮</div><div><b data-i18n="f3t">Калькулятор гранта по ЕНТ</b><p data-i18n="f3d">Сколько баллов нужно, чтобы пройти на грант</p></div></div>
+      <div class="card"><div class="ico">📚</div><div><b data-i18n="f4t">Подготовка к IELTS и SAT</b><p data-i18n="f4d">Если хочешь учиться за границей</p></div></div>
+      <div class="card"><div class="ico">✍️</div><div><b data-i18n="f5t">Помощь с эссе</b><p data-i18n="f5d">Для поступления в зарубежные вузы</p></div></div>
+      <div class="card"><div class="ico">🤖</div><div><b data-i18n="f6t">ИИ-помощник Venti</b><p data-i18n="f6d">Отвечает на вопросы о поступлении в любое время</p></div></div>
     </div>
   </section>
 
   <section>
-    <h2>Что будет после кнопки</h2>
+    <h2 data-i18n="stepsTitle">Что будет после кнопки</h2>
     <div class="steps">
-      <div class="step"><b>Регистрация — 30 секунд</b><p>Через Google или по почте</p></div>
-      <div class="step"><b>Пара вопросов о тебе</b><p>Класс, интересы, планы. Пройди до конца, чтобы Ventorme смог подобрать профессии и вузы</p></div>
-      <div class="step"><b>Твой план поступления</b><p>Профессии, вузы и что делать дальше</p></div>
+      <div class="step"><b data-i18n="s1t">Регистрация — 30 секунд</b><p data-i18n="s1d">Через Google или по почте</p></div>
+      <div class="step"><b data-i18n="s2t">Пара вопросов о тебе</b><p data-i18n="s2d">Класс, интересы, планы. Пройди до конца, чтобы Ventorme смог подобрать профессии и вузы</p></div>
+      <div class="step"><b data-i18n="s3t">Твой план поступления</b><p data-i18n="s3d">Профессии, вузы и что делать дальше</p></div>
     </div>
     <div class="tip">
-      <b>Подсказка, чтобы не застрять</b>
-      На странице регистрации сначала поставь галочку согласия с документами — без неё кнопка Google не нажимается. После входа через Google пару секунд может быть белый экран: это загрузка, подожди.
+      <b data-i18n="tipT">Подсказка, чтобы не застрять</b>
+      <span data-i18n="tipD">На странице регистрации сначала поставь галочку согласия с документами — без неё кнопка Google не нажимается. После входа через Google пару секунд может быть белый экран: это загрузка, подожди.</span>
     </div>
   </section>
 
   <section>
-    <h2>Частые вопросы</h2>
-    <details>
-      <summary>Это платно?</summary>
-      <p>Регистрация бесплатная, начать пользоваться можно бесплатно. Платные тарифы — по желанию, если понадобятся дополнительные функции.</p>
-    </details>
-    <details>
-      <summary>Что я получу после регистрации?</summary>
-      <p>Доступ к профтесту, подбору вузов, калькулятору гранта по ЕНТ и ИИ-помощнику Venti. После онбординга — персональные рекомендации профессий и вузов.</p>
-    </details>
-    <details>
-      <summary>А если у меня не идеальные оценки?</summary>
-      <p>Ventorme для того и нужен: он помогает найти направления и вузы, которые подходят под твои интересы и результаты, а не только под отличников.</p>
-    </details>
-    <details>
-      <summary>Что с моими данными?</summary>
-      <p>Для регистрации нужна только почта или аккаунт Google. Перед регистрацией Ventorme просит согласие на обработку данных — с документами можно ознакомиться на странице регистрации.</p>
-    </details>
-    <details>
-      <summary>Я ещё в 8–9 классе, мне рано?</summary>
-      <p>Нет. Чем раньше поймёшь, что тебе интересно, тем проще выбрать профильные предметы ЕНТ и подготовиться.</p>
-    </details>
+    <h2 data-i18n="faqTitle">Частые вопросы</h2>
+    <details><summary data-i18n="q1">Это платно?</summary><p data-i18n="a1">Регистрация бесплатная, начать пользоваться можно бесплатно. Платные тарифы — по желанию, если понадобятся дополнительные функции.</p></details>
+    <details><summary data-i18n="q2">Что я получу после регистрации?</summary><p data-i18n="a2">Доступ к профтесту, подбору вузов, калькулятору гранта по ЕНТ и ИИ-помощнику Venti. После онбординга — персональные рекомендации профессий и вузов.</p></details>
+    <details><summary data-i18n="q3">А если у меня не идеальные оценки?</summary><p data-i18n="a3">Ventorme для того и нужен: он помогает найти направления и вузы, которые подходят под твои интересы и результаты, а не только под отличников.</p></details>
+    <details><summary data-i18n="q4">Что с моими данными?</summary><p data-i18n="a4">Для регистрации нужна только почта или аккаунт Google. Перед регистрацией Ventorme просит согласие на обработку данных — с документами можно ознакомиться на странице регистрации.</p></details>
+    <details><summary data-i18n="q5">Я ещё в 8–9 классе, мне рано?</summary><p data-i18n="a5">Нет. Чем раньше поймёшь, что тебе интересно, тем проще выбрать профильные предметы ЕНТ и подготовиться.</p></details>
   </section>
 
   <div class="final">
-    <h2>Узнай свой путь к поступлению</h2>
-    <p>Бесплатно. Регистрация за 30 секунд.</p>
-    <a class="btn btn-lime js-reg" href="https://ventorme.ai/register?utm_source=hacknext&utm_campaign=team-058">Зарегистрироваться в Ventorme</a>
+    <h2 data-i18n="finalT">Узнай свой путь к поступлению</h2>
+    <p data-i18n="finalD">Бесплатно. Регистрация за 30 секунд.</p>
+    <a class="btn btn-lime js-reg" href="https://ventorme.ai/register?utm_source=hacknext&amp;utm_campaign=team-058" data-i18n="finalBtn">Зарегистрироваться в Ventorme</a>
   </div>
 </main>
 
-<footer>
+<footer data-i18n="footer">
   Ventorme — платформа для выбора профессии и поступления. Страница сделана командой хакатона Hacknext 2026, регистрация проходит на сайте ventorme.ai.
 </footer>
 
 <div class="sticky" id="sticky">
-  <a class="btn btn-blue js-reg" href="https://ventorme.ai/register?utm_source=hacknext&utm_campaign=team-058">Зарегистрироваться бесплатно</a>
+  <a class="btn btn-blue js-reg" href="https://ventorme.ai/register?utm_source=hacknext&amp;utm_campaign=team-058" data-i18n="stickyBtn">Зарегистрироваться бесплатно</a>
 </div>
 
 <script>
 (function () {
-  // Номер команды 058 задан в ссылках выше (team-058).
+  // Ссылка команды 058 стоит в href кнопок выше (team-058).
   var regLinks = document.querySelectorAll(".js-reg");
   var REG_URL = regLinks[0].getAttribute("href");
   if (REG_URL.indexOf("team-XXX") !== -1) {
     document.getElementById("teamWarning").style.display = "block";
   }
 
-  var QUESTIONS = [
-    { key: "grade", title: "В каком ты классе?",
-      options: [["8–9 класс", "early"], ["10 класс", "mid"], ["11 класс", "final"], ["Колледж", "college"]] },
-    { key: "interest", title: "Что тебе ближе всего?",
-      options: [["Цифры, логика, задачи", "logic"], ["Люди и общение", "people"], ["Рисовать, придумывать, снимать", "creative"],
-                ["Техника и как всё устроено", "tech"], ["Природа, здоровье, биология", "nature"]] },
-    { key: "where", title: "Где хочешь учиться?",
-      options: [["В Казахстане, на грант", "kz"], ["За границей", "abroad"], ["Пока не знаю", "unsure"]] },
-    { key: "pain", title: "Что сейчас сложнее всего?",
-      options: [["Не знаю, кем хочу стать", "career"], ["Не знаю, хватит ли баллов", "score"],
-                ["Подготовка к IELTS / SAT", "exams"], ["Не знаю, с чего начать", "start"]] }
-  ];
-
-  var DIRECTIONS = {
-    logic: ["IT и программирование", "Аналитика данных", "Финансы", "Инженерия"],
-    people: ["Психология", "Менеджмент", "Педагогика", "Журналистика"],
-    creative: ["Дизайн", "Архитектура", "Медиа и кино", "Маркетинг"],
-    tech: ["Инженерия", "Робототехника", "IT", "Энергетика"],
-    nature: ["Медицина", "Биотехнологии", "Экология", "Фармацевтика"]
+  var T = {
+    ru: {
+      docTitle: "Ventorme — узнай, кем стать и куда поступать",
+      reg: "Регистрация",
+      h1: "Не знаешь, <em>кем стать</em> и куда поступать?",
+      lead: "Ventorme подберёт профессию и вузы под тебя и покажет, хватит ли баллов ЕНТ на грант.",
+      chip1: "⏱ 1 минута", chip2: "Без регистрации", chip3: "Бесплатно",
+      start: "Ответить на 4 вопроса →", regNow: "или сразу зарегистрироваться",
+      featTitle: "Что внутри Ventorme",
+      f1t: "Профтест", f1d: "Поймёшь, какие профессии подходят именно тебе",
+      f2t: "Подбор вузов", f2d: "Вузы в Казахстане и за рубежом под твои интересы",
+      f3t: "Калькулятор гранта по ЕНТ", f3d: "Сколько баллов нужно, чтобы пройти на грант",
+      f4t: "Подготовка к IELTS и SAT", f4d: "Если хочешь учиться за границей",
+      f5t: "Помощь с эссе", f5d: "Для поступления в зарубежные вузы",
+      f6t: "ИИ-помощник Venti", f6d: "Отвечает на вопросы о поступлении в любое время",
+      stepsTitle: "Что будет после кнопки",
+      s1t: "Регистрация — 30 секунд", s1d: "Через Google или по почте",
+      s2t: "Пара вопросов о тебе", s2d: "Класс, интересы, планы. Пройди до конца, чтобы Ventorme смог подобрать профессии и вузы",
+      s3t: "Твой план поступления", s3d: "Профессии, вузы и что делать дальше",
+      tipT: "Подсказка, чтобы не застрять",
+      tipD: "На странице регистрации сначала поставь галочку согласия с документами — без неё кнопка Google не нажимается. После входа через Google пару секунд может быть белый экран: это загрузка, подожди.",
+      faqTitle: "Частые вопросы",
+      q1: "Это платно?", a1: "Регистрация бесплатная, начать пользоваться можно бесплатно. Платные тарифы — по желанию, если понадобятся дополнительные функции.",
+      q2: "Что я получу после регистрации?", a2: "Доступ к профтесту, подбору вузов, калькулятору гранта по ЕНТ и ИИ-помощнику Venti. После онбординга — персональные рекомендации профессий и вузов.",
+      q3: "А если у меня не идеальные оценки?", a3: "Ventorme для того и нужен: он помогает найти направления и вузы, которые подходят под твои интересы и результаты, а не только под отличников.",
+      q4: "Что с моими данными?", a4: "Для регистрации нужна только почта или аккаунт Google. Перед регистрацией Ventorme просит согласие на обработку данных — с документами можно ознакомиться на странице регистрации.",
+      q5: "Я ещё в 8–9 классе, мне рано?", a5: "Нет. Чем раньше поймёшь, что тебе интересно, тем проще выбрать профильные предметы ЕНТ и подготовиться.",
+      finalT: "Узнай свой путь к поступлению", finalD: "Бесплатно. Регистрация за 30 секунд.", finalBtn: "Зарегистрироваться в Ventorme",
+      footer: "Ventorme — платформа для выбора профессии и поступления. Страница сделана командой хакатона Hacknext 2026, регистрация проходит на сайте ventorme.ai.",
+      stickyBtn: "Зарегистрироваться бесплатно",
+      langBtn: "ҚАЗ",
+      qStep: "Вопрос {n} из {t}", back: "← Назад", restart: "Пройти заново",
+      resTitle: "Тебе стоит присмотреться к этим направлениям:",
+      resBtn: "Получить полный разбор в Ventorme →",
+      resNote: "Это быстрая подсказка по твоим ответам, а не результат профтеста. Полный профтест, подбор вузов и план поступления — в Ventorme после бесплатной регистрации.",
+      questions: [
+        { key: "grade", title: "В каком ты классе?",
+          options: [["8–9 класс", "early"], ["10 класс", "mid"], ["11 класс", "final"], ["Колледж", "college"]] },
+        { key: "interest", title: "Что тебе ближе всего?",
+          options: [["Цифры, логика, задачи", "logic"], ["Люди и общение", "people"], ["Рисовать, придумывать, снимать", "creative"],
+                    ["Техника и как всё устроено", "tech"], ["Природа, здоровье, биология", "nature"]] },
+        { key: "where", title: "Где хочешь учиться?",
+          options: [["В Казахстане, на грант", "kz"], ["За границей", "abroad"], ["Пока не знаю", "unsure"]] },
+        { key: "pain", title: "Что сейчас сложнее всего?",
+          options: [["Не знаю, кем хочу стать", "career"], ["Не знаю, хватит ли баллов", "score"],
+                    ["Подготовка к IELTS / SAT", "exams"], ["Не знаю, с чего начать", "start"]] }
+      ],
+      dirs: {
+        logic: ["IT и программирование", "Аналитика данных", "Финансы", "Инженерия"],
+        people: ["Психология", "Менеджмент", "Педагогика", "Журналистика"],
+        creative: ["Дизайн", "Архитектура", "Медиа и кино", "Маркетинг"],
+        tech: ["Инженерия", "Робототехника", "IT", "Энергетика"],
+        nature: ["Медицина", "Биотехнологии", "Экология", "Фармацевтика"]
+      },
+      next: {
+        career: "Пройди полный профтест в Ventorme — он покажет, какие профессии подходят тебе больше всего.",
+        score: "В Ventorme есть калькулятор гранта по ЕНТ — узнаешь, сколько баллов нужно на твою специальность.",
+        exams: "В Ventorme есть подготовка к IELTS и SAT — начни с проверки уровня.",
+        start: "Ventorme соберёт план по шагам: профессия → вузы → экзамены → поступление."
+      },
+      abroad: " А для учёбы за границей там же есть подготовка к IELTS/SAT и помощь с эссе.",
+      grade: {
+        early: "У тебя есть время спокойно выбрать профильные предметы.",
+        mid: "Самое время определиться с профильными предметами ЕНТ.",
+        final: "До ЕНТ осталось немного — план нужен уже сейчас.",
+        college: "После колледжа тоже можно поступить в вуз — Ventorme подскажет как."
+      }
+    },
+    kk: {
+      docTitle: "Ventorme — кім болатыныңды және қайда түсетініңді біл",
+      reg: "Тіркелу",
+      h1: "<em>Кім боларыңды</em> және қайда түсеріңді білмейсің бе?",
+      lead: "Ventorme саған мамандық пен университет таңдап, ҰБТ баллың грантқа жете ме, соны көрсетеді.",
+      chip1: "⏱ 1 минут", chip2: "Тіркелусіз", chip3: "Тегін",
+      start: "4 сұраққа жауап бер →", regNow: "немесе бірден тіркел",
+      featTitle: "Ventorme-да не бар",
+      f1t: "Кәсіптік тест", f1d: "Саған қандай мамандықтар сай келетінін түсінесің",
+      f2t: "Университет таңдау", f2d: "Қызығушылығыңа сай Қазақстандағы және шетелдегі университеттер",
+      f3t: "ҰБТ бойынша грант калькуляторы", f3d: "Грантқа түсу үшін қанша балл керек",
+      f4t: "IELTS және SAT-қа дайындық", f4d: "Шетелде оқығың келсе",
+      f5t: "Эссе жазуға көмек", f5d: "Шетелдік университеттерге түсу үшін",
+      f6t: "Venti ЖИ-көмекшісі", f6d: "Түсу туралы сұрақтарға кез келген уақытта жауап береді",
+      stepsTitle: "Батырмадан кейін не болады",
+      s1t: "Тіркелу — 30 секунд", s1d: "Google арқылы немесе пошта арқылы",
+      s2t: "Өзің туралы бірнеше сұрақ", s2d: "Сынып, қызығушылықтар, жоспарлар. Ventorme саған мамандық пен университет таңдай алуы үшін соңына дейін өт",
+      s3t: "Сенің түсу жоспарың", s3d: "Мамандықтар, университеттер және әрі қарай не істеу керек",
+      tipT: "Тоқтап қалмау үшін кеңес",
+      tipD: "Тіркелу бетінде алдымен құжаттарға келісім белгісін қой — онсыз Google батырмасы басылмайды. Google арқылы кіргеннен кейін бірнеше секунд ақ экран болуы мүмкін: бұл жүктелу, күте тұр.",
+      faqTitle: "Жиі қойылатын сұрақтар",
+      q1: "Бұл ақылы ма?", a1: "Тіркелу тегін, пайдалануды тегін бастауға болады. Ақылы тарифтер — қосымша мүмкіндіктер керек болса, өз қалауыңмен.",
+      q2: "Тіркелгеннен кейін не аламын?", a2: "Кәсіптік тестке, университет таңдауға, ҰБТ грант калькуляторына және Venti ЖИ-көмекшісіне қолжетімділік. Онбордингтен кейін — мамандықтар мен университеттер бойынша жеке ұсыныстар.",
+      q3: "Бағаларым мінсіз болмаса ше?", a3: "Ventorme дәл осы үшін керек: ол тек үздіктерге емес, сенің қызығушылығың мен нәтижелеріңе сай бағыттар мен университеттерді табуға көмектеседі.",
+      q4: "Менің деректерім не болады?", a4: "Тіркелу үшін тек пошта немесе Google аккаунты керек. Тіркелер алдында Ventorme деректерді өңдеуге келісім сұрайды — құжаттармен тіркелу бетінде танысуға болады.",
+      q5: "Мен әлі 8–9 сыныптамын, ерте ме?", a5: "Жоқ. Өзіңе не қызық екенін неғұрлым ерте түсінсең, ҰБТ бейіндік пәндерін таңдау және дайындалу соғұрлым оңай.",
+      finalT: "Түсуге апаратын жолыңды біл", finalD: "Тегін. Тіркелу 30 секунд.", finalBtn: "Ventorme-ға тіркелу",
+      footer: "Ventorme — мамандық таңдауға және университетке түсуге арналған платформа. Бұл бетті Hacknext 2026 хакатонының командасы жасады, тіркелу ventorme.ai сайтында өтеді.",
+      stickyBtn: "Тегін тіркелу",
+      langBtn: "РУС",
+      qStep: "{n}-сұрақ / {t}", back: "← Артқа", restart: "Қайта өту",
+      resTitle: "Мына бағыттарға назар аудар:",
+      resBtn: "Ventorme-да толық талдау алу →",
+      resNote: "Бұл — жауаптарың бойынша жылдам кеңес, кәсіптік тесттің нәтижесі емес. Толық кәсіптік тест, университет таңдау және түсу жоспары — тегін тіркелгеннен кейін Ventorme-да.",
+      questions: [
+        { key: "grade", title: "Нешінші сыныпта оқисың?",
+          options: [["8–9 сынып", "early"], ["10 сынып", "mid"], ["11 сынып", "final"], ["Колледж", "college"]] },
+        { key: "interest", title: "Саған не жақын?",
+          options: [["Сандар, логика, есептер", "logic"], ["Адамдар және қарым-қатынас", "people"], ["Сурет салу, ойлап табу, түсіру", "creative"],
+                    ["Техника және бәрі қалай жұмыс істейді", "tech"], ["Табиғат, денсаулық, биология", "nature"]] },
+        { key: "where", title: "Қайда оқығың келеді?",
+          options: [["Қазақстанда, грантқа", "kz"], ["Шетелде", "abroad"], ["Әзірге білмеймін", "unsure"]] },
+        { key: "pain", title: "Қазір не ең қиын?",
+          options: [["Кім болғым келетінін білмеймін", "career"], ["Баллым жете ме, білмеймін", "score"],
+                    ["IELTS / SAT-қа дайындық", "exams"], ["Неден бастарымды білмеймін", "start"]] }
+      ],
+      dirs: {
+        logic: ["IT және бағдарламалау", "Деректер аналитикасы", "Қаржы", "Инженерия"],
+        people: ["Психология", "Менеджмент", "Педагогика", "Журналистика"],
+        creative: ["Дизайн", "Сәулет", "Медиа және кино", "Маркетинг"],
+        tech: ["Инженерия", "Робототехника", "IT", "Энергетика"],
+        nature: ["Медицина", "Биотехнология", "Экология", "Фармацевтика"]
+      },
+      next: {
+        career: "Ventorme-да толық кәсіптік тесттен өт — ол саған қай мамандықтар көбірек сай келетінін көрсетеді.",
+        score: "Ventorme-да ҰБТ бойынша грант калькуляторы бар — өз мамандығыңа қанша балл керек екенін білесің.",
+        exams: "Ventorme-да IELTS және SAT-қа дайындық бар — деңгейіңді тексеруден баста.",
+        start: "Ventorme қадамдық жоспар құрады: мамандық → университеттер → емтихандар → түсу."
+      },
+      abroad: " Ал шетелде оқу үшін онда IELTS/SAT-қа дайындық пен эссе жазуға көмек те бар.",
+      grade: {
+        early: "Бейіндік пәндерді асықпай таңдауға уақытың бар.",
+        mid: "ҰБТ бейіндік пәндерін анықтайтын кез келді.",
+        final: "ҰБТ-ға аз уақыт қалды — жоспар қазір керек.",
+        college: "Колледжден кейін де университетке түсуге болады — Ventorme қалай екенін айтады."
+      }
+    }
   };
 
-  var NEXT = {
-    career: "Пройди полный профтест в Ventorme — он покажет, какие профессии подходят тебе больше всего.",
-    score: "В Ventorme есть калькулятор гранта по ЕНТ — узнаешь, сколько баллов нужно на твою специальность.",
-    exams: "В Ventorme есть подготовка к IELTS и SAT — начни с проверки уровня.",
-    start: "Ventorme соберёт план по шагам: профессия → вузы → экзамены → поступление."
-  };
-
-  var GRADE_HINT = {
-    early: "У тебя есть время спокойно выбрать профильные предметы.",
-    mid: "Самое время определиться с профильными предметами ЕНТ.",
-    final: "До ЕНТ осталось немного — план нужен уже сейчас.",
-    college: "После колледжа тоже можно поступить в вуз — Ventorme подскажет как."
-  };
+  // Язык: ?lang=kk в ссылке → сохранённый выбор → язык телефона → русский
+  function pickLang() {
+    var m = location.search.match(/[?&]lang=(kk|kz|ru)\b/);
+    if (m) return m[1] === "ru" ? "ru" : "kk";
+    try { var saved = localStorage.getItem("vt_lang"); if (saved === "kk" || saved === "ru") return saved; } catch (e) {}
+    return /^kk/i.test(navigator.language || "") ? "kk" : "ru";
+  }
+  var lang = pickLang();
+  var L = T[lang];
 
   var quiz = document.getElementById("quiz");
   var heroStart = document.getElementById("heroStart");
   var answers = {};
   var step = 0;
+  var quizOpen = false;
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
 
+  function applyLang() {
+    L = T[lang];
+    document.documentElement.lang = lang === "kk" ? "kk" : "ru";
+    document.title = L.docTitle;
+    document.querySelectorAll("[data-i18n]").forEach(function (el) { el.textContent = L[el.getAttribute("data-i18n")]; });
+    document.querySelectorAll("[data-i18n-html]").forEach(function (el) { el.innerHTML = L[el.getAttribute("data-i18n-html")]; });
+    document.getElementById("langBtn").textContent = L.langBtn;
+    if (quizOpen) { if (step < L.questions.length) renderQuestion(); else renderResult(false); }
+  }
+
   function renderQuestion() {
-    var q = QUESTIONS[step];
-    var html = '<div class="progress"><div style="width:' + (step / QUESTIONS.length * 100) + '%"></div></div>' +
-      '<div class="q-step">Вопрос ' + (step + 1) + ' из ' + QUESTIONS.length + '</div>' +
+    var qs = L.questions, q = qs[step];
+    var html = '<div class="progress"><div style="width:' + (step / qs.length * 100) + '%"></div></div>' +
+      '<div class="q-step">' + esc(L.qStep.replace("{n}", step + 1).replace("{t}", qs.length)) + '</div>' +
       '<div class="q-title">' + esc(q.title) + '</div><div class="options">';
     q.options.forEach(function (o) {
       html += '<button type="button" class="opt" data-v="' + esc(o[1]) + '">' + esc(o[0]) + '</button>';
     });
     html += '</div>';
-    if (step > 0) html += '<button type="button" class="q-back" id="qBack">← Назад</button>';
+    if (step > 0) html += '<button type="button" class="q-back" id="qBack">' + esc(L.back) + '</button>';
     quiz.innerHTML = html;
     quiz.querySelectorAll(".opt").forEach(function (b) {
       b.addEventListener("click", function () {
@@ -352,7 +469,7 @@
         answers[q.key] = b.getAttribute("data-v");
         setTimeout(function () {
           step++;
-          if (step < QUESTIONS.length) renderQuestion(); else renderResult();
+          if (step < L.questions.length) renderQuestion(); else renderResult(true);
         }, 160);
       });
     });
@@ -360,27 +477,36 @@
     if (back) back.addEventListener("click", function () { step--; renderQuestion(); });
   }
 
-  function renderResult() {
-    var dirs = DIRECTIONS[answers.interest] || [];
-    var next = NEXT[answers.pain];
-    if (answers.where === "abroad" && answers.pain !== "exams") next += " А для учёбы за границей там же есть подготовка к IELTS/SAT и помощь с эссе.";
+  function renderResult(scroll) {
+    var dirs = L.dirs[answers.interest] || [];
+    var next = L.next[answers.pain] || "";
+    if (answers.where === "abroad" && answers.pain !== "exams") next += L.abroad;
     var html = '<div class="progress"><div style="width:100%"></div></div><div class="result">' +
-      '<h3>Тебе стоит присмотреться к этим направлениям:</h3><div class="dirs">';
+      '<h3>' + esc(L.resTitle) + '</h3><div class="dirs">';
     dirs.forEach(function (d) { html += '<span>' + esc(d) + '</span>'; });
-    html += '</div><div class="next"><b>' + esc(GRADE_HINT[answers.grade] || "") + '</b><br>' + esc(next) + '</div>' +
-      '<a class="btn btn-blue js-reg" href="' + esc(REG_URL) + '">Получить полный разбор в Ventorme →</a>' +
-      '<div class="note">Это быстрая подсказка по твоим ответам, а не результат профтеста. Полный профтест, подбор вузов и план поступления — в Ventorme после бесплатной регистрации.</div>' +
-      '<button type="button" class="q-back" id="qRestart">Пройти заново</button></div>';
+    html += '</div><div class="next"><b>' + esc(L.grade[answers.grade] || "") + '</b><br>' + esc(next) + '</div>' +
+      '<a class="btn btn-blue js-reg" href="' + esc(REG_URL) + '">' + esc(L.resBtn) + '</a>' +
+      '<div class="note">' + esc(L.resNote) + '</div>' +
+      '<button type="button" class="q-back" id="qRestart">' + esc(L.restart) + '</button></div>';
     quiz.innerHTML = html;
-    quiz.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (scroll) quiz.scrollIntoView({ behavior: "smooth", block: "start" });
     document.getElementById("qRestart").addEventListener("click", function () { step = 0; answers = {}; renderQuestion(); });
   }
 
   document.getElementById("startQuiz").addEventListener("click", function () {
     heroStart.style.display = "none";
     quiz.classList.add("open");
+    quizOpen = true;
     renderQuestion();
   });
+
+  document.getElementById("langBtn").addEventListener("click", function () {
+    lang = lang === "kk" ? "ru" : "kk";
+    try { localStorage.setItem("vt_lang", lang); } catch (e) {}
+    applyLang();
+  });
+
+  if (lang !== "ru") applyLang();
 
   // Липкая кнопка появляется, когда шапка с первым экраном ушла вверх
   var sticky = document.getElementById("sticky");
