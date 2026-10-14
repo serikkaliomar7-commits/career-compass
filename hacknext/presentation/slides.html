@@ -60,6 +60,7 @@
   th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
   th { font-size: 13px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 800; }
   td b { font-weight: 800; }
+  table.tight { font-size: 14px; } table.tight th, table.tight td { padding: 6px 8px; }
 
   .shot { border-radius: 16px; border: 1px solid var(--line); background: #fff; object-fit: cover; object-position: top; }
   .shots { display: flex; gap: 14px; align-items: flex-start; }
@@ -297,12 +298,13 @@
   <div class="foot"><span>То же во внешнем браузере Safari — проблема в вёрстке, а не в Instagram</span><span>8</span></div>
 </section>
 
-<!-- 9. Кастдев -->
+<!-- 9. Живые наблюдения -->
 <section class="slide">
   <div class="kicker">Живые наблюдения</div>
-  <h2>Кастдев: что видит сверстник, который <em>впервые</em> открыл ventorme.ai</h2>
+  <h2>Кастдев и наш собственный путь новичка: <em>где люди спотыкаются</em></h2>
   <div class="row">
     <div class="col">
+      <p class="muted" style="font-size:15px;">Кастдев со сверстником, который впервые открыл ventorme.ai</p>
       <div class="quote">«Квиз сказал зарегистрироваться, чтобы получить ответ, — а после регистрации ответа нет»<small>Ерс</small></div>
       <div class="quote">«Всё платно. Главное окно непонятное»<small>Ерс</small></div>
       <div class="quote">«Свою школу не нашёл, регистрация длинная»<small>Ерс</small></div>
@@ -310,18 +312,21 @@
     </div>
     <div class="col">
       <div class="card" style="flex:1;">
-        <h3>Что подтвердилось и что нового</h3>
-        <ul>
-          <li><span class="tag yes">подтверждает</span> Первое впечатление верное: «сайт, где можно построить план поступления» — смысл понятен, но действие не очевидно</li>
-          <li><span class="tag hyp">новое</span> <b>Обещание квиза не выполняется</b> — после регистрации результата нет. Разочарование прямо перед онбордингом</li>
-          <li><span class="tag hyp">новое</span> В вопросах теста не хватает варианта «другое / все перечисленное»</li>
-          <li><span class="tag hyp">новое</span> Онбординг длинный: выбор школы, код подтверждения может не прийти</li>
-          <li><span class="tag hyp">новое</span> Узнаёт о поступлении из Telegram-каналов — это канал привлечения</li>
-        </ul>
+        <h3>Что видим вместе с данными</h3>
+        <table class="tight">
+          <tr><th>Наблюдение</th><th>Источник</th></tr>
+          <tr><td>Регистрация на телефоне — внизу меню из 10 пунктов</td><td style="white-space:nowrap">наша проверка <span class="src">Т9</span></td></tr>
+          <tr><td>Cookie-баннер закрывает квиз на первом экране</td><td style="white-space:nowrap">наша проверка <span class="src">Т9</span></td></tr>
+          <tr><td>Кнопка Google заблокирована до галочки согласия</td><td style="white-space:nowrap">наша проверка <span class="src">Т1</span></td></tr>
+          <tr><td><b>Обещание квиза не выполняется</b> — после регистрации результата нет</td><td>кастдев</td></tr>
+          <tr><td>В тесте нет варианта «другое / все перечисленное»</td><td>кастдев</td></tr>
+          <tr><td>Онбординг длинный: школы нет в списке, код может не прийти</td><td>кастдев</td></tr>
+          <tr><td>О поступлении узнают из Telegram-каналов</td><td>кастдев</td></tr>
+        </table>
       </div>
     </div>
   </div>
-  <div class="foot"><span>Метод: тест 5 секунд, задание «зарегистрируйся», разбор по сценарию</span><span>9</span></div>
+  <div class="foot"><span>Наша проверка: iPhone и Samsung, из Instagram, TikTok, Telegram, WhatsApp</span><span>9</span></div>
 </section>
 
 <!-- 10. Лендинг -->
