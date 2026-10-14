@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Почему уходят с главной Ventorme — команда 058</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: 1280px 720px; margin: 0; }
+  :root {
+    --blue: #3F3FF0; --blue-dark: #2B2BC4; --lime: #DDFF1A; --ink: #111133;
+    --muted: #5A5A78; --bg: #F5F6FB; --card: #FFFFFF; --line: #E3E4EE; --soft: #ECECFF;
+    --gray: #B8BACB; --red: #D93025;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Manrope", system-ui, sans-serif; color: var(--ink); background: #ccc; }
+  .slide {
+    width: 1280px; height: 720px; background: var(--bg); position: relative; overflow: hidden;
+    padding: 52px 64px 48px; page-break-after: always; break-after: page; display: flex; flex-direction: column;
+  }
+  .slide:last-child { page-break-after: auto; break-after: auto; }
+  .slide.blue { background: var(--blue); color: #fff; }
+  .kicker { font-size: 15px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); margin-bottom: 10px; }
+  .blue .kicker { color: var(--lime); }
+  h1 { font-size: 60px; line-height: 1.05; font-weight: 800; letter-spacing: -1.5px; }
+  h2 { font-size: 38px; line-height: 1.12; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 22px; }
+  h2 em, h1 em { font-style: normal; color: var(--blue); }
+  .blue h1 em, .blue h2 em { color: var(--lime); }
+  p, li { font-size: 19px; line-height: 1.45; }
+  .muted { color: var(--muted); }
+  .foot { position: absolute; left: 64px; right: 64px; bottom: 20px; font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; }
+  .blue .foot { color: rgba(255,255,255,.7); }
+  .row { display: flex; gap: 28px; flex: 1; min-height: 0; }
+  .col { flex: 1; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px 22px; }
+  .card h3 { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .card p, .card li { font-size: 17px; }
+  .src { font-size: 13px; font-weight: 800; color: var(--blue); background: var(--soft); border-radius: 6px; padding: 2px 7px; margin-left: 4px; white-space: nowrap; }
+  .big { font-size: 64px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+  .stat .lbl { font-size: 16px; color: var(--muted); margin-top: 6px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 6px; }
+
+  /* Горизонтальные бары: серый — сравнение, синий — то, на что смотрим */
+  .bars { display: flex; flex-direction: column; gap: 12px; }
+  .bar { display: grid; grid-template-columns: 210px 1fr 70px; align-items: center; gap: 12px; font-size: 16px; }
+  .bar .name { font-weight: 700; }
+  .bar .name small { display: block; font-weight: 600; color: var(--muted); font-size: 13px; }
+  .bar .track { height: 26px; background: transparent; border-left: 1px solid var(--line); }
+  .bar .fill { height: 100%; border-radius: 0 4px 4px 0; background: var(--gray); }
+  .bar .fill.hl { background: var(--blue); }
+  .bar .fill.bad { background: var(--blue-dark); }
+  .bar .val { font-weight: 800; font-variant-numeric: tabular-nums; }
+  .legend { display: flex; gap: 18px; font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+  .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  table { border-collapse: collapse; width: 100%; font-size: 16px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 13px; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); font-weight: 800; }
+  td b { font-weight: 800; }
+
+  .shot { border-radius: 16px; border: 1px solid var(--line); background: #fff; object-fit: cover; object-position: top; }
+  .shots { display: flex; gap: 14px; align-items: flex-start; }
+  .cap { font-size: 13px; color: var(--muted); margin-top: 6px; text-align: center; }
+  .quote { border-left: 4px solid var(--lime); background: var(--card); border-radius: 0 14px 14px 0; padding: 12px 16px; font-size: 18px; font-weight: 600; }
+  .quote small { display: block; font-size: 13px; color: var(--muted); font-weight: 600; margin-top: 4px; }
+  .tag { display: inline-block; font-size: 13px; font-weight: 800; padding: 4px 10px; border-radius: 999px; }
+  .tag.no { background: #FDE7E5; color: var(--red); }
+  .tag.yes { background: #E3F6E8; color: #1C7C3A; }
+  .tag.hyp { background: #FFF5CC; color: #8A6D00; }
+  .num { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--blue); color: #fff; font-weight: 800; font-size: 17px; margin-right: 10px; flex: 0 0 34px; }
+  .h-num .num { vertical-align: 6px; }
+</style>
+</head>
+<body>
+
+<!-- 1. Титул -->
+<section class="slide blue">
+  <div class="kicker">Hacknext 2026 × Ventorme · 1 тур</div>
+  <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
+    <h1>Почему 80% новых посетителей <em>уходят</em> с главной Ventorme — и как это исправить</h1>
+    <p style="font-size:24px; margin-top:28px; opacity:.92;">Разбор данных Т1–Т11, ручная проверка сайта, кастдев и новый лендинг</p>
+  </div>
+  <div style="display:flex; gap:48px; font-size:18px;">
+    <div><div style="opacity:.7; font-size:14px;">Команда</div><b>Swallow in the logo · №058</b></div>
+    <div><div style="opacity:.7; font-size:14px;">Участники</div><b>Nurali, Omar, Nurmukhamed</b></div>
+    <div><div style="opacity:.7; font-size:14px;">Школа</div><b>БИЛ Талдыкорган</b></div>
+  </div>
+</section>
+
+<!-- 2. Проблема -->
+<section class="slide">
+  <div class="kicker">Проблема</div>
+  <h2>Из 1 277 новых посетителей главной зарегистрировались <em>244</em></h2>
+  <div class="stats">
+    <div class="card stat"><div class="big">19,1%</div><div class="lbl">конверсия в регистрацию <span class="src">Т1</span></div></div>
+    <div class="card stat"><div class="big">80,5%</div><div class="lbl">заходят с телефона <span class="src">Т2</span></div></div>
+    <div class="card stat"><div class="big">52,5%</div><div class="lbl">приходят из Instagram <span class="src">Т3</span></div></div>
+    <div class="card stat"><div class="big">30%</div><div class="lbl">с телефона уходят меньше чем за 10 секунд <span class="src">Т7</span></div></div>
+  </div>
+  <div class="row" style="margin-top:24px;">
+    <div class="col card">
+      <h3>Что мы сделали</h3>
+      <ul>
+        <li>Разобрали все 11 таблиц; для ключевых сравнений посчитали 95% доверительные интервалы, чтобы отделить реальную разницу от случайной</li>
+        <li>Сами прошли путь новичка на iPhone и Samsung, из Instagram, Telegram, TikTok, WhatsApp</li>
+        <li>Провели кастдев со сверстником, который не видел сайт</li>
+        <li>Каждую догадку проверяли: одна не подтвердилась — показываем и её</li>
+      </ul>
+    </div>
+    <div class="col card">
+      <h3>Что нашли — коротко</h3>
+      <p><span class="num" style="display:inline-grid;">1</span>Холодный трафик из Instagram не получает ответа «зачем мне это»</p>
+      <p><span class="num" style="display:inline-grid;">2</span>На телефоне регистрация спрятана за меню из 10 пунктов</p>
+      <p><span class="num" style="display:inline-grid;">3</span>Квиз — главный источник регистраций — закрыт cookie-баннером</p>
+    </div>
+  </div>
+  <div class="foot"><span>Данные: новые посетители главной ventorme.ai, 17.08–20.09.2026</span><span>2</span></div>
+</section>
+
+<!-- 3. Ловушка: устройство -->
+<section class="slide">
+  <div class="kicker">Причина или совпадение · 1</div>
+  <h2>«С телефона регистрируются вдвое хуже» — <em>это не про телефон</em></h2>
+  <div class="row">
+    <div class="col">
+      <div class="legend"><span><i style="background:var(--gray)"></i>Компьютер</span><span><i style="background:var(--blue)"></i>Телефон</span></div>
+      <div class="card">
+        <p class="muted" style="font-size:15px; margin-bottom:10px;">Все источники вместе <span class="src">Т2</span></p>
+        <div class="bars">
+          <div class="bar"><span class="name">Компьютер</span><div class="track"><div class="fill" style="width:65.6%"></div></div><span class="val">32,8%</span></div>
+          <div class="bar"><span class="name">Телефон</span><div class="track"><div class="fill hl" style="width:31.2%"></div></div><span class="val">15,6%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="muted" style="font-size:15px; margin-bottom:10px;">Один и тот же источник — «Прямой заход» <span class="src">Т4</span></p>
+        <div class="bars">
+          <div class="bar"><span class="name">Компьютер <small>145 чел.</small></span><div class="track"><div class="fill" style="width:46.8%"></div></div><span class="val">23,4%</span></div>
+          <div class="bar"><span class="name">Телефон <small>223 чел.</small></span><div class="track"><div class="fill hl" style="width:46.6%"></div></div><span class="val">23,3%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col" style="flex:0.85;">
+      <div class="card" style="flex:1;">
+        <h3>Почему так</h3>
+        <p>98% трафика из Instagram — телефоны (658 из 670) <span class="src">Т4</span>. Instagram конвертирует плохо — и тянет вниз всю «телефонную» цифру.</p>
+        <p style="margin-top:12px;">При одинаковом источнике разницы нет: <b>23,3% против 23,4%</b>.</p>
+        <p style="margin-top:12px;">Без Instagram и Facebook: телефон 27,4% [22,8–32,4], компьютер 33,8% [27,9–40,2] — интервалы пересекаются.</p>
+        <p style="margin-top:14px; font-weight:800;">Вывод: важно не устройство, а то, откуда пришёл человек.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>В скобках — 95% доверительный интервал</span><span>3</span></div>
+</section>
+
+<!-- 4. Другие ловушки -->
+<section class="slide">
+  <div class="kicker">Причина или совпадение · 2</div>
+  <h2>Ещё 6 выводов, которые <em>напрашиваются</em>, но неверны</h2>
+  <table>
+    <tr><th style="width:34%">Кажется</th><th>На самом деле</th></tr>
+    <tr><td><b>«Кто дольше на сайте, тот регистрируется»</b> <span class="src">Т7</span></td><td>Обратная связь: регистрация сама удлиняет визит</td></tr>
+    <tr><td><b>«Квиз поднимает конверсию с 5,8% до 66,7%»</b> <span class="src">Т8</span></td><td>Самоотбор: квиз начинают заинтересованные. Сильный аргумент другой — 95% начавших доходят до конца</td></tr>
+    <tr><td><b>«Неделя 24–30 августа провалилась (6,8%)»</b> <span class="src">Т5</span></td><td>Сменился состав трафика: визитов в 1,5–2 раза больше обычного, 88,9% с телефона. Без этой недели — 24,3%. <span class="tag hyp">гипотеза</span></td></tr>
+    <tr><td><b>«На казахском конверсия 30,8%, на планшете 80%»</b> <span class="src">Т10, Т2</span></td><td>Группы из 13 и 5 человек — шум. Интервал для казахского: 12,7–57,6%</td></tr>
+    <tr><td><b>«Язык сайта влияет»</b> <span class="src">Т10</span></td><td>Русский 18,4% [16,1–20,9] vs английский 21,3% [16,9–26,7] — интервалы пересекаются</td></tr>
+    <tr><td><b>«Нужно, чтобы долистывали до конца»</b> <span class="src">Т6</span></td><td>Долиставшие на телефоне регистрируются на 12,5% — не лучше среднего</td></tr>
+  </table>
+  <p class="muted" style="font-size:15px; margin-top:14px;">И артефакт измерения: «устройство» = браузер. Кто открыл ссылку в Instagram, а зарегистрировался позже в Safari, посчитан как ушедший — конверсия Instagram немного занижена.</p>
+  <div class="foot"><span>Т1 — не воронка: строки пересекаются, их нельзя вычитать друг из друга</span><span>4</span></div>
+</section>
+
+<!-- 5. Отвергнутая гипотеза -->
+<section class="slide">
+  <div class="kicker">Проверили догадку</div>
+  <h2>Гипотеза: вход через Google ломается во встроенном браузере Instagram — <em>не подтвердилась</em></h2>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <h3>Почему подозревали</h3>
+        <ul>
+          <li>55% регистраций — через Google <span class="src">Т11</span></li>
+          <li>Google блокирует вход во встроенных браузерах приложений</li>
+          <li>Facebook: 0 регистраций из 48, при средней конверсии ждали ~9 <span class="src">Т3</span></li>
+          <li>78 человек открыли страницу регистрации и не зарегистрировались <span class="src">Т1</span></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Как проверили</h3>
+        <p>Открыли ventorme.ai из Instagram, TikTok, Telegram, WhatsApp на iPhone и Samsung и прошли регистрацию через Google.</p>
+        <p style="margin-top:8px;"><span class="tag no">не подтвердилась</span> &nbsp;Регистрация проходит. Причина низкой конверсии Instagram — не техническая.</p>
+      </div>
+    </div>
+    <div class="col" style="flex:0.9;">
+      <div class="card">
+        <h3>Но нашли два мелких трения</h3>
+        <div class="shots">
+          <div style="flex:1;"><img class="shot" src="../screenshots/register-consent-required.webp" style="width:100%; height:300px;"><div class="cap">Кнопка Google серая, пока не отметишь согласие</div></div>
+          <div style="flex:1;"><img class="shot" src="../screenshots/google-login-blank.webp" style="width:100%; height:300px;"><div class="cap">Белый экран без индикатора загрузки</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Ручная проверка 13.10.2026</span><span>5</span></div>
+</section>
+
+<!-- 6. Причина 1 -->
+<section class="slide">
+  <div class="kicker">Причина 1</div>
+  <h2 class="h-num"><span class="num">1</span>Холодный трафик из Instagram не понимает, <em>зачем ему это</em></h2>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <p class="muted" style="font-size:15px; margin-bottom:10px;">Конверсия в регистрацию по источникам <span class="src">Т3</span></p>
+        <div class="bars">
+          <div class="bar"><span class="name">Яндекс <small>17 чел. — мало данных</small></span><div class="track"><div class="fill" style="width:94.2%"></div></div><span class="val">47,1%</span></div>
+          <div class="bar"><span class="name">Google <small>158 чел.</small></span><div class="track"><div class="fill" style="width:89.8%"></div></div><span class="val">44,9%</span></div>
+          <div class="bar"><span class="name">Прямой заход <small>369 чел.</small></span><div class="track"><div class="fill" style="width:47.2%"></div></div><span class="val">23,6%</span></div>
+          <div class="bar"><span class="name">Instagram <small>670 чел.</small></span><div class="track"><div class="fill hl" style="width:22%"></div></div><span class="val">11,0%</span></div>
+          <div class="bar"><span class="name">Facebook <small>48 чел.</small></span><div class="track"><div class="fill hl" style="width:0.6%"></div></div><span class="val">0%</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="col" style="flex:0.85;">
+      <div class="card" style="flex:1;">
+        <h3>Что это значит</h3>
+        <ul>
+          <li>Instagram + Facebook — <b>56% визитов</b>, но конверсия <b>10,3%</b>. Все остальные источники — <b>30,4%</b></li>
+          <li>Из поиска приходят те, кто сам ищет «профориентация», «вузы» — и регистрируются почти каждый второй</li>
+          <li>Из ленты приходят случайно. Главная говорит им «One platform…», а не отвечает на их вопрос</li>
+          <li>Провал недели 24–30 августа (6,8%) похож на волну такого трафика <span class="src">Т5</span></li>
+        </ul>
+        <p style="margin-top:10px; font-weight:800;">Лендинг должен за 3 секунды ответить: «что я получу».</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>«Другие сайты» (15 чел.) не показаны — мало данных</span><span>6</span></div>
+</section>
+
+<!-- 7. Причина 2 -->
+<section class="slide">
+  <div class="kicker">Причина 2</div>
+  <h2 class="h-num"><span class="num">2</span>На телефоне регистрация <em>спрятана</em> за меню из 10 пунктов</h2>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <p class="muted" style="font-size:15px; margin-bottom:10px;">Конверсия тех, кто не прокручивал главную <span class="src">Т6</span></p>
+        <div class="bars">
+          <div class="bar"><span class="name">Компьютер <small>125 чел.</small></span><div class="track"><div class="fill" style="width:56%"></div></div><span class="val">28,0%</span></div>
+          <div class="bar"><span class="name">Телефон <small>385 чел.</small></span><div class="track"><div class="fill hl" style="width:7.2%"></div></div><span class="val">3,6%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="muted" style="font-size:15px; margin-bottom:10px;">Нажали «Регистрация», «Войти» или «Вход» в шапке <span class="src">Т9</span></p>
+        <div class="bars">
+          <div class="bar"><span class="name">Компьютер</span><div class="track"><div class="fill" style="width:54%"></div></div><span class="val">≤27%</span></div>
+          <div class="bar"><span class="name">Телефон</span><div class="track"><div class="fill hl" style="width:4%"></div></div><span class="val">≤2%</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <p style="font-size:16px;">Пункты меню «Для кого», «Переключатель языка», «Родителям» — <b>0 нажатий</b> с телефона <span class="src">Т9</span>. Меню на телефоне почти никто не открывает.</p>
+      </div>
+    </div>
+    <div class="col" style="flex:0.75;">
+      <div class="shots">
+        <div style="flex:1;"><img class="shot" src="../screenshots/menu-1.webp" style="width:100%; height:430px;"><div class="cap">Меню: 10 пунктов…</div></div>
+        <div style="flex:1;"><img class="shot" src="../screenshots/menu-2.webp" style="width:100%; height:430px; object-position: bottom;"><div class="cap">…и только внизу «Регистрация»</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>На компьютере кнопка регистрации видна в шапке сразу; на телефоне — 3 действия</span><span>7</span></div>
+</section>
+
+<!-- 8. Причина 3 -->
+<section class="slide">
+  <div class="kicker">Причина 3</div>
+  <h2 class="h-num"><span class="num">3</span>Квиз приносит половину регистраций — но его <em>закрывает cookie-баннер</em></h2>
+  <div class="row">
+    <div class="col">
+      <div class="stats" style="grid-template-columns: 1fr 1fr;">
+        <div class="card stat"><div class="big">51%</div><div class="lbl">всех регистраций пришли через мини-квиз (124 из 244) <span class="src">Т8</span></div></div>
+        <div class="card stat"><div class="big">16%</div><div class="lbl">посетителей с телефона вообще начали квиз (165 из 1 028) <span class="src">Т8</span></div></div>
+        <div class="card stat"><div class="big">95%</div><div class="lbl">начавших доходят до конца — формат работает <span class="src">Т8</span></div></div>
+        <div class="card stat"><div class="big">45,7%</div><div class="lbl">нажали «Принять cookie» — самый нажимаемый элемент сайта <span class="src">Т9</span></div></div>
+      </div>
+      <div class="card">
+        <p style="font-size:16px;">Ещё 19,4% тыкают в картинки и пустые места, которые не нажимаются <span class="src">Т9</span>. «Начать тест» нажали 275, а квиз начали 184 — часть кнопок ведёт не туда <span class="src">Т8, Т9</span>.</p>
+      </div>
+    </div>
+    <div class="col" style="flex:0.5; align-items:center;">
+      <img class="shot" src="../screenshots/instagram-first-screen.webp" style="width:220px; height:400px;">
+      <div class="cap">Из Instagram: квиз под cookie-баннером</div>
+    </div>
+  </div>
+  <div class="foot"><span>То же во внешнем браузере Safari — проблема в вёрстке, а не в Instagram</span><span>8</span></div>
+</section>
+
+<!-- 9. Кастдев -->
+<section class="slide">
+  <div class="kicker">Живые наблюдения</div>
+  <h2>Кастдев: что видит сверстник, который <em>впервые</em> открыл ventorme.ai</h2>
+  <div class="row">
+    <div class="col">
+      <div class="quote">«Квиз сказал зарегистрироваться, чтобы получить ответ, — а после регистрации ответа нет»<small>Ерс</small></div>
+      <div class="quote">«Всё платно. Главное окно непонятное»<small>Ерс</small></div>
+      <div class="quote">«Свою школу не нашёл, регистрация длинная»<small>Ерс</small></div>
+      <div class="quote">«Зарегистрировался бы, но не использовал бы»<small>Ерс</small></div>
+    </div>
+    <div class="col">
+      <div class="card" style="flex:1;">
+        <h3>Что подтвердилось и что нового</h3>
+        <ul>
+          <li><span class="tag yes">подтверждает</span> Первое впечатление верное: «сайт, где можно построить план поступления» — смысл понятен, но действие не очевидно</li>
+          <li><span class="tag hyp">новое</span> <b>Обещание квиза не выполняется</b> — после регистрации результата нет. Разочарование прямо перед онбордингом</li>
+          <li><span class="tag hyp">новое</span> В вопросах теста не хватает варианта «другое / все перечисленное»</li>
+          <li><span class="tag hyp">новое</span> Онбординг длинный: выбор школы, код подтверждения может не прийти</li>
+          <li><span class="tag hyp">новое</span> Узнаёт о поступлении из Telegram-каналов — это канал привлечения</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Метод: тест 5 секунд, задание «зарегистрируйся», разбор по сценарию</span><span>9</span></div>
+</section>
+
+<!-- 10. Лендинг -->
+<section class="slide">
+  <div class="kicker">Решение</div>
+  <h2>Наш лендинг: <em>одна кнопка</em> на первом экране и результат до регистрации</h2>
+  <div class="row">
+    <div class="col" style="flex:1.45;">
+      <table>
+        <tr><th style="width:38%">Причина</th><th>Что на лендинге</th></tr>
+        <tr><td><b>1. Холодный трафик</b></td><td>Заголовок про выгоду: «Узнай свой путь к поступлению за 1 минуту». Почти без текста — решение за 3 секунды</td></tr>
+        <tr><td><b>2. Регистрация спрятана</b></td><td>«Регистрация» в шапке без меню + закреплённая кнопка внизу экрана</td></tr>
+        <tr><td><b>3. Квиз закрыт баннером</b></td><td>Огромная кнопка «Пройти мини-квиз» — первое, что видно на любом устройстве. Cookie-баннера нет</td></tr>
+        <tr><td><b>Квиз не отдаёт результат</b> <small class="muted">(кастдев)</small></td><td>Результат показываем <b>сразу</b>: совет по ЕНТ / IELTS / SAT + материалы Ventorme под ответы → «Зарегистрироваться бесплатно»</td></tr>
+        <tr><td><b>Нет нужного варианта</b> <small class="muted">(кастдев)</small></td><td>В каждом вопросе есть «не знаю» или «другое»</td></tr>
+        <tr><td><b>Трения в регистрации</b></td><td>Подсказки: галочка согласия, код в «Спаме», нет школы в списке, пройди онбординг до конца</td></tr>
+      </table>
+      <p class="muted" style="font-size:14px; margin-top:8px;">Русский и казахский · кнопка ведёт на ventorme.ai/register?…utm_campaign=team-058 · честно: «регистрация бесплатная, часть материалов платная»</p>
+    </div>
+    <div class="col" style="flex:0.55; flex-direction:row; gap:12px;">
+      <div><img class="shot" src="../screenshots/landing-first-screen.png" style="width:150px; height:310px;"><div class="cap">Первый экран</div></div>
+      <div><img class="shot" src="../screenshots/landing-quiz-result.png" style="width:150px; height:310px;"><div class="cap">Результат квиза</div></div>
+    </div>
+  </div>
+  <div class="foot"><span>Лендинг: eloquent-nougat-b16ebf.netlify.app</span><span>10</span></div>
+</section>
+
+<!-- 11. Привлечение -->
+<section class="slide">
+  <div class="kicker">Результат</div>
+  <h2>Как приводим людей — <em>без рекламы и накрутки</em></h2>
+  <div class="row">
+    <div class="col">
+      <div class="card"><h3>🏫 Классы своей школы</h3><p>5–7 минут в классе: вопрос «кто знает, сколько баллов нужно на грант?», QR-код на лендинг, каждый регистрируется сам со своего телефона, помогаем дойти до конца онбординга</p></div>
+      <div class="card"><h3>💬 Классные и школьные чаты</h3><p>Короткое сообщение со ссылкой; для казахских классов — ссылка с ?lang=kk</p></div>
+      <div class="card"><h3>📣 Telegram-каналы о поступлении</h3><p>Канал, который назвал респондент; просим админов о бесплатном посте</p></div>
+    </div>
+    <div class="col">
+      <div class="card" style="flex:1;">
+        <h3>Правила, которые соблюдаем</h3>
+        <ul>
+          <li>Один человек — один аккаунт, только со своего устройства</li>
+          <li>Никаких подарков и обещаний за регистрацию</li>
+          <li>Кто уже есть в Ventorme, повторно не регистрируется</li>
+        </ul>
+        <h3 style="margin-top:16px;">Результат</h3>
+        <p>Регистрации с пройденным онбордингом по ссылке team-058 считает Ventorme.</p>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>Ссылка команды: ventorme.ai/register?utm_source=hacknext&amp;utm_campaign=team-058</span><span>11</span></div>
+</section>
+
+<!-- 12. Рекомендации -->
+<section class="slide blue">
+  <div class="kicker">Что мы советуем Ventorme</div>
+  <h2>5 быстрых правок главной, которые <em>следуют из данных</em></h2>
+  <div class="row" style="flex-direction:column; gap:12px;">
+    <div class="card" style="color:var(--ink);"><p><b>1. Кнопка регистрации в шапке на телефоне</b>, а не внизу меню из 10 пунктов <span class="src">Т6, Т9</span></p></div>
+    <div class="card" style="color:var(--ink);"><p><b>2. Cookie-баннер — тонкой полосой внизу</b>, чтобы не закрывал квиз <span class="src">Т8, Т9</span></p></div>
+    <div class="card" style="color:var(--ink);"><p><b>3. После регистрации из квиза — сразу показать результат квиза</b>, как обещано <span class="src">кастдев</span></p></div>
+    <div class="card" style="color:var(--ink);"><p><b>4. Отдельный первый экран для Instagram-трафика</b> — про выгоду, а не «One platform» <span class="src">Т3, Т4</span></p></div>
+    <div class="card" style="color:var(--ink);"><p><b>5. Короче онбординг</b>: школа — с вариантом «нет в списке», галочка согласия — не блокирует кнопку Google <span class="src">кастдев, Т1</span></p></div>
+  </div>
+  <div class="foot"><span>Команда 058 · Swallow in the logo · Nurali, Omar, Nurmukhamed</span><span>12</span></div>
+</section>
+
+</body>
+</html>
