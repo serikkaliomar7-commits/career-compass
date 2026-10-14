@@ -120,7 +120,9 @@
     font-size: 14px; font-weight: 700; line-height: 1.3; color: var(--blue-dark);
   }
   .mat .e { display: block; font-size: 24px; margin-bottom: 6px; }
-  .mat .lock { position: absolute; top: 10px; right: 10px; font-size: 14px; }
+  .mtag { display: block; margin-top: 6px; font-size: 12px; font-weight: 800; }
+  .mtag.free { color: #1C7C3A; }
+  .mtag.paid { color: var(--muted); }
   .result .cta-text { font-weight: 800; font-size: 18px; margin-bottom: 10px; text-align: center; }
   .result .note { font-size: 13px; color: var(--muted); margin-top: 10px; text-align: center; }
 
@@ -241,7 +243,7 @@
       <div class="tip"><span class="e">✅</span><span data-i18n="tip1">Сначала поставь галочку согласия — без неё кнопка Google не нажимается</span></div>
       <div class="tip"><span class="e">📩</span><span data-i18n="tip2">Код не пришёл? Проверь папку «Спам» или войди через Google</span></div>
       <div class="tip"><span class="e">🏫</span><span data-i18n="tip3">Нет своей школы в списке? Выбери ближайшую в своём городе и иди дальше</span></div>
-      <div class="tip"><span class="e">🏁</span><span data-i18n="tip4">Ответь на вопросы после регистрации до конца — так Ventorme подберёт тебе вузы</span></div>
+      <div class="tip"><span class="e">🏁</span><span data-i18n="tip4">После регистрации заполни профиль и пройди «AI Career Test» — он бесплатный</span></div>
     </div>
   </section>
 
@@ -287,7 +289,7 @@
       tip1: "Сначала поставь галочку согласия — без неё кнопка Google не нажимается",
       tip2: "Код не пришёл? Проверь папку «Спам» или войди через Google",
       tip3: "Нет своей школы в списке? Выбери ближайшую в своём городе и иди дальше",
-      tip4: "Ответь на вопросы после регистрации до конца — так Ventorme подберёт тебе вузы",
+      tip4: "После регистрации заполни профиль и пройди «AI Career Test» — он бесплатный",
       faqT: "Вопросы",
       q1: "Это платно?", a1: "Регистрация бесплатная. Часть материалов платная — после регистрации увидишь, что доступно бесплатно, и решишь сам.",
       q2: "Что с моими данными?", a2: "Для регистрации нужна только почта или аккаунт Google. Ventorme просит согласие на обработку данных — документы можно прочитать на странице регистрации.",
@@ -339,11 +341,12 @@
       },
       matTitle: "Что для тебя есть в Ventorme:",
       mats: {
-        ielts: ["📚", "Подготовка к IELTS и SAT"], unis_abroad: ["🌍", "Подбор зарубежных вузов"], essay: ["✍️", "Помощь с эссе"],
-        grant: ["🧮", "Калькулятор гранта по ЕНТ"], unis_kz: ["🎓", "Подбор вузов в Казахстане"], test: ["🧭", "Профтест"],
-        unis: ["🎓", "Подбор вузов"], venti: ["🤖", "ИИ-помощник Venti"]
+        ielts: ["📚", "Подготовка к IELTS и SAT"], unis_abroad: ["🌍", "Подбор зарубежных вузов"], essay: ["✍️", "Конструктор эссе"],
+        grant: ["🧮", "Калькулятор гранта по ЕНТ"], unis_kz: ["🎓", "Подбор вузов в Казахстане"], test: ["🧭", "ИИ-профтест"],
+        unis: ["🎓", "Подбор вузов"], venti: ["🤖", "Вопросы ИИ-помощнику Venti"], schol: ["🏅", "Стипендии и гранты"]
       },
-      ctaText: "Хочешь посмотреть эти материалы?",
+      tagFree: "бесплатно", tagPaid: "в платном тарифе",
+      ctaText: "Начни с бесплатного — зарегистрируйся",
       ctaBtn: "Зарегистрироваться бесплатно →",
       note: "Это быстрая подсказка по твоим ответам, а не результат профтеста. Регистрация бесплатная, часть материалов в Ventorme платная."
     },
@@ -361,7 +364,7 @@
       tip1: "Алдымен келісім белгісін қой — онсыз Google батырмасы басылмайды",
       tip2: "Код келмеді ме? «Спам» папкасын тексер немесе Google арқылы кір",
       tip3: "Тізімде мектебің жоқ па? Қалаңдағы ең жақын мектепті таңдап, әрі қарай өт",
-      tip4: "Тіркелгеннен кейінгі сұрақтарға соңына дейін жауап бер — сонда Ventorme саған университет таңдап береді",
+      tip4: "Тіркелгеннен кейін профильді толтырып, «AI Career Test»-тен өт — ол тегін",
       faqT: "Сұрақтар",
       q1: "Бұл ақылы ма?", a1: "Тіркелу тегін. Материалдардың бір бөлігі ақылы — тіркелгеннен кейін не тегін екенін көріп, өзің шешесің.",
       q2: "Менің деректерім не болады?", a2: "Тіркелу үшін тек пошта немесе Google аккаунты керек. Ventorme деректерді өңдеуге келісім сұрайды — құжаттарды тіркелу бетінде оқуға болады.",
@@ -413,11 +416,12 @@
       },
       matTitle: "Ventorme-да саған не бар:",
       mats: {
-        ielts: ["📚", "IELTS және SAT-қа дайындық"], unis_abroad: ["🌍", "Шетелдік университеттерді таңдау"], essay: ["✍️", "Эссе жазуға көмек"],
-        grant: ["🧮", "ҰБТ грант калькуляторы"], unis_kz: ["🎓", "Қазақстандағы университеттерді таңдау"], test: ["🧭", "Кәсіптік тест"],
-        unis: ["🎓", "Университет таңдау"], venti: ["🤖", "Venti ЖИ-көмекшісі"]
+        ielts: ["📚", "IELTS және SAT-қа дайындық"], unis_abroad: ["🌍", "Шетелдік университеттерді таңдау"], essay: ["✍️", "Эссе конструкторы"],
+        grant: ["🧮", "ҰБТ грант калькуляторы"], unis_kz: ["🎓", "Қазақстандағы университеттерді таңдау"], test: ["🧭", "ЖИ кәсіптік тест"],
+        unis: ["🎓", "Университет таңдау"], venti: ["🤖", "Venti ЖИ-көмекшісіне сұрақтар"], schol: ["🏅", "Стипендиялар мен гранттар"]
       },
-      ctaText: "Бұл материалдарды көргің келе ме?",
+      tagFree: "тегін", tagPaid: "ақылы тарифте",
+      ctaText: "Тегіннен баста — тіркел",
       ctaBtn: "Тегін тіркелу →",
       note: "Бұл — жауаптарың бойынша жылдам кеңес, кәсіптік тесттің нәтижесі емес. Тіркелу тегін, Ventorme-дағы материалдардың бір бөлігі ақылы."
     }
@@ -439,11 +443,16 @@
     ];
   }
 
+  // Что бесплатно, а что платно — по экрану Ventorme после регистрации (14.10):
+  // ИИ-профтест, вузы, стипендии, вопросы Venti — открыты; эссе и подготовка к экзаменам — под замком.
+  // Калькулятор гранта на этом экране не виден, поэтому метку не ставим.
   var MATS = {
-    abroad: ["ielts", "unis_abroad", "essay", "venti"],
-    kz: ["grant", "unis_kz", "test", "venti"],
-    unsure: ["test", "unis", "grant", "venti"]
+    abroad: ["unis_abroad", "schol", "ielts", "essay"],
+    kz: ["test", "unis_kz", "schol", "grant"],
+    unsure: ["test", "unis", "schol", "venti"]
   };
+  var FREE = { test: true, unis: true, unis_kz: true, unis_abroad: true, schol: true, venti: true };
+  var PAID = { ielts: true, essay: true };
 
   function pickLang() {
     var m = location.search.match(/[?&]lang=(kk|kz|ru)\b/);
@@ -509,7 +518,9 @@
       '<div class="mat-title">' + esc(L.matTitle) + '</div><div class="mats">';
     mats.forEach(function (k) {
       var m = L.mats[k];
-      html += '<div class="mat"><span class="lock">🔒</span><span class="e">' + m[0] + '</span>' + esc(m[1]) + '</div>';
+      var tag = FREE[k] ? '<span class="mtag free">✓ ' + esc(L.tagFree) + '</span>'
+              : PAID[k] ? '<span class="mtag paid">🔒 ' + esc(L.tagPaid) + '</span>' : '';
+      html += '<div class="mat"><span class="e">' + m[0] + '</span>' + esc(m[1]) + tag + '</div>';
     });
     html += '</div><div class="cta-text">' + esc(L.ctaText) + '</div>' +
       '<a class="btn btn-blue js-reg" href="' + esc(REG_URL) + '">' + esc(L.ctaBtn) + '</a>' +
