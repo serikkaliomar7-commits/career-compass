@@ -305,7 +305,6 @@
   <div class="row">
     <div class="col">
       <p class="muted" style="font-size:15px;">Кастдев со сверстником, который впервые открыл ventorme.ai</p>
-      <div class="quote">«Квиз сказал зарегистрироваться, чтобы получить ответ, — а после регистрации ответа нет»<small>Ерс</small></div>
       <div class="quote">«Всё платно. Главное окно непонятное»<small>Ерс</small></div>
       <div class="quote">«Свою школу не нашёл, регистрация длинная»<small>Ерс</small></div>
       <div class="quote">«Зарегистрировался бы, но не использовал бы»<small>Ерс</small></div>
@@ -318,8 +317,7 @@
           <tr><td>Регистрация на телефоне — внизу меню из 10 пунктов</td><td style="white-space:nowrap">наша проверка <span class="src">Т9</span></td></tr>
           <tr><td>Cookie-баннер закрывает квиз на первом экране</td><td style="white-space:nowrap">наша проверка <span class="src">Т9</span></td></tr>
           <tr><td>Кнопка Google заблокирована до галочки согласия</td><td style="white-space:nowrap">наша проверка <span class="src">Т1</span></td></tr>
-          <tr><td><b>Обещание квиза не выполняется</b> — после регистрации главный экран, результата квиза нет</td><td style="white-space:nowrap">кастдев + проверили сами</td></tr>
-          <tr><td>«Всё платно»: 7 разделов меню под замком, кнопка «Upgrade plan»</td><td style="white-space:nowrap">кастдев + проверили сами</td></tr>
+          <tr><td><b>«Всё платно»</b>: 7 разделов меню под замком, кнопка «Upgrade plan»</td><td style="white-space:nowrap">кастдев + проверили сами</td></tr>
           <tr><td>В тесте нет варианта «другое / все перечисленное»</td><td>кастдев</td></tr>
           <tr><td>Онбординг длинный: школы нет в списке, код может не прийти</td><td>кастдев</td></tr>
           
@@ -333,7 +331,7 @@
 <!-- 10. Лендинг -->
 <section class="slide">
   <div class="kicker">Решение</div>
-  <h2>Наш лендинг: <em>одна кнопка</em> на первом экране и результат до регистрации</h2>
+  <h2>Наш лендинг: <em>одна кнопка</em> на первом экране и совет сразу после квиза</h2>
   <div class="row">
     <div class="col" style="flex:1.45;">
       <table>
@@ -341,7 +339,7 @@
         <tr><td><b>1. Холодный трафик</b></td><td>Заголовок про выгоду: «Узнай свой путь к поступлению за 1 минуту». Почти без текста — решение за 3 секунды</td></tr>
         <tr><td><b>2. Регистрация спрятана</b></td><td>«Регистрация» в шапке без меню + закреплённая кнопка внизу экрана</td></tr>
         <tr><td><b>3. Квиз закрыт баннером</b></td><td>Огромная кнопка «Пройти мини-квиз» — первое, что видно на любом устройстве. Cookie-баннера нет</td></tr>
-        <tr><td><b>Квиз не отдаёт результат</b> <small class="muted">(кастдев)</small></td><td>Результат показываем <b>сразу</b>: совет по ЕНТ / IELTS / SAT + материалы Ventorme с честной меткой «бесплатно» / «в платном тарифе» → «Начни с бесплатного»</td></tr>
+        <tr><td><b>«Всё платно»</b> <small class="muted">(кастдев)</small></td><td>После квиза — совет по ЕНТ / IELTS / SAT и материалы Ventorme с честной меткой «бесплатно» / «в платном тарифе» → «Начни с бесплатного»</td></tr>
         <tr><td><b>Нет нужного варианта</b> <small class="muted">(кастдев)</small></td><td>В каждом вопросе есть «не знаю» или «другое»</td></tr>
         <tr><td><b>Трения в регистрации</b></td><td>Подсказки: галочка согласия, код в «Спаме», нет школы в списке, пройди онбординг до конца</td></tr>
       </table>
@@ -349,7 +347,7 @@
     </div>
     <div class="col" style="flex:0.55; flex-direction:row; gap:12px;">
       <div><img class="shot" src="../screenshots/landing-first-screen.png" style="width:150px; height:310px;"><div class="cap">Первый экран</div></div>
-      <div><img class="shot" src="../screenshots/landing-quiz-result.png" style="width:150px; height:310px;"><div class="cap">Результат квиза</div></div>
+      <div><img class="shot" src="../screenshots/landing-quiz-result.png" style="width:150px; height:310px;"><div class="cap">После квиза</div></div>
     </div>
   </div>
   <div class="foot"><span>Лендинг: eloquent-nougat-b16ebf.netlify.app</span><span>10</span></div>
@@ -388,7 +386,7 @@
   <div class="row" style="flex-direction:column; gap:12px;">
     <div class="card" style="color:var(--ink);"><p><b>1. Кнопка регистрации в шапке на телефоне</b>, а не внизу меню из 10 пунктов <span class="src">Т6, Т9</span></p></div>
     <div class="card" style="color:var(--ink);"><p><b>2. Cookie-баннер — тонкой полосой внизу</b>, чтобы не закрывал квиз <span class="src">Т8, Т9</span></p></div>
-    <div class="card" style="color:var(--ink);"><p><b>3. После регистрации из квиза — сразу показать результат квиза</b>, как обещано <span class="src">кастдев</span></p></div>
+    <div class="card" style="color:var(--ink);"><p><b>3. Показывать, что бесплатно, ещё до регистрации</b> — сейчас 7 разделов под замком видны только после неё <span class="src">кастдев</span></p></div>
     <div class="card" style="color:var(--ink);"><p><b>4. Отдельный первый экран для Instagram-трафика</b> — про выгоду, а не «One platform» <span class="src">Т3, Т4</span></p></div>
     <div class="card" style="color:var(--ink);"><p><b>5. Короче онбординг</b>: школа — с вариантом «нет в списке», галочка согласия — не блокирует кнопку Google <span class="src">кастдев, Т1</span></p></div>
   </div>
