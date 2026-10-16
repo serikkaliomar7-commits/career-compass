@@ -176,14 +176,11 @@
         ids.forEach(function (id, k) { buildReading(id, seed + 500 + k * 10, mode.options).forEach(function (q) { q.section = si; qs.push(q); }); });
         return;
       }
-      var math = Z.topicsFor(f.school, 'math'), logic = Z.topicsFor(f.school, 'logic');
+      // Темы раздаём по кругу из перемешанного списка — так в варианте нет перекоса в одну тему.
+      var mPool = r.shuffle(Z.topicsFor(f.school, 'math')), lPool = r.shuffle(Z.topicsFor(f.school, 'logic')), mi = 0, li = 0;
       [1, 2, 3].forEach(function (lvl) {
         var n = sec.mix[lvl] || 0, nLogic = Math.round(n * sec.logicShare), list = [];
-        var mPool = r.shuffle(math), lPool = r.shuffle(logic);
-        for (var i = 0; i < n; i++) {
-          var isLogic = i < nLogic, pool = isLogic ? lPool : mPool;
-          list.push(pool[i % pool.length].id);
-        }
+        for (var i = 0; i < n; i++) list.push(i < nLogic ? lPool[li++ % lPool.length].id : mPool[mi++ % mPool.length].id);
         r.shuffle(list).forEach(function (tid, i) {
           // Одинаковые задачи в одном варианте пересоздаём с другим seed.
           var q, s2 = seed + lvl * 100000 + i * 977 + si, tries = 0;
