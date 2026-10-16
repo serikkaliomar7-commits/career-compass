@@ -19,6 +19,17 @@
   function videoUrl(tp) { return S.videos[tp.id] || 'https://www.youtube.com/results?search_query=' + encodeURIComponent(tp.video); }
   function pct(x) { return Math.round(x * 100) + '%'; }
 
+  // Своё окно подтверждения: window.confirm/alert блокируются во встроенных браузерах.
+  function ask(msg, yes, onYes, no) {
+    var box = document.getElementById('modal');
+    box.innerHTML = '<div class="modal-bg"><div class="modal card" role="dialog" aria-modal="true"><p>' + msg + '</p><div class="steps">' +
+      (no === false ? '' : '<button class="btn ghost" data-act="modalNo">' + (no || t('c.cancel')) + '</button>') +
+      '<button class="btn primary" data-act="modalYes" data-autofocus>' + yes + '</button></div></div></div>';
+    mem.modalYes = onYes;
+    var b = box.querySelector('[data-act=modalYes]'); if (b) b.focus();
+  }
+  function closeModal() { document.getElementById('modal').innerHTML = ''; mem.modalYes = null; }
+
   // Текст задания: казахский, русский или оба (как в двуязычных тестах БИЛ).
   function qText(q) {
     var l = (S.profile && S.profile.qLang) || 'both';
@@ -51,6 +62,7 @@
   /* =================== МАРШРУТЫ =================== */
   function render() {
     if (mem.timer && !/^#\/exam/.test(location.hash)) { clearInterval(mem.timer); mem.timer = null; }
+    closeModal();
     var parts = location.hash.replace(/^#\/?/, '').split('/');
     var view = document.getElementById('view'), html;
     document.body.classList.remove('menu-open');
@@ -422,10 +434,10 @@
       render();
     },
     startExam: function (el) {
-      if (S.activeExam && !window.confirm(t('ex.resume') + '. ' + t('ex.abandon') + '?')) { go('#/exam'); return; }
-      var ex = E.buildExam(el.dataset.f, U.newSeed());
-      ex.cur = 0; S.activeExam = ex; mem.sheet = false; save();
-      go('#/exam');
+      var fid = el.dataset.f;
+      function start() { var ex = E.buildExam(fid, U.newSeed()); ex.cur = 0; S.activeExam = ex; mem.sheet = false; save(); go('#/exam'); }
+      if (S.activeExam) ask(t('ex.resume') + '. ' + t('ex.abandon') + '?', t('ex.abandon'), start, t('c.cancel'));
+      else start();
     },
     abandonExam: function () { S.activeExam = null; save(); render(); },
     exPick: function (el) {
@@ -446,7 +458,7 @@
       readExamInput();
       var ex = S.activeExam;
       var empty = ex.questions.filter(function (q, i) { return ex.answers[i] === undefined || ex.answers[i] === ''; }).length;
-      if (window.confirm(t('ex.confirm', { n: empty }))) finishExam(false);
+      ask(t('ex.confirm', { n: empty }), t('c.finish'), function () { finishExam(false); });
     },
     export: function () {
       var blob = new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' });
@@ -454,7 +466,9 @@
       a.href = URL.createObjectURL(blob); a.download = 'zerde-' + today() + '.json'; a.click();
       setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     },
-    reset: function () { if (window.confirm(t('set.resetQ'))) { S = Z.store.reset(); mem = { lastExam: null }; go('#/today'); } }
+    reset: function () { ask(t('set.resetQ'), t('set.reset'), function () { S = Z.store.reset(); mem = { lastExam: null }; go('#/today'); }); },
+    modalYes: function () { var f = mem.modalYes; closeModal(); if (f) f(); },
+    modalNo: function () { closeModal(); }
   };
 
   document.addEventListener('click', function (e) {
@@ -467,6 +481,7 @@
     if (e.target.closest('#burger')) document.body.classList.toggle('menu-open');
   });
   document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && mem.modalYes !== undefined) { closeModal(); return; }
     if (e.key !== 'Enter') return;
     if (e.target.id === 'ans') { e.preventDefault(); A.check(); }
     else if (e.target.id === 'exans') { e.preventDefault(); A.exNext(); }
@@ -486,7 +501,7 @@
       var rd = new FileReader();
       rd.onload = function () {
         try { var data = JSON.parse(rd.result); if (!data.profile) throw new Error('no profile'); S = data; save(); I.setLang(S.profile.uiLang || 'kk'); go('#/today'); }
-        catch (err) { window.alert(t('set.importBad')); }
+        catch (err) { ask(t('set.importBad'), 'OK', null, false); }
       };
       rd.readAsText(el.files[0]);
     }
