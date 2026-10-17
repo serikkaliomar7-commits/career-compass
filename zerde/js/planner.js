@@ -108,7 +108,7 @@
       if (h.ok || h.passage || !h.topic || h.mistakeId) return;
       var id = h.topic + ':' + h.lvl + ':' + h.seed;
       if (state.mistakes.some(function (m) { return m.id === id; })) return;
-      state.mistakes.push({ id: id, topic: h.topic, lvl: h.lvl, seed: h.seed, date: date });
+      state.mistakes.push({ id: id, topic: h.topic, lvl: h.lvl, seed: h.seed, vary: h.vary !== false, date: date });
     });
     hist.forEach(function (h) {
       if (h.mistakeId && h.ok) state.mistakes = state.mistakes.filter(function (m) { return m.id !== h.mistakeId; });
@@ -128,7 +128,7 @@
     });
     if (state.exams.length > 200) state.exams.shift();
     recordMistakes(state, ex.questions.map(function (q, i) {
-      return { topic: q.topic, lvl: q.lvl, seed: q.seed, passage: q.passage || null, ok: Z.engine.check(q, ex.answers[i]) === true };
+      return { topic: q.topic, lvl: q.lvl, seed: q.seed, vary: false, passage: q.passage || null, ok: Z.engine.check(q, ex.answers[i]) === true };
     }), date);
     var plan = state.plans[date];
     // Полный пробный засчитывает и короткий тест дня — он заведомо больше.

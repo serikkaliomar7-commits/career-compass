@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'banks.js', 'curriculum.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'banks.js', 'curriculum.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;
@@ -35,7 +35,7 @@ Z.topics.forEach(function (t) {
         } else {
           var keys = q.options.map(function (o) { return o.key; });
           // Банк логики хранит 3 неверных ответа, поэтому в режиме 5 вариантов допускаем 4.
-          var minOpts = t.bank ? Math.min(4, mode.options) : mode.options;
+          var minOpts = (t.bank || q.ansKey.indexOf('s:') === 0) ? Math.min(4, mode.options) : mode.options;   // у текстовых ответов (сравнение, утверждения) по смыслу 4 варианта
           if (keys.length < minOpts || keys.length > mode.options) fail(tag + ': ' + keys.length + ' options');
           var uniq = keys.filter(function (k, i) { return keys.indexOf(k) === i; });
           if (uniq.length !== keys.length) fail(tag + ': duplicate options ' + keys.join(' | '));
@@ -98,6 +98,18 @@ E.answer(hw2, String(hw2.current.ansValue)); E.advance(hw2);
 if (hw2.idx !== 1 || hw2.current.isRetry) fail('after retry the homework must continue');
 var hr2 = E.sessionResult(hw2);
 if (hr2.total !== 1 || hr2.correct !== 0) fail('retries must not count in the grade');
+
+// Разнообразие: в домашке по каждой генерируемой теме — не меньше 4 разных типов задач
+// (по началу формулировки), а не одна задача с разными числами.
+Z.topics.forEach(function (t) {
+  if (!t.gen) return;
+  ['BIL', 'RFMSH'].forEach(function (sc) {
+    var ss = E.newSession(t.id, sc), kinds = {};
+    for (var i = 0; i < ss.n; i++) kinds[ss.current ? ss.current.kk.replace(/<[^>]+>/g, '').replace(/[\d−,.\s]+/g, ' ').slice(0, 22) : ''] = 1, E.advance(ss);
+    var nk = Object.keys(kinds).length;
+    if (nk < 4) fail('variety: ' + t.id + ' ' + sc + ' has only ' + nk + ' problem types in a 50-problem homework');
+  });
+});
 
 // Банковые темы и чтение: очередь из банка, без повторов.
 var bq = E.newSession('l_puzzles', 'BIL');

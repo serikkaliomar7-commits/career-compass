@@ -53,15 +53,72 @@
   /* Собрать вопрос.
    * mode: { answer: 'mc' | 'int', options: 4|5 }
    * reading-вопросы собираются отдельно (buildReading), т.к. идут блоком к тексту. */
-  function buildQuestion(topicId, lvl, seed, mode) {
+  /* Выбор формата: базовая задача темы или один из дополнительных форматов (gen_formats.js).
+   * opts.vary = false — только базовый генератор и форматы без общих преобразований (для пробных). */
+  function generate(t, lvl, r, needInt, vary) {
+    var opt = { int: needInt };
+    if (t.bank) return pickBank(Z.bank[t.bank], lvl, r, needInt);
+    if (lvl === 4 && Z.gen4[t.gen]) return Z.gen4[t.gen](r, lvl, opt);
+    var pool = [function () { return Z.gen[t.gen](r, Math.min(lvl, 3), opt); }];
+    (Z.formats[t.gen] || []).forEach(function (fm) { if (fm.lv.indexOf(lvl) >= 0) pool.push(function () { return fm.f(r, lvl, opt); }); });
+    var raw = r.pick(pool)();
+    if (vary && r() < 0.2) raw = transform(t, lvl, r, needInt, raw) || raw;
+    return raw;
+  }
+
+  /* Общие преобразования — меняют то, ЧТО спрашивают, а не только числа:
+   *  ошибка ученика — «на сколько ошибся Асан?» (нужно решить и сравнить);
+   *  сравнение — две задачи темы, какая величина больше (как «Сандық сипаттама» НИШ);
+   *  свойство — какое утверждение об ответе верно (чётность, делимость, границы). */
+  function transform(t, lvl, r, needInt, raw) {
+    var a = norm(raw.ans);
+    if (typeof a !== 'number' || a % 1 !== 0) return null;
+    var kinds = needInt ? ['error'] : ['error', 'compare', 'property'];
+    var k = r.pick(kinds), unitKk = raw.unit ? ' ' + raw.unit.kk : '', unitRu = raw.unit ? ' ' + (raw.unit.ru || raw.unit.kk) : '';
+    if (k === 'error') {
+      var w = (raw.wrong || []).map(norm).filter(function (x) { return typeof x === 'number' && x % 1 === 0 && x !== a; })[0];
+      if (w === undefined) return null;
+      var d = a - w;
+      return { kk: raw.kk + '<div class="note">Асан бұл есепке <b>' + U.fmt(w) + unitKk + '</b> деп жауап берді. Дұрыс жауаптан Асанның жауабын азайтыңыз: айырма неге тең?</div>',
+        ru: raw.ru + '<div class="note">Асан ответил: <b>' + U.fmt(w) + unitRu + '</b>. Вычтите ответ Асана из правильного ответа: чему равна разность?</div>',
+        ans: d, wrong: [-d, a, w], sol_kk: 'Дұрыс жауап: ' + U.fmt(a) + '. ' + raw.sol_kk + ' Айырма: ' + U.fmt(a) + ' − (' + U.fmt(w) + ') = ' + U.fmt(d) + '.',
+        sol_ru: 'Правильный ответ: ' + U.fmt(a) + '. ' + (raw.sol_ru || raw.sol_kk) + ' Разность: ' + U.fmt(d) + '.' };
+    }
+    if (k === 'compare') {
+      var raw2 = Z.gen[t.gen] ? Z.gen[t.gen](r, Math.min(lvl, 3), { int: true }) : null, b2 = raw2 && norm(raw2.ans);
+      if (!raw2 || typeof b2 !== 'number' || b2 % 1 !== 0) return null;
+      var rel = a > b2 ? 'A > B' : a < b2 ? 'A < B' : 'A = B';
+      return { kk: '<div class="cmp"><div><b>A</b>' + raw.kk + '</div><div><b>B</b>' + raw2.kk + '</div></div>A және B жауаптарын салыстырыңыз.',
+        ru: '<div class="cmp"><div><b>A</b>' + raw.ru + '</div><div><b>B</b>' + raw2.ru + '</div></div>Сравните ответы A и B.',
+        ans: rel, wrong: ['A > B', 'A < B', 'A = B', 'Анықтау мүмкін емес / Нельзя определить'].filter(function (x) { return x !== rel; }),
+        sol_kk: 'A = ' + U.fmt(a) + ' (' + raw.sol_kk + ') B = ' + U.fmt(b2) + ' (' + raw2.sol_kk + ') Сондықтан ' + rel + '.',
+        sol_ru: 'A = ' + U.fmt(a) + ', B = ' + U.fmt(b2) + '. Значит, ' + rel + '.' };
+    }
+    // property
+    var lim = Math.round(a / 10) * 10 + (r.chance(0.5) ? 5 : -5);
+    var props = [
+      [a % 2 === 0, 'жұп сан', 'чётное число', 'тақ сан', 'нечётное число'],
+      [a % 3 === 0, '3-ке қалдықсыз бөлінеді', 'делится на 3', '3-ке бөлінбейді', 'не делится на 3'],
+      [a > lim, U.fmt(lim) + '-тен үлкен', 'больше ' + U.fmt(lim), U.fmt(lim) + '-тен кіші', 'меньше ' + U.fmt(lim)],
+      [a % 5 === 0, '5-ке қалдықсыз бөлінеді', 'делится на 5', '5-ке бөлінбейді', 'не делится на 5']
+    ];
+    var stm = [];
+    props.forEach(function (p) { stm.push({ ok: p[0], kk: p[1], ru: p[2] }, { ok: !p[0], kk: p[3], ru: p[4] }); });
+    var trues = r.shuffle(stm.filter(function (x) { return x.ok; })), falses = r.shuffle(stm.filter(function (x) { return !x.ok; }));
+    var right = trues[0];
+    return { kk: raw.kk + '<div class="note">Есептің жауабы туралы қай тұжырым <b>дұрыс</b>?</div>', ru: raw.ru + '<div class="note">Какое утверждение об ответе <b>верно</b>?</div>',
+      ans: 'Жауабы — ' + right.kk + ' / ' + right.ru, wrong: falses.slice(0, 3).map(function (x) { return 'Жауабы — ' + x.kk + ' / ' + x.ru; }),
+      sol_kk: 'Жауабы ' + U.fmt(a) + '. ' + raw.sol_kk, sol_ru: 'Ответ ' + U.fmt(a) + '. ' + (raw.sol_ru || raw.sol_kk) };
+  }
+
+  function buildQuestion(topicId, lvl, seed, mode, opts) {
     var t = Z.topicById[topicId];
     if (!t) throw new Error('unknown topic ' + topicId);
-    var needInt = mode.answer === 'int';
+    var needInt = mode.answer === 'int', vary = !opts || opts.vary !== false;
     var raw, s = seed, tries = 0, r;
     for (;;) {
       r = U.rng(s);
-      raw = t.bank ? pickBank(Z.bank[t.bank], lvl, r, needInt)
-        : lvl === 4 && Z.gen4[t.gen] ? Z.gen4[t.gen](r, lvl, { int: needInt }) : Z.gen[t.gen](r, Math.min(lvl, 3), { int: needInt });
+      raw = generate(t, lvl, r, needInt, vary);
       var a = norm(raw.ans);
       if (!needInt || (typeof a === 'number' && a % 1 === 0)) break;
       if (++tries > 60) throw new Error('topic ' + topicId + ' lvl ' + lvl + ' cannot produce integer answers');
@@ -183,7 +240,7 @@
   function mistakeSession(list, school) {
     var mode = modeFor(school);
     var s = { topic: null, school: school, mode: 'mistakes', idx: 0, seed: U.newSeed(), hist: [], extra: 0, retry: false, level: 1, streak: 0, done: false, startedAt: Date.now() };
-    s.queue = list.map(function (m) { var q = buildQuestion(m.topic, m.lvl, m.seed, mode); q.mistakeId = m.id; return q; });
+    s.queue = list.map(function (m) { var q = buildQuestion(m.topic, m.lvl, m.seed, mode, { vary: m.vary !== false }); q.mistakeId = m.id; return q; });
     s.n = s.queue.length; s.maxLevel = 1;
     s.current = s.queue[0] || null;
     if (!s.current) s.done = true;
@@ -198,7 +255,7 @@
 
   function answer(s, given) {
     var q = s.current, ok = check(q, given) === true;
-    s.hist.push({ topic: q.topic, lvl: q.lvl, seed: q.seed, ok: ok, given: given, retry: !!q.isRetry, passage: q.passage || null, mistakeId: q.mistakeId || null });
+    s.hist.push({ topic: q.topic, lvl: q.lvl, seed: q.seed, vary: q.vary !== false, ok: ok, given: given, retry: !!q.isRetry, passage: q.passage || null, mistakeId: q.mistakeId || null });
     if (s.mode === 'quick' && !s.queue) {
       if (ok) { s.streak++; if (s.streak >= 2 && s.level < 4) { s.level++; s.streak = 0; } }
       else { s.streak = 0; if (s.level > 1) s.level--; }
@@ -257,7 +314,8 @@
         r.shuffle(list).forEach(function (tid, i) {
           // Одинаковые задачи в одном варианте пересоздаём с другим seed.
           var q, s2 = seed + lvl * 100000 + i * 977 + si, tries = 0;
-          do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode); } while (seen[q.kk] && ++tries < 25);
+          do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false }); } while (seen[q.kk] && ++tries < 25);
+          q.vary = false;
           seen[q.kk] = 1;
           q.section = si; qs.push(q);
         });
