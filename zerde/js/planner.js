@@ -121,14 +121,14 @@
     if (plan) plan.tasks.forEach(function (t) { if (t.topic === topicId) t.video = true; });
   }
 
-  /* Насколько трудные тексты давать: каждые две работы с текстами (домашка или тест с чтением)
-   * поднимают уровень на ступень. Если последняя домашка по чтению ниже 6/10 — ступень назад. */
+  /* Насколько трудные тексты давать (2–4; уровень A — только разминка в домашке): каждые две работы
+   * с текстами (домашка или тест с чтением) поднимают уровень. Последняя домашка ниже 6/10 — ступень назад. */
   function readLevel(state) {
     var p = state.topics.r_read || {}, n = p.hw || 0;
     state.exams.forEach(function (e) { if (e.format === 'BIL_full' || e.format === 'BIL_read') n++; });
-    var lvl = 1 + Math.floor(n / 2);
+    var lvl = 2 + Math.floor(n / 2);
     if (p.lastGrade && p.lastGrade < 6) lvl--;
-    return Math.max(1, Math.min(4, lvl));
+    return Math.max(2, Math.min(4, lvl));
   }
 
   function recordExam(state, ex, res, date) {

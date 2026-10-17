@@ -35,7 +35,8 @@
   function tn(tp) { return I.lang() === 'ru' ? tp.ru : tp.kk; }
   function fname(f) { return I.lang() === 'ru' ? f.ru : f.kk; }
   function school() { return Z.schools[S.profile.school]; }
-  function stars(n) { var s = ''; for (var i = 0; i < 3; i++) s += i < n ? '★' : '☆'; return '<span class="stars" aria-label="' + n + '/3">' + s + '</span>'; }
+  // Освоение темы: три деления (0–3), без «звёздочек».
+  function stars(n) { var s = ''; for (var i = 0; i < 3; i++) s += '<i' + (i < n ? ' class="on"' : '') + '></i>'; return '<span class="mast" title="' + n + ' / 3" aria-label="' + n + ' / 3">' + s + '</span>'; }
   function qCount(f) { return f.sections.reduce(function (a, s) { return a + (s.count || [1, 2, 3, 4].reduce(function (x, l) { return x + (s.mix[l] || 0); }, 0)); }, 0); }
   function searchUrl(tp) { return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(tp.video); }
   function videoList(tp) {
@@ -44,7 +45,6 @@
   }
   function firstVideo(tp) { var v = videoList(tp); return v.length ? v[0].url : searchUrl(tp); }
   function pct(x) { return Math.round(x * 100) + '%'; }
-  function kindIcon(k) { return k === 'logic' ? 'logic' : k === 'reading' ? 'reading' : 'math'; }
   function lvPill(l) { return '<span class="pill l' + l + '">' + LV[l] + '</span>'; }
   function gradeHtml(g) { return '<span class="grade">' + g + '<small>/10</small></span>'; }
 
@@ -150,27 +150,17 @@
 
   /* =================== БҮГІН / СЕГОДНЯ =================== */
   function hwOf(id) { return S.hw && S.hw[id]; }
-  function taskState(task) {
-    if (task.done) return 'on';
-    if (task.type === 'topic' && hwOf(task.topic)) return 'mid';
-    return '';
-  }
   function vToday() {
     var p = S.profile, d = today(), plan = P.planFor(S, d);
     save();
     var left = p.examDate ? U.daysBetween(d, p.examDate) : null;
     var fc = P.forecast(S), streak = P.streak(S, d), ready = P.readiness(S);
-    var stats = (left !== null && left >= 0 ? '<div><b>' + left + '</b><span>' + t('today.stLeft') + '</span></div>' : '') +
-      '<div><b>' + streak + '</b><span>' + t('today.streak') + '</span></div><div><b>' + pct(ready) + '</b><span>' + t('today.ready') + '</span></div>' +
-      (fc ? '<div><b>' + fc.score + '</b><span>' + t('today.forecast') + ' / ' + fc.max + '</span></div>' : '');
-    var sheet = plan.tasks.map(function (task, i) {
-      var name = task.type === 'test' ? fname(Z.examFormats[task.format]) : tn(Z.topicById[task.topic]);
-      return '<div class="sheet-row"><span class="n">' + (i + 1) + '</span><span class="t">' + name + '</span><span class="bub ' + taskState(task) + '"></span></div>';
-    }).join('');
+    function kpi(v, l) { return '<div><dd>' + v + '</dd><dt>' + l + '</dt></div>'; }
     var done = plan.tasks.filter(function (x) { return x.done; }).length;
-    var h = '<section class="hero"><div><h1>' + t('today.hello', { name: esc(p.name) }) + '</h1><p class="sub">' + t('today.sub', { school: school().name }) + '</p>' +
-      '<div class="hero-stats">' + stats + '</div></div>' +
-      '<div class="sheet-card" aria-label="' + t('today.sheet') + '"><div class="sh-h"><span>' + t('today.sheet').toUpperCase() + '</span><span>' + done + ' / ' + plan.tasks.length + '</span></div>' + sheet + '</div></section>';
+    var stats = (left !== null && left >= 0 ? kpi(left, t('today.stLeft')) : '') + kpi(done + '<small>/' + plan.tasks.length + '</small>', t('today.tasks')) +
+      kpi(streak, t('today.streak')) + kpi(pct(ready), t('today.ready')) + (fc ? kpi(fc.score + '<small>/' + fc.max + '</small>', t('today.forecast')) : '');
+    var h = '<section class="dhead"><div><span class="label">' + longDate(d) + '</span><h1>' + t('today.hello', { name: esc(p.name) }) + '</h1><p class="sub">' + t('today.sub', { school: school().name }) + '</p></div>' +
+      '<dl class="kpis">' + stats + '</dl></section>';
     if (S.activeExam) h += resumeBanner();
     if (plan.mock) h += '<div class="note amber"><b>' + t('today.mockBadge') + '.</b> ' + (school().id === 'BIL' ? t('ex.rulesBIL') : t('ex.rulesRFMSH', { max: 150 })) + '</div>';
     if (done === plan.tasks.length && done > 0) h += '<div class="note ok">' + t('today.allDone') + '</div>';
@@ -181,20 +171,28 @@
     h += weekStrip();
     return h;
   }
-  function taskCard(task) {
+  function longDate(d) {
+    var dt = new Date(d + 'T00:00:00'), ru = I.lang() === 'ru';
+    var mon = ru ? ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'] :
+      ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
+    var wd = ru ? ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'] : ['жексенбі', 'дүйсенбі', 'сейсенбі', 'сәрсенбі', 'бейсенбі', 'жұма', 'сенбі'];
+    return dt.getDate() + ' ' + mon[dt.getMonth()] + ' · ' + wd[dt.getDay()];
+  }
+  function taskCard(task, i) {
+    var num = '<span class="tk-n">' + U.pad2(i + 1) + '</span>';
     if (task.type === 'test') {
       var f = Z.examFormats[task.format];
-      return '<li class="task' + (task.done ? ' done' : '') + '"><span class="tk-ico test">' + ic('test') + '</span><div class="tk-body">' +
+      return '<li class="task' + (task.done ? ' done' : '') + '">' + num + '<div class="tk-body">' +
         '<span class="label">' + (f.full ? t('today.mock') : t('today.short')) + '</span><b>' + fname(f) + '</b><span class="meta">' + t('task.testSteps', { n: qCount(f), m: f.minutes }) + '</span></div>' +
         '<div class="tk-act">' + (task.done ? '<span class="done-mark">' + ic('check') + t('c.done') + '</span>' : '<button class="btn primary" data-act="startExam" data-f="' + f.id + '">' + t('c.start') + '</button>') + '</div></li>';
     }
     var tp = Z.topicById[task.topic], pr = S.topics[tp.id], hw = hwOf(tp.id);
-    var meta = '<span>' + t('hw.title') + ' · ' + t('hw.n', { n: hw ? hw.n : sessionLen(tp) }) + '</span>' + (hw ? '<span class="pill l2">' + hw.idx + ' / ' + hw.n + '</span>' : '') +
+    var meta = '<span>' + t('hw.title') + ' · ' + t('hw.n', { n: hw ? hw.n : sessionLen(tp) }) + '</span>' + (hw ? '<span class="mini"><span class="bar"><i style="width:' + (hw.idx / hw.n * 100) + '%"></i></span>' + hw.idx + ' / ' + hw.n + '</span>' : '') +
       (pr && pr.grade ? '<span>' + gradeHtml(pr.grade) + '</span>' : '');
     var act = task.done ? '<span class="done-mark">' + ic('check') + t('c.done') + '</span>' :
       '<a class="btn line' + (task.video ? ' done' : '') + '" href="' + esc(firstVideo(tp)) + '" target="_blank" rel="noopener" data-act="video" data-topic="' + tp.id + '">' + ic('play') + (task.video ? t('task.watched') : t('c.video')) + '</a>' +
       '<button class="btn primary" data-act="hw" data-topic="' + tp.id + '">' + (hw ? t('hw.cont', { i: hw.idx, n: hw.n }) : t('hw.start')) + '</button>';
-    return '<li class="task' + (task.done ? ' done' : '') + '"><span class="tk-ico ' + tp.kind + '">' + ic(kindIcon(tp.kind)) + '</span>' +
+    return '<li class="task' + (task.done ? ' done' : '') + '">' + num +
       '<div class="tk-body"><span class="label">' + t('kind.' + tp.kind) + '</span><b><a href="#/topic/' + tp.id + '">' + tn(tp) + '</a></b><span class="meta">' + meta + '</span></div>' +
       '<div class="tk-act">' + act + '</div></li>';
   }
@@ -296,9 +294,10 @@
     var exit = s.topic ? '#/topic/' + s.topic : '#/mistakes';
     var h = '<div class="ph"><a class="back" href="' + exit + '" aria-label="' + t('c.back') + '">' + ic('close') + '</a><div class="ph-title"><b>' + title + '</b>' + bar + '</div>' +
       '<span class="qnum">' + Math.min(s.idx + 1, s.n) + ' / ' + s.n + '</span></div>';
+    // Текст для чтения — слева, вопрос — справа (на телефоне друг под другом).
+    if (q.passage) h += '<div class="rsplit">' + passageBox(q.passage);
     h += '<section class="card qcard"><div class="qtop"><span class="row">' + lvPill(q.lvl) + (q.isRetry ? '<span class="pill retry">' + t('hw.retry') + '</span>' : '') +
       (s.mode === 'mistakes' ? '<span class="pill">' + tn(qtp) + '</span>' : '') + '</span></div>';
-    if (q.passage) h += passageBox(q.passage);
     h += qText(q) + answerArea(q, fb ? fb.given : mem.sel, !!fb);
     if (fb) {
       h += '<div class="fb ' + (fb.ok ? 'ok' : 'no') + '"><b>' + (fb.ok ? t('pr.right') : t('pr.wrong')) + '</b>' +
@@ -308,7 +307,7 @@
     } else {
       h += '<button class="btn primary wide" data-act="check"' + (q.type === 'mc' && !mem.sel ? ' disabled' : '') + '>' + t('c.check') + '</button>';
     }
-    return h + '</section>';
+    return h + '</section>' + (q.passage ? '</div>' : '');
   }
   function answerArea(q, chosen, locked) {
     if (q.type === 'int') {
@@ -325,7 +324,8 @@
   }
   function passageBox(id) {
     var p = Z.bank.reading.filter(function (x) { return x.id === id; })[0];
-    return '<details class="passage" open><summary>' + t('ex.passage') + ': «' + esc(p.title) + '»</summary><div>' + esc(p.text).replace(/\n/g, '<br>') + '</div></details>';
+    var body = p.html ? p.text : esc(p.text).split(/\n\s*\n/).map(function (x) { return '<p>' + x.replace(/\n/g, '<br>') + '</p>'; }).join('');
+    return '<article class="passage"><span class="label">' + t('ex.passage') + '</span><h3>' + esc(p.title) + '</h3><div class="ptext">' + body + '</div></article>';
   }
   function practiceDone(s) {
     var r = mem.res, tp = s.topic ? Z.topicById[s.topic] : null;
@@ -333,7 +333,7 @@
     var msg = r.grade >= 10 ? t('hw.g10') : r.grade >= 8 ? t('hw.g8') : r.grade >= 6 ? t('hw.g6') : t('hw.g0');
     var h = '<section class="card"><span class="label">' + (tp ? tn(tp) : t('nav.mistakes')) + '</span><h1>' + title + '</h1>' +
       '<div class="row" style="justify-content:space-between;align-items:flex-end"><div><span class="label">' + t('hw.grade') + '</span><div class="result-big"><b>' + r.grade + '</b><span>/ 10</span></div></div>' +
-      (s.mode === 'mistakes' ? '' : '<div style="font-size:2rem">' + stars(r.stars) + '</div>') + '</div>' +
+      (s.mode === 'mistakes' ? '' : '<div class="mast-lg">' + stars(r.stars) + '</div>') + '</div>' +
       '<p>' + t('hw.solved', { c: r.correct, n: r.total }) + (r.retries ? ' · ' + t('hw.retries', { n: r.retries }) : '') + '</p><p>' + msg + '</p>';
     var lv = Object.keys(r.byLevel);
     if (lv.length > 1) {
@@ -397,8 +397,8 @@
         return '<button class="' + (i === ex.cur ? 'c' : '') + (ex.flags[i] ? ' f' : '') + '" data-act="goto" data-i="' + i + '">' + (i + 1) + ' <span class="bub' + (answered(ex, i) ? ' on' : '') + '"></span></button>';
       }).join('') + '</div>';
     }
+    if (q.passage) h += '<div class="rsplit">' + passageBox(q.passage);
     h += '<section class="card qcard"><div class="qtop"><span class="qnum">' + (ex.cur + 1) + ' / ' + n + '</span>' + (f.points ? '<span class="row">' + lvPill(q.lvl) + '<span class="pill">' + f.points[q.lvl] + '</span></span>' : '') + '</div>';
-    if (q.passage) h += passageBox(q.passage);
     h += qText(q);
     if (q.type === 'int') {
       h += '<div class="int-in"><input id="exans" inputmode="numeric" autocomplete="off" placeholder="' + t('pr.input') + '" value="' + esc(ex.answers[ex.cur] || '') + '" data-autofocus>' +
@@ -411,7 +411,7 @@
     h += '<div class="exnav"><button class="btn line" data-act="exPrev"' + (ex.cur === 0 ? ' disabled' : '') + '>' + t('ex.prev') + '</button>' +
       '<button class="btn line" data-act="exFlag">' + (ex.flags[ex.cur] ? t('ex.flagged') : t('ex.flag')) + '</button>' +
       '<button class="btn primary" data-act="exNext">' + (ex.cur === n - 1 ? t('c.finish') : t('c.next')) + '</button></div></section>';
-    return h;
+    return h + (q.passage ? '</div>' : '');
   }
   function startTimer() {
     if (mem.timer) clearInterval(mem.timer);
@@ -538,12 +538,12 @@
     hw: function (el) {
       var id = el.dataset.topic;
       S.hw = S.hw || {};
-      if (!S.hw[id]) { S.hw[id] = E.newSession(id, S.profile.school, { mode: 'hw', readStage: P.readLevel(S) - 1 }); save(); }
+      if (!S.hw[id]) { S.hw[id] = E.newSession(id, S.profile.school, { mode: 'hw', readStage: P.readLevel(S) - 2 }); save(); }
       startSession(S.hw[id]);
     },
     quick: function (el) {
       var id = el.dataset.topic, pr = S.topics[id];
-      startSession(E.newSession(id, S.profile.school, { mode: 'quick', startLevel: pr ? Math.max(1, pr.level - 1) : 1, readStage: P.readLevel(S) - 1 }));
+      startSession(E.newSession(id, S.profile.school, { mode: 'quick', startLevel: pr ? Math.max(1, pr.level - 1) : 1, readStage: P.readLevel(S) - 2 }));
     },
     mistakes: function (el) {
       var list = (S.mistakes || []).filter(function (m) { return Z.topicById[m.topic] && Z.topicById[m.topic].schools.indexOf(S.profile.school) >= 0 && (!el.dataset.topic || m.topic === el.dataset.topic); });
