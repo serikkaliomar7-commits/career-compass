@@ -1,6 +1,7 @@
 /* Зерде — планировщик: что ученик делает сегодня.
  *
- * Каждый день: темы (логика + математика: видео → 12 задач) и тест.
+ * Каждый день: темы (видеоурок → домашка на 50 задач A → B → C → ★) и тест.
+ * Незаконченная домашка переходит на следующий день и продолжается с того же места.
  * Полные пробные тесты 2 раза в неделю, а за 60 дней до экзамена — 3 раза.
  * В остальные дни — короткий тест (мини-тест или чтение для БИЛ).
  * План дня фиксируется при первом открытии, чтобы задания не «прыгали». */
@@ -8,10 +9,11 @@
   'use strict';
   var Z = root.Z, U = Z.util;
 
+  // Нагрузка в темах (каждая — 50 задач). light: одна тема, по очереди логика/математика.
   var INTENSITY = {
-    light: { logic: 1, math: 1, short: 'none' },
-    normal: { logic: 1, math: 2, short: 'alt' },
-    intense: { logic: 2, math: 2, short: 'all' }
+    light: { logic: 1, math: 1, alternate: true, short: 'none' },
+    normal: { logic: 1, math: 1, short: 'alt' },
+    intense: { logic: 1, math: 2, short: 'all' }
   };
 
   function mockDays(daysLeft) { return daysLeft <= 60 ? [1, 3, 5] : [2, 5]; }
@@ -50,8 +52,10 @@
     if (state.plans[date]) return state.plans[date];
     var info = dayInfo(state, date), mode = INTENSITY[state.profile.intensity || 'normal'];
     var tasks = [];
-    var logic = pickTopics(state, 'logic', mode.logic, []);
-    var math = pickTopics(state, 'math', mode.math, []);
+    var nl = mode.logic, nm = mode.math;
+    if (mode.alternate) { if (info.idx % 2) nl = 0; else nm = 0; }
+    var logic = pickTopics(state, 'logic', nl, []);
+    var math = pickTopics(state, 'math', nm, []);
     logic.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
     math.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
     var test = testFor(state, info);
@@ -81,17 +85,35 @@
   function touch(state, date) { state.activity[date] = (state.activity[date] || 0) + 1; }
 
   // Итог практики по теме → прогресс темы и отметка в плане дня.
+  // Итог домашки или повторения → прогресс темы; домашка закрывает задание дня.
   function recordPractice(state, topicId, res, date) {
-    var p = state.topics[topicId] || { sessions: 0, stars: 0, best: 0, level: 1, solved: 0, correct: 0 };
+    var p = state.topics[topicId] || { sessions: 0, stars: 0, best: 0, level: 1, solved: 0, correct: 0, hw: 0, grade: 0 };
     p.sessions++;
     p.solved += res.total; p.correct += res.correct;
     p.lastAcc = res.acc; p.best = Math.max(p.best, res.acc);
     p.stars = Math.max(p.stars, res.stars);
+    if (res.mode === 'hw') { p.hw = (p.hw || 0) + 1; p.grade = Math.max(p.grade || 0, res.grade); p.lastGrade = res.grade; }
     p.level = res.nextLevel; p.lastDate = date;
     state.topics[topicId] = p;
     var plan = state.plans[date];
-    if (plan) plan.tasks.forEach(function (t) { if (t.type === 'topic' && t.topic === topicId) t.done = true; });
+    if (plan && res.mode === 'hw') plan.tasks.forEach(function (t) { if (t.type === 'topic' && t.topic === topicId) t.done = true; });
     touch(state, date);
+  }
+
+  /* Тетрадь ошибок: каждая неверно решённая задача (кроме чтения) сохраняется по seed,
+   * чтобы её можно было решить ещё раз. Верное решение в «работе над ошибками» удаляет её. */
+  function recordMistakes(state, hist, date) {
+    state.mistakes = state.mistakes || [];
+    hist.forEach(function (h) {
+      if (h.ok || h.passage || !h.topic || h.mistakeId) return;
+      var id = h.topic + ':' + h.lvl + ':' + h.seed;
+      if (state.mistakes.some(function (m) { return m.id === id; })) return;
+      state.mistakes.push({ id: id, topic: h.topic, lvl: h.lvl, seed: h.seed, date: date });
+    });
+    hist.forEach(function (h) {
+      if (h.mistakeId && h.ok) state.mistakes = state.mistakes.filter(function (m) { return m.id !== h.mistakeId; });
+    });
+    if (state.mistakes.length > 300) state.mistakes = state.mistakes.slice(-300);
   }
 
   function recordVideo(state, topicId, date) {
@@ -105,6 +127,9 @@
       correct: res.correct, wrong: res.wrong, skipped: res.skipped, byTopic: res.byTopic, secs: Math.round((Date.now() - ex.startedAt) / 1000)
     });
     if (state.exams.length > 200) state.exams.shift();
+    recordMistakes(state, ex.questions.map(function (q, i) {
+      return { topic: q.topic, lvl: q.lvl, seed: q.seed, passage: q.passage || null, ok: Z.engine.check(q, ex.answers[i]) === true };
+    }), date);
     var plan = state.plans[date];
     // Полный пробный засчитывает и короткий тест дня — он заведомо больше.
     var full = Z.examFormats[ex.format].full;
@@ -151,6 +176,6 @@
 
   Z.planner = {
     INTENSITY: INTENSITY, planFor: planFor, weekPreview: weekPreview, dayInfo: dayInfo, recordPractice: recordPractice,
-    recordVideo: recordVideo, recordExam: recordExam, streak: streak, readiness: readiness, forecast: forecast, weakTopics: weakTopics
+    recordVideo: recordVideo, recordExam: recordExam, recordMistakes: recordMistakes, streak: streak, readiness: readiness, forecast: forecast, weakTopics: weakTopics
   };
 })(typeof window !== 'undefined' ? window : globalThis);

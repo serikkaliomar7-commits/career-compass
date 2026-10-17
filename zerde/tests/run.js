@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'banks.js', 'curriculum.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'banks.js', 'curriculum.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;
@@ -18,7 +18,8 @@ function bad(s) { return /undefined|NaN|Infinity|\[object/.test(String(s)); }
 var SEEDS = +(process.env.SEEDS || 400);
 Z.topics.forEach(function (t) {
   if (t.kind === 'reading') return;
-  [1, 2, 3].forEach(function (lvl) {
+  if (t.gen && !Z.gen4[t.gen]) fail(t.id + ': no level-4 generator');
+  [1, 2, 3, 4].forEach(function (lvl) {
     [{ answer: 'mc', options: 4 }, { answer: 'mc', options: 5 }, { answer: 'int' }].forEach(function (mode) {
       if (mode.answer === 'int' && t.schools.indexOf('RFMSH') < 0) return;
       for (var s = 1; s <= SEEDS; s++) {
@@ -81,12 +82,40 @@ if (E.scoreExam(bil).score !== -60) fail('BIL all wrong must score −60');
 if (E.buildExam('BIL_full', 1).questions.length && E.scoreExam(E.buildExam('RFMSH_full', 3)).max !== 150) fail('RFMSH max must be 150');
 if (E.scoreExam(E.buildExam('BIL_full', 3)).max !== 240) fail('BIL max must be 240');
 
-// Адаптивность: серия верных ответов поднимает уровень до 3.
-var ses = E.newSession('m_percent', 'BIL', 1);
-while (!ses.done) { E.answer(ses, ses.current.ansKey); E.advance(ses); }
-if (ses.maxLevel !== 3) fail('adaptive: level did not reach 3');
-var rs = E.sessionResult(ses);
-if (rs.stars !== 3) fail('adaptive: all-correct session must give 3 stars, got ' + rs.stars);
+// Домашка: 50 задач лесенкой A→B→C→★, всё верно — 10/10 и ★★★.
+var hw = E.newSession('m_percent', 'BIL');
+if (hw.n !== 50) fail('homework must have 50 problems, got ' + hw.n);
+while (!hw.done) { E.answer(hw, hw.current.ansKey); E.advance(hw); }
+var hr = E.sessionResult(hw);
+if (hr.grade !== 10 || hr.stars !== 3 || hr.total !== 50) fail('homework all-correct: grade ' + hr.grade + ', stars ' + hr.stars);
+if (hr.byLevel[4].n !== 8) fail('homework must end with 8 olympiad problems');
+
+// Ошибка в домашке → следующая задача «повторная» того же уровня и темы, в оценку не идёт.
+var hw2 = E.newSession('m_frac', 'RFMSH'), lvl0 = hw2.current.lvl;
+E.answer(hw2, '-99999'); E.advance(hw2);
+if (!hw2.current.isRetry || hw2.current.lvl !== lvl0 || hw2.idx !== 0) fail('wrong answer must give a retry problem');
+E.answer(hw2, String(hw2.current.ansValue)); E.advance(hw2);
+if (hw2.idx !== 1 || hw2.current.isRetry) fail('after retry the homework must continue');
+var hr2 = E.sessionResult(hw2);
+if (hr2.total !== 1 || hr2.correct !== 0) fail('retries must not count in the grade');
+
+// Банковые темы и чтение: очередь из банка, без повторов.
+var bq = E.newSession('l_puzzles', 'BIL');
+if (bq.n !== Z.bank.logic.length) fail('logic bank homework must use every bank item');
+var rq = E.newSession('r_read', 'BIL');
+if (rq.n !== Z.bank.reading.length * 5) fail('reading homework must use all passages');
+var rfq = E.newSession('l_puzzles', 'RFMSH');
+rfq.queue.forEach(function (q) { if (q.type !== 'int') fail('RFMSH bank queue must be integer-answer'); });
+
+// Короткое повторение: 10 задач, адаптивный уровень доходит до 4.
+var qs = E.newSession('m_eq', 'BIL', { mode: 'quick' });
+while (!qs.done) { E.answer(qs, qs.current.ansKey); E.advance(qs); }
+if (qs.n !== 10 || qs.maxLevel !== 4) fail('quick session: n=' + qs.n + ' maxLevel=' + qs.maxLevel);
+
+// Тетрадь ошибок: задача восстанавливается по seed в точности.
+var q1 = E.buildQuestion('m_work', 3, 4242, E.modeFor('BIL'));
+var ms = E.mistakeSession([{ id: 'x', topic: 'm_work', lvl: 3, seed: 4242 }], 'BIL');
+if (ms.current.kk !== q1.kk || ms.current.ansKey !== q1.ansKey) fail('mistake replay must rebuild the same problem');
 
 console.log((fails ? 'FAILED ' + fails : 'OK') + ' — ' + checks + ' checks');
 process.exit(fails ? 1 : 0);

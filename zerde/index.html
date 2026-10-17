@@ -4,29 +4,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Зерде</title>
-<meta name="description" content="БИЛ, РФМШ және НЗМ-ге дайындық: күнделікті жоспар, видеосабақтар, бейімделгіш есептер, сынақ тесттер.">
+<meta name="description" content="БИЛ, РФМШ және НЗМ-ге дайындық: күнделікті жоспар, видеосабақтар, үй жұмыстары, сынақ тесттер.">
 <meta name="theme-color" content="#16213E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <aside id="side">
-  <a class="logo" href="#/today">Зерде<small id="tag"></small></a>
+  <a class="brand" href="#/today"><span class="brand-mark">З</span><span class="brand-name">Зерде</span><span class="brand-tag">EDU</span></a>
   <nav id="nav"></nav>
   <div id="me"></div>
 </aside>
-<header id="top">
-  <button id="burger" aria-label="Меню">☰</button>
-  <a class="logo" href="#/today">Зерде</a>
-</header>
-<main id="view" aria-live="polite"></main>
+<div id="main">
+  <header id="top">
+    <button id="burger" aria-label="Мәзір">
+      <svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div id="page-title"></div>
+    <div id="top-right"></div>
+  </header>
+  <main id="view" aria-live="polite"></main>
+</div>
 <div id="modal"></div>
 <noscript>Зерде жұмыс істеуі үшін JavaScript қосыңыз.</noscript>
 <script src="js/util.js"></script>
 <script src="js/gen_math.js"></script>
 <script src="js/gen_logic.js"></script>
+<script src="js/gen_olymp.js"></script>
 <script src="js/banks.js"></script>
 <script src="js/curriculum.js"></script>
 <script src="js/engine.js"></script>

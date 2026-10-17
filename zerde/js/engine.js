@@ -60,16 +60,20 @@
     var raw, s = seed, tries = 0, r;
     for (;;) {
       r = U.rng(s);
-      raw = t.bank ? pickBank(Z.bank[t.bank], lvl, r, needInt) : Z.gen[t.gen](r, lvl, { int: needInt });
+      raw = t.bank ? pickBank(Z.bank[t.bank], lvl, r, needInt)
+        : lvl === 4 && Z.gen4[t.gen] ? Z.gen4[t.gen](r, lvl, { int: needInt }) : Z.gen[t.gen](r, Math.min(lvl, 3), { int: needInt });
       var a = norm(raw.ans);
       if (!needInt || (typeof a === 'number' && a % 1 === 0)) break;
       if (++tries > 60) throw new Error('topic ' + topicId + ' lvl ' + lvl + ' cannot produce integer answers');
       s = (s * 31 + 7) % 2147483646 + 1;
     }
+    return finishQuestion(topicId, lvl, seed, mode, raw, r);
+  }
+  function finishQuestion(topicId, lvl, seed, mode, raw, r) {
     var q = {
       topic: topicId, lvl: lvl, seed: seed, kk: raw.kk, ru: raw.ru || raw.kk,
       sol_kk: raw.sol_kk, sol_ru: raw.sol_ru || raw.sol_kk, unit: raw.unit || null,
-      type: needInt ? 'int' : 'mc', ansKey: keyOf(raw.ans), ansValue: norm(raw.ans)
+      type: mode.answer === 'int' ? 'int' : 'mc', ansKey: keyOf(raw.ans), ansValue: norm(raw.ans)
     };
     if (q.type === 'mc') q.options = makeOptions(raw.ans, raw.wrong, mode.options || 4, r, raw.unit);
     return q;
@@ -121,50 +125,119 @@
     return { answer: sc.answer, options: sc.options || 4 };
   }
 
-  /* ---------- адаптивная практика по теме ----------
-   * 2 верных подряд → уровень выше; ошибка → уровень ниже.
-   * Так ученик быстро доходит до своего потолка и тренируется на нём. */
-  var SESSION_LEN = 12;
-  function newSession(topicId, school, startLevel) {
-    var t = Z.topicById[topicId];
-    var s = {
-      topic: topicId, school: school, n: t.kind === 'reading' ? 10 : SESSION_LEN, idx: 0,
-      level: Math.min(3, Math.max(1, startLevel || 1)), streak: 0, maxLevel: 1, hist: [], seed: U.newSeed(), done: false
-    };
-    s.maxLevel = s.level;
+  /* ---------- тренировки по теме ----------
+   * Два режима:
+   *  hw    — домашнее задание на 50 задач: лесенка A → B → C → ★ (олимпиада).
+   *          Ошибка → сразу «повторная» задача того же типа (до 10 штук на задание),
+   *          чтобы ученик закрепил исправленный способ. Оценка — по первым попыткам.
+   *  quick — короткое повторение на 10 задач с адаптивным уровнем
+   *          (2 верных подряд → выше, ошибка → ниже). */
+  var HW_PLAN = { 1: 12, 2: 16, 3: 14, 4: 8 };     // 50 задач
+  var QUICK_LEN = 10, MAX_RETRY = 10;
+  var SESSION_LEN = 50;
+
+  function hwLevels() {
+    var out = [];
+    [1, 2, 3, 4].forEach(function (l) { for (var i = 0; i < HW_PLAN[l]; i++) out.push(l); });
+    return out;
+  }
+
+  // Банковые темы (логика, чтение): берём все задачи банка по возрастанию уровня.
+  function bankQueue(t, school, seed) {
+    var r = U.rng(seed), mode = modeFor(school);
     if (t.kind === 'reading') {
-      var ids = U.rng(s.seed).shuffle(Z.bank.reading.map(function (p) { return p.id; })).slice(0, 2);
-      s.queue = buildReading(ids[0], s.seed, 4).concat(buildReading(ids[1], s.seed + 100, 4));
+      var out = [];
+      r.shuffle(Z.bank.reading).forEach(function (p, k) { out = out.concat(buildReading(p.id, seed + k * 100, mode.options)); });
+      return out;
     }
+    var items = Z.bank[t.bank].filter(function (q) { return mode.answer !== 'int' || q.int; });
+    items = r.shuffle(items).sort(function (a, b) { return a.lvl - b.lvl; });
+    return items.map(function (it, k) {
+      var q = { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru };
+      return finishQuestion(t.id, it.lvl, seed + k, mode, q, r);
+    });
+  }
+
+  function newSession(topicId, school, opts) {
+    opts = opts || {};
+    var t = Z.topicById[topicId], seed = U.newSeed();
+    var s = {
+      topic: topicId, school: school, mode: opts.mode || 'hw', idx: 0, seed: seed, hist: [], extra: 0, retry: false,
+      level: Math.min(4, Math.max(1, opts.startLevel || 1)), streak: 0, done: false, startedAt: Date.now()
+    };
+    if (t.bank) {
+      s.queue = bankQueue(t, school, seed);
+      s.n = s.mode === 'quick' ? Math.min(QUICK_LEN, s.queue.length) : s.queue.length;
+      if (s.mode === 'quick') s.queue = s.queue.slice(0, s.n);
+    } else if (s.mode === 'hw') {
+      s.plan = hwLevels(); s.n = s.plan.length;
+    } else {
+      s.n = QUICK_LEN;
+    }
+    s.maxLevel = s.level;
     s.current = nextQuestion(s);
     return s;
   }
+
+  // Сессия по сохранённым ошибкам (тетрадь ошибок): те же задачи, тот же seed.
+  function mistakeSession(list, school) {
+    var mode = modeFor(school);
+    var s = { topic: null, school: school, mode: 'mistakes', idx: 0, seed: U.newSeed(), hist: [], extra: 0, retry: false, level: 1, streak: 0, done: false, startedAt: Date.now() };
+    s.queue = list.map(function (m) { var q = buildQuestion(m.topic, m.lvl, m.seed, mode); q.mistakeId = m.id; return q; });
+    s.n = s.queue.length; s.maxLevel = 1;
+    s.current = s.queue[0] || null;
+    if (!s.current) s.done = true;
+    return s;
+  }
+
+  function levelFor(s) { return s.plan ? s.plan[s.idx] : s.level; }
   function nextQuestion(s) {
     if (s.queue) return s.queue[s.idx];
-    return buildQuestion(s.topic, s.level, s.seed + s.idx * 7919, modeFor(s.school));
+    return buildQuestion(s.topic, levelFor(s), s.seed + s.idx * 7919 + s.extra * 104729, modeFor(s.school));
   }
+
   function answer(s, given) {
-    var ok = check(s.current, given) === true;
-    s.hist.push({ lvl: s.current.lvl, ok: ok, given: given });
-    if (!s.queue) {
-      if (ok) { s.streak++; if (s.streak >= 2 && s.level < 3) { s.level++; s.streak = 0; } }
+    var q = s.current, ok = check(q, given) === true;
+    s.hist.push({ topic: q.topic, lvl: q.lvl, seed: q.seed, ok: ok, given: given, retry: !!q.isRetry, passage: q.passage || null, mistakeId: q.mistakeId || null });
+    if (s.mode === 'quick' && !s.queue) {
+      if (ok) { s.streak++; if (s.streak >= 2 && s.level < 4) { s.level++; s.streak = 0; } }
       else { s.streak = 0; if (s.level > 1) s.level--; }
-      s.maxLevel = Math.max(s.maxLevel, s.level);
     }
+    s.maxLevel = Math.max(s.maxLevel, q.lvl);
+    // Домашка: неверно → следующая задача — такая же по типу и уровню (кроме банковых тем).
+    s.retry = s.mode === 'hw' && !ok && !q.isRetry && !q.passage && s.extra < MAX_RETRY;
     return ok;
   }
+
   function advance(s) {
+    if (s.retry) {
+      s.extra++; s.retry = false;
+      var q = buildQuestion(s.current.topic, s.current.lvl, s.seed + 900000 + s.extra * 7907, modeFor(s.school));
+      q.isRetry = true; s.current = q;
+      return;
+    }
     s.idx++;
     if (s.idx >= s.n) { s.done = true; s.current = null; return; }
     s.current = nextQuestion(s);
   }
-  // Итог: звёзды 0–3. 3★ — ≥75% и решены задачи 3-го уровня.
+
+  // Итог: оценка из 10 и звёзды — только по первым попыткам.
   function sessionResult(s) {
-    var correct = s.hist.filter(function (h) { return h.ok; }).length;
-    var hardOk = s.hist.filter(function (h) { return h.ok && h.lvl === 3; }).length;
-    var acc = correct / s.hist.length;
-    var stars = acc >= 0.75 && (hardOk >= 2 || s.queue) ? 3 : acc >= 0.6 ? 2 : acc >= 0.4 ? 1 : 0;
-    return { correct: correct, total: s.hist.length, acc: acc, stars: stars, nextLevel: Math.max(1, Math.min(3, s.level)), hardOk: hardOk };
+    var first = s.hist.filter(function (h) { return !h.retry; });
+    var correct = first.filter(function (h) { return h.ok; }).length;
+    var acc = first.length ? correct / first.length : 0;
+    var star = first.filter(function (h) { return h.lvl === 4; }), starOk = star.filter(function (h) { return h.ok; }).length;
+    var hard = first.filter(function (h) { return h.lvl >= 3 && h.ok; }).length;
+    var stars;
+    if (s.mode === 'hw') stars = acc >= 0.85 && (!star.length || starOk / star.length >= 0.5) ? 3 : acc >= 0.7 ? 2 : acc >= 0.5 ? 1 : 0;
+    else stars = acc >= 0.8 ? 2 : acc >= 0.5 ? 1 : 0;   // короткое повторение не даёт ★★★
+    var byLevel = {};
+    first.forEach(function (h) { var b = byLevel[h.lvl] = byLevel[h.lvl] || { ok: 0, n: 0 }; b.n++; if (h.ok) b.ok++; });
+    return {
+      mode: s.mode, correct: correct, total: first.length, acc: acc, grade: Math.round(acc * 10), stars: stars, hardOk: hard,
+      starOk: starOk, starN: star.length, retries: s.extra, byLevel: byLevel,
+      nextLevel: s.mode === 'quick' ? s.level : Math.max(1, Math.min(4, s.maxLevel))
+    };
   }
 
   /* ---------- пробные тесты ---------- */
@@ -178,7 +251,7 @@
       }
       // Темы раздаём по кругу из перемешанного списка — так в варианте нет перекоса в одну тему.
       var mPool = r.shuffle(Z.topicsFor(f.school, 'math')), lPool = r.shuffle(Z.topicsFor(f.school, 'logic')), mi = 0, li = 0;
-      [1, 2, 3].forEach(function (lvl) {
+      [1, 2, 3, 4].forEach(function (lvl) {
         var n = sec.mix[lvl] || 0, nLogic = Math.round(n * sec.logicShare), list = [];
         for (var i = 0; i < n; i++) list.push(i < nLogic ? lPool[li++ % lPool.length].id : mPool[mi++ % mPool.length].id);
         r.shuffle(list).forEach(function (tid, i) {
@@ -219,7 +292,7 @@
 
   Z.engine = {
     keyOf: keyOf, show: show, buildQuestion: buildQuestion, buildReading: buildReading, check: check, modeFor: modeFor,
-    newSession: newSession, answer: answer, advance: advance, sessionResult: sessionResult,
-    buildExam: buildExam, scoreExam: scoreExam, SESSION_LEN: SESSION_LEN
+    newSession: newSession, mistakeSession: mistakeSession, answer: answer, advance: advance, sessionResult: sessionResult,
+    buildExam: buildExam, scoreExam: scoreExam, SESSION_LEN: SESSION_LEN, QUICK_LEN: QUICK_LEN, HW_PLAN: HW_PLAN
   };
 })(typeof window !== 'undefined' ? window : globalThis);

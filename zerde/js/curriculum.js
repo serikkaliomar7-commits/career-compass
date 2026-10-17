@@ -73,24 +73,25 @@
   Z.topics.forEach(function (t) { Z.topicById[t.id] = t; });
 
   /* Форматы пробных тестов.
-   * mix — сколько вопросов каждого уровня; points — баллы по уровням (РФМШ). */
+   * mix — сколько вопросов каждого уровня (4 — олимпиадный); points — баллы по уровням (РФМШ:
+   * олимпиадные задачи идут в блоке C и стоят 7, как в официальном пробном тесте). */
   Z.examFormats = {
     BIL_full: { id: 'BIL_full', school: 'BIL', kk: 'БИЛ: толық сынақ', ru: 'БИЛ: полный пробный', minutes: 110, full: true,
-      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 15, 2: 25, 3: 10 } },
+      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 15, 2: 22, 3: 9, 4: 4 } },
                  { kk: 'Оқу сауаттылығы', kinds: ['reading'], count: 10 }],
       answer: 'mc', options: 4, scoring: { correct: 4, wrong: -1, skip: 0 } },
     BIL_mini: { id: 'BIL_mini', school: 'BIL', kk: 'БИЛ: шағын сынақ', ru: 'БИЛ: мини-тест', minutes: 30,
-      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 5, 2: 7, 3: 3 } }],
+      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 5, 2: 6, 3: 3, 4: 1 } }],
       answer: 'mc', options: 4, scoring: { correct: 4, wrong: -1, skip: 0 } },
     BIL_read: { id: 'BIL_read', school: 'BIL', kk: 'БИЛ: оқу сауаттылығы', ru: 'БИЛ: чтение', minutes: 20,
       sections: [{ kk: 'Оқу сауаттылығы', kinds: ['reading'], count: 10 }],
       answer: 'mc', options: 4, scoring: { correct: 4, wrong: -1, skip: 0 } },
     RFMSH_full: { id: 'RFMSH_full', school: 'RFMSH', kk: 'РФМШ: толық сынақ', ru: 'РФМШ: полный пробный', minutes: 120, full: true,
-      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 10, 2: 10, 3: 10 } }],
-      answer: 'int', points: { 1: 3, 2: 5, 3: 7 } },
+      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 10, 2: 10, 3: 6, 4: 4 } }],
+      answer: 'int', points: { 1: 3, 2: 5, 3: 7, 4: 7 } },
     RFMSH_mini: { id: 'RFMSH_mini', school: 'RFMSH', kk: 'РФМШ: шағын сынақ', ru: 'РФМШ: мини-тест', minutes: 35,
-      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 3, 2: 3, 3: 3 } }],
-      answer: 'int', points: { 1: 3, 2: 5, 3: 7 } }
+      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 3, 2: 3, 3: 2, 4: 1 } }],
+      answer: 'int', points: { 1: 3, 2: 5, 3: 7, 4: 7 } }
   };
 
   Z.topicsFor = function (school, kind) {
@@ -99,4 +100,43 @@
   Z.formatsFor = function (school) {
     return Object.keys(Z.examFormats).map(function (k) { return Z.examFormats[k]; }).filter(function (f) { return f.school === school; });
   };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* Видеоуроки по темам: найдены через поисковый индекс YouTube (октябрь 2026),
+ * названия — как у автора ролика. Если ролик удалят, остаётся кнопка поиска по теме,
+ * а учитель может заменить ссылку в «Баптаулар». */
+(function (root) {
+  'use strict';
+  var Z = root.Z;
+  var V = {
+    m_order: [['28N03GrlVT8', 'Амалдардың орындалу реті'], ['gsGbvH-JeEs', 'Өрнектің мәнін тап 2+5·3+4 — Альсейтов']],
+    m_neg: [['_yDElD_R4rU', 'Таңбалары әртүрлі рационал сандарды қосу'], ['iiWlCdR_Elk', 'Рационал сандарды қосу мен көбейтудің қасиеттері']],
+    m_divis: [['xfzdae7rG2k', 'Натурал сандардың бөлінгіштік белгілері'], ['TowSZblcvx4', '3 және 9 сандарына бөлінгіштік белгілері']],
+    m_gcdlcm: [['QmdZs-DdMCg', 'ЕҮОБ және ЕКОЕ табу'], ['mMXH06DoLqE', 'ЕКОЕ-ні 5 минутта оңай табу — НЗМ-ге дайындық']],
+    m_frac: [['QgGqTwmQ6Wc', 'Жай бөлшектер: қосу, азайту, көбейту, бөлу'], ['kYYeFBF34Pc', 'Жай бөлшектерді қосу және азайту'], ['7B0r155thfw', 'Санның бөлігін және бөлігі бойынша санды табу']],
+    m_dec: [['5WkcBWs8AIY', 'Ондық бөлшектерді қосу, азайту, көбейту және бөлу'], ['bHaPjeMGE9w', 'Ондық бөлшектерді көбейту және бөлу']],
+    m_percent: [['EOIwTiYMG9g', 'Пайыз. Мәтіндік есептер шығару'], ['806bDymUfJ0', 'Пайызға байланысты мәселе есептер']],
+    m_ratio: [['yofmkLMoZlw', 'Қатынас (6-сынып, 1.1)'], ['yczLz9fUyGQ', 'Масштабқа есеп']],
+    m_eq: [['veZT_M9SDJA', 'Бір айнымалы сызықтық теңдеулер'], ['mVJfrsvPmAE', 'Мәтін есептерді теңдеу құру арқылы шығару — НЗМ, БИЛ']],
+    m_motion: [['JMHqw6pGNSo', 'Қозғалысқа берілген мәтін есептер: негізгі түрлері — Альсейтов'], ['NjqoQUw3T6c', 'Қарама-қарсы бағыттағы қозғалыс']],
+    m_work: [['4WnNwNXIH_s', 'Жұмысқа байланысты мәселе есептерді талдау'], ['-6fLbV_AC4s', 'Бірлесіп орындалатын жұмыс']],
+    m_time: [],
+    m_geom: [['csX036FX9wI', 'Тіктөртбұрыштың ауданы — Альсейтов'], ['EtKaeAOxXRM', 'Периметр табу']],
+    m_volume: [['gaF1UfH2C78', 'Тікбұрышты параллелепипед: көлемі мен бетінің ауданы — Альсейтов']],
+    m_angles: [['0wsaWiJpXGg', 'Сыбайлас және вертикаль бұрыштар, биссектриса'], ['ffU2310d8IA', 'Үшбұрыш бұрыштарының қосындысы'], ['4yxZcLr9tok', 'Сағат тілдерінің арасындағы бұрыш']],
+    m_avg: [['gBgvHymnLgo', 'Арифметикалық орта'], ['3cgpRZwMETg', 'Арифметикалық орта — мат. сауаттылық']],
+    m_word: [['ZTvVbj_eJqI', 'Жасқа байланысты есептер'], ['8sqsNU8Enhk', 'Мәселе есептер']],
+    l_seq: [['KkO_BrRND1s', 'Сандар тізбегі (5-сынып)']],
+    l_fig: [['B5m4QyB6L98', 'Сұрақ белгісі орнындағы санды тап'], ['SEStEPJX2go', 'Шеңбердегі сандардың логикалық амалы']],
+    l_op: [['OLwumTqHagY', 'КТЛ/БИЛ логикасы: «Амалдар» тесті']],
+    l_count: [['GC-U9nK-_m8', 'Комбинаторика есептерін іріктеу тәсілімен шығару'], ['6bT7f1ACD78', 'Терулерге 10 есеп — Альсейтов']],
+    l_digits: [],
+    l_cal: [],
+    l_balance: [],
+    l_puzzles: [['_8WAgU4LEsE', 'КТЛ-де келетін логикадан 5 есеп'], ['JpwcKG7g12Y', 'Логикалық есеп. 5–6 класс, НИШ/БИЛ']],
+    r_read: [['FU9yOqwXO0k', 'Оқу сауаттылығы: мәтінмен жұмыс'], ['Fc0Pv5W6-6c', 'Мәтін және оның түрлері']]
+  };
+  Z.topics.forEach(function (t) {
+    t.videos = (V[t.id] || []).map(function (v) { return { url: 'https://www.youtube.com/watch?v=' + v[0], title: v[1] }; });
+  });
 })(typeof window !== 'undefined' ? window : globalThis);
