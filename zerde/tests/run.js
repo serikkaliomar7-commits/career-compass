@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'banks.js', 'curriculum.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'banks.js', 'reading.js', 'curriculum.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;
@@ -115,7 +115,29 @@ Z.topics.forEach(function (t) {
 var bq = E.newSession('l_puzzles', 'BIL');
 if (bq.n !== Z.bank.logic.length) fail('logic bank homework must use every bank item');
 var rq = E.newSession('r_read', 'BIL');
-if (rq.n !== Z.bank.reading.length * 5) fail('reading homework must use all passages');
+if (rq.n !== 20) fail('reading homework must be 4 passages × 5 = 20, got ' + rq.n);
+// Тексты: у каждого 5 вопросов, верный ответ отличается от неверных, 4 варианта.
+Z.bank.reading.forEach(function (p) {
+  if (!p.lvl || p.qs.length !== 5) fail('passage ' + p.id + ': lvl/5 questions');
+  p.qs.forEach(function (q, i) {
+    if (q.wrong.length !== 3 || q.wrong.indexOf(q.ans) >= 0 || new Set(q.wrong).size !== 3) fail('passage ' + p.id + ' q' + i + ' bad options');
+  });
+  E.buildReading(p.id, 5, 4).forEach(function (q) {
+    if (q.options.length !== 4 || q.options.filter(function (o) { return o.key === q.ansKey; }).length !== 1) fail('passage ' + p.id + ' built options');
+  });
+});
+[0, 1, 2].forEach(function (st) {
+  var s = E.newSession('r_read', 'BIL', { readStage: st }), lv = s.queue.map(function (q) { return q.lvl; });
+  var want = E.READ_STAGES[st];
+  for (var k = 0; k < 4; k++) if (lv[k * 5] !== want[k]) fail('reading stage ' + st + ': got ' + lv.join(','));
+  if (new Set(s.queue.map(function (q) { return q.passage; })).size !== 4) fail('reading stage ' + st + ' repeats a passage');
+});
+[1, 2, 3, 4].forEach(function (rl) {
+  var ex = E.buildExam('BIL_read', 7 + rl, { readLevel: rl }), lv = ex.questions.map(function (q) { return q.lvl; });
+  if (lv[0] !== rl || lv[5] !== Math.min(4, rl + 1)) fail('exam reading level ' + rl + ': ' + lv.join(','));
+  var full = E.buildExam('BIL_full', 7 + rl, { readLevel: rl }).questions.filter(function (q) { return q.passage; });
+  if (full.length !== 10 || full[0].lvl < 2) fail('full mock reading must be ≥ B');
+});
 var rfq = E.newSession('l_puzzles', 'RFMSH');
 rfq.queue.forEach(function (q) { if (q.type !== 'int') fail('RFMSH bank queue must be integer-answer'); });
 

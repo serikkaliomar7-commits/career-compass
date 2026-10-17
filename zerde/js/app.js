@@ -198,7 +198,7 @@
       '<div class="tk-body"><span class="label">' + t('kind.' + tp.kind) + '</span><b><a href="#/topic/' + tp.id + '">' + tn(tp) + '</a></b><span class="meta">' + meta + '</span></div>' +
       '<div class="tk-act">' + act + '</div></li>';
   }
-  function sessionLen(tp) { return tp.kind === 'reading' ? Z.bank.reading.length * 5 : tp.bank ? Z.bank[tp.bank].filter(function (q) { return school().answer !== 'int' || q.int; }).length : E.SESSION_LEN; }
+  function sessionLen(tp) { return tp.kind === 'reading' ? 20 : tp.bank ? Z.bank[tp.bank].filter(function (q) { return school().answer !== 'int' || q.int; }).length : E.SESSION_LEN; }
   function weekStrip() {
     var wk = P.weekPreview(S, today()), names = I.lang() === 'ru' ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : ['Дс', 'Сс', 'Ср', 'Бс', 'Жм', 'Сн', 'Жс'];
     return '<section class="sec"><h2>' + t('today.week') + '</h2><div class="week">' + wk.map(function (d, i) {
@@ -538,12 +538,12 @@
     hw: function (el) {
       var id = el.dataset.topic;
       S.hw = S.hw || {};
-      if (!S.hw[id]) { S.hw[id] = E.newSession(id, S.profile.school, { mode: 'hw' }); save(); }
+      if (!S.hw[id]) { S.hw[id] = E.newSession(id, S.profile.school, { mode: 'hw', readStage: P.readLevel(S) - 1 }); save(); }
       startSession(S.hw[id]);
     },
     quick: function (el) {
       var id = el.dataset.topic, pr = S.topics[id];
-      startSession(E.newSession(id, S.profile.school, { mode: 'quick', startLevel: pr ? Math.max(1, pr.level - 1) : 1 }));
+      startSession(E.newSession(id, S.profile.school, { mode: 'quick', startLevel: pr ? Math.max(1, pr.level - 1) : 1, readStage: P.readLevel(S) - 1 }));
     },
     mistakes: function (el) {
       var list = (S.mistakes || []).filter(function (m) { return Z.topicById[m.topic] && Z.topicById[m.topic].schools.indexOf(S.profile.school) >= 0 && (!el.dataset.topic || m.topic === el.dataset.topic); });
@@ -572,7 +572,7 @@
     },
     startExam: function (el) {
       var fid = el.dataset.f;
-      function start() { var ex = E.buildExam(fid, U.newSeed()); ex.cur = 0; S.activeExam = ex; mem.sheet = false; save(); go('#/exam'); }
+      function start() { var ex = E.buildExam(fid, U.newSeed(), { readLevel: P.readLevel(S) }); ex.cur = 0; S.activeExam = ex; mem.sheet = false; save(); go('#/exam'); }
       if (S.activeExam) ask(t('ex.resume') + '. ' + t('ex.abandon') + '?', t('ex.abandon'), start, t('c.cancel'));
       else start();
     },

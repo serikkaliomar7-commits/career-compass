@@ -161,7 +161,7 @@
     var r = U.rng(seed);
     return p.qs.map(function (it, i) {
       return {
-        topic: 'r_read', lvl: 2, seed: seed + i, passage: p.id, kk: it.kk, ru: it.kk,
+        topic: 'r_read', lvl: p.lvl || 2, seed: seed + i, passage: p.id, kk: it.kk, ru: it.kk,
         sol_kk: it.sol_kk, sol_ru: it.sol_kk, type: 'mc', ansKey: keyOf(it.ans), ansValue: it.ans,
         options: makeOptions(it.ans, it.wrong, nOpts || 4, r, null)
       };
@@ -199,12 +199,29 @@
     return out;
   }
 
+  /* Чтение растёт вместе с учеником: стадия = сколько раз он уже работал с текстами.
+   * 0 → короткие тексты (A) и средние (B); 1 → B и C; дальше → C и ★ (длинные, с таблицами,
+   * двумя точками зрения, притчами). Внутри набора тексты идут от лёгкого к трудному. */
+  var READ_STAGES = [[1, 1, 2, 2], [2, 2, 3, 3], [3, 3, 4, 4]];
+  function pickPassages(r, levels) {
+    var used = {}, out = [];
+    levels.forEach(function (lvl) {
+      var best = null;
+      r.shuffle(Z.bank.reading).forEach(function (p) {
+        if (used[p.id]) return;
+        if (!best || Math.abs(p.lvl - lvl) < Math.abs(best.lvl - lvl)) best = p;
+      });
+      if (best) { used[best.id] = 1; out.push(best); }
+    });
+    return out.sort(function (a, b) { return a.lvl - b.lvl; });
+  }
+
   // Банковые темы (логика, чтение): берём все задачи банка по возрастанию уровня.
-  function bankQueue(t, school, seed) {
+  function bankQueue(t, school, seed, opts) {
     var r = U.rng(seed), mode = modeFor(school);
     if (t.kind === 'reading') {
-      var out = [];
-      r.shuffle(Z.bank.reading).forEach(function (p, k) { out = out.concat(buildReading(p.id, seed + k * 100, mode.options)); });
+      var st = READ_STAGES[Math.min(READ_STAGES.length - 1, (opts && opts.readStage) || 0)], out = [];
+      pickPassages(r, st).forEach(function (p, k) { out = out.concat(buildReading(p.id, seed + k * 100, mode.options)); });
       return out;
     }
     var items = Z.bank[t.bank].filter(function (q) { return mode.answer !== 'int' || q.int; });
@@ -223,7 +240,7 @@
       level: Math.min(4, Math.max(1, opts.startLevel || 1)), streak: 0, done: false, startedAt: Date.now()
     };
     if (t.bank) {
-      s.queue = bankQueue(t, school, seed);
+      s.queue = bankQueue(t, school, seed, opts);
       s.n = s.mode === 'quick' ? Math.min(QUICK_LEN, s.queue.length) : s.queue.length;
       if (s.mode === 'quick') s.queue = s.queue.slice(0, s.n);
     } else if (s.mode === 'hw') {
@@ -298,11 +315,16 @@
   }
 
   /* ---------- пробные тесты ---------- */
-  function buildExam(formatId, seed) {
+  // opts.readLevel (1–4) — уровень текстов: второй текст на ступень труднее первого.
+  function buildExam(formatId, seed, opts) {
+    var rl = Math.max(1, Math.min(4, (opts && opts.readLevel) || 2));
     var f = Z.examFormats[formatId], r = U.rng(seed), qs = [], seen = {}, mode = { answer: f.answer, options: f.options || 4 };
     f.sections.forEach(function (sec, si) {
       if (sec.kinds[0] === 'reading') {
-        var ids = r.shuffle(Z.bank.reading.map(function (p) { return p.id; })).slice(0, Math.ceil(sec.count / 5));
+        if (f.full) rl = Math.max(2, rl);
+        var lv = [], np = Math.ceil(sec.count / 5);
+        for (var j = 0; j < np; j++) lv.push(Math.min(4, rl + (j ? 1 : 0)));
+        var ids = pickPassages(r, lv).map(function (p) { return p.id; });
         ids.forEach(function (id, k) { buildReading(id, seed + 500 + k * 10, mode.options).forEach(function (q) { q.section = si; qs.push(q); }); });
         return;
       }
@@ -349,7 +371,7 @@
   }
 
   Z.engine = {
-    keyOf: keyOf, show: show, buildQuestion: buildQuestion, buildReading: buildReading, check: check, modeFor: modeFor,
+    keyOf: keyOf, show: show, buildQuestion: buildQuestion, buildReading: buildReading, READ_STAGES: READ_STAGES, check: check, modeFor: modeFor,
     newSession: newSession, mistakeSession: mistakeSession, answer: answer, advance: advance, sessionResult: sessionResult,
     buildExam: buildExam, scoreExam: scoreExam, SESSION_LEN: SESSION_LEN, QUICK_LEN: QUICK_LEN, HW_PLAN: HW_PLAN
   };

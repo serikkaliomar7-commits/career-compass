@@ -121,6 +121,16 @@
     if (plan) plan.tasks.forEach(function (t) { if (t.topic === topicId) t.video = true; });
   }
 
+  /* Насколько трудные тексты давать: каждые две работы с текстами (домашка или тест с чтением)
+   * поднимают уровень на ступень. Если последняя домашка по чтению ниже 6/10 — ступень назад. */
+  function readLevel(state) {
+    var p = state.topics.r_read || {}, n = p.hw || 0;
+    state.exams.forEach(function (e) { if (e.format === 'BIL_full' || e.format === 'BIL_read') n++; });
+    var lvl = 1 + Math.floor(n / 2);
+    if (p.lastGrade && p.lastGrade < 6) lvl--;
+    return Math.max(1, Math.min(4, lvl));
+  }
+
   function recordExam(state, ex, res, date) {
     state.exams.push({
       id: 'ex' + Date.now(), format: ex.format, date: date, score: res.score, max: res.max, pct: res.pct,
@@ -176,6 +186,6 @@
 
   Z.planner = {
     INTENSITY: INTENSITY, planFor: planFor, weekPreview: weekPreview, dayInfo: dayInfo, recordPractice: recordPractice,
-    recordVideo: recordVideo, recordExam: recordExam, recordMistakes: recordMistakes, streak: streak, readiness: readiness, forecast: forecast, weakTopics: weakTopics
+    recordVideo: recordVideo, recordExam: recordExam, readLevel: readLevel, recordMistakes: recordMistakes, streak: streak, readiness: readiness, forecast: forecast, weakTopics: weakTopics
   };
 })(typeof window !== 'undefined' ? window : globalThis);
