@@ -43,11 +43,19 @@
     return out;
   }
 
+  // Текстовые варианты с переводом (банк естествознания): ans_ru / wrong_ru → словарь kk → ru.
+  function ruMapOf(it) {
+    if (!it.ans_ru) return null;
+    var m = {}; m[it.ans] = it.ans_ru;
+    it.wrong.forEach(function (w, i) { m[w] = it.wrong_ru[i]; });
+    return m;
+  }
+
   function pickBank(bank, lvl, r, needInt) {
     var items = bank.filter(function (q) { return q.lvl === lvl && (!needInt || q.int); });
     if (!items.length) items = bank.filter(function (q) { return !needInt || q.int; });
     var it = r.pick(items);
-    return { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru, bankId: it.id };
+    return { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru, bankId: it.id, ruMap: ruMapOf(it) };
   }
 
   /* Собрать вопрос.
@@ -132,11 +140,15 @@
       sol_kk: raw.sol_kk, sol_ru: raw.sol_ru || raw.sol_kk, unit: raw.unit || null,
       type: mode.answer === 'int' ? 'int' : 'mc', ansKey: keyOf(raw.ans), ansValue: norm(raw.ans)
     };
-    if (q.type === 'mc') q.options = makeOptions(raw.ans, raw.wrong, mode.options || 4, r, raw.unit);
+    if (q.type === 'mc') q.options = raw.fixed ? raw.fixed.map(function (v) { return optOf(v, null, raw.ruMap); }) : makeOptions(raw.ans, raw.wrong, mode.options || 4, r, raw.unit, raw.ruMap);
+    if (raw.fixed) q.fixed = true;
     return q;
   }
 
-  function makeOptions(ans, wrong, n, r, unit) {
+  function optOf(v, unit, ruMap) {
+    return { key: keyOf(v), kk: show(v, unit, 'kk'), ru: ruMap && ruMap[v] ? ruMap[v] : show(v, unit, 'ru') };
+  }
+  function makeOptions(ans, wrong, n, r, unit, ruMap) {
     var seen = {}, list = [];
     var ak = keyOf(ans);
     seen[ak] = 1;
@@ -150,18 +162,24 @@
     list = list.slice(0, n - 1);
     list.push(ans);
     list = r.shuffle(list);
-    return list.map(function (v) {
-      return { key: keyOf(v), kk: show(v, unit, 'kk'), ru: show(v, unit, 'ru') };
-    });
+    return list.map(function (v) { return optOf(v, unit, ruMap); });
   }
 
   // Блок чтения: текст + его вопросы (по порядку, варианты перемешаны).
+  var PASSAGE_BANKS = ['reading', 'reading_ru', 'reading_en'];
+  function findPassage(id) {
+    for (var i = 0; i < PASSAGE_BANKS.length; i++) {
+      var b = Z.bank[PASSAGE_BANKS[i]] || [];
+      for (var j = 0; j < b.length; j++) if (b[j].id === id) return b[j];
+    }
+    return null;
+  }
   function buildReading(passageId, seed, nOpts) {
-    var p = Z.bank.reading.filter(function (x) { return x.id === passageId; })[0];
+    var p = findPassage(passageId);
     var r = U.rng(seed);
     return p.qs.map(function (it, i) {
       return {
-        topic: 'r_read', lvl: p.lvl || 2, seed: seed + i, passage: p.id, kk: it.kk, ru: it.kk,
+        topic: p.topic || 'r_read', lvl: p.lvl || 2, seed: seed + i, passage: p.id, kk: it.kk, ru: it.kk,
         sol_kk: it.sol_kk, sol_ru: it.sol_kk, type: 'mc', ansKey: keyOf(it.ans), ansValue: it.ans,
         options: makeOptions(it.ans, it.wrong, nOpts || 4, r, null)
       };
@@ -203,11 +221,11 @@
    * 0 → разминка на коротком тексте (A), затем B и C; 1 → B, C и ★; дальше → C и ★ (длинные,
    * с таблицами, двумя точками зрения, притчами). Внутри набора тексты идут от лёгкого к трудному. */
   var READ_STAGES = [[1, 2, 2, 3], [2, 3, 3, 4], [3, 4, 4, 4]];
-  function pickPassages(r, levels) {
+  function pickPassages(r, levels, bank) {
     var used = {}, out = [];
     levels.forEach(function (lvl) {
       var best = null;
-      r.shuffle(Z.bank.reading).forEach(function (p) {
+      r.shuffle(Z.bank[bank || 'reading']).forEach(function (p) {
         if (used[p.id]) return;
         if (!best || Math.abs(p.lvl - lvl) < Math.abs(best.lvl - lvl)) best = p;
       });
@@ -221,13 +239,13 @@
     var r = U.rng(seed), mode = modeFor(school);
     if (t.kind === 'reading') {
       var st = READ_STAGES[Math.min(READ_STAGES.length - 1, (opts && opts.readStage) || 0)], out = [];
-      pickPassages(r, st).forEach(function (p, k) { out = out.concat(buildReading(p.id, seed + k * 100, mode.options)); });
+      pickPassages(r, st, t.bank).forEach(function (p, k) { out = out.concat(buildReading(p.id, seed + k * 100, mode.options)); });
       return out;
     }
     var items = Z.bank[t.bank].filter(function (q) { return mode.answer !== 'int' || q.int; });
-    items = r.shuffle(items).sort(function (a, b) { return a.lvl - b.lvl; });
+    items = r.shuffle(items).slice(0, SESSION_LEN).sort(function (a, b) { return a.lvl - b.lvl; });   // большой банк — 50 случайных
     return items.map(function (it, k) {
-      var q = { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru };
+      var q = { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru, ruMap: ruMapOf(it) };
       return finishQuestion(t.id, it.lvl, seed + k, mode, q, r);
     });
   }
@@ -323,15 +341,16 @@
       if (sec.kinds[0] === 'reading') {
         if (f.full) rl = Math.max(2, rl);
         var lv = [], np = Math.ceil(sec.count / 5);
-        for (var j = 0; j < np; j++) lv.push(Math.min(4, rl + (j ? 1 : 0)));
-        var ids = pickPassages(r, lv).map(function (p) { return p.id; });
-        ids.forEach(function (id, k) { buildReading(id, seed + 500 + k * 10, mode.options).forEach(function (q) { q.section = si; qs.push(q); }); });
+        for (var j = 0; j < np; j++) lv.push(Math.min(4, rl + (j >= np / 2 ? 1 : 0)));   // вторая половина текстов — на ступень труднее
+        var ids = pickPassages(r, lv, sec.bank).map(function (p) { return p.id; });
+        ids.forEach(function (id, k) { buildReading(id, seed + 500 + si * 1000 + k * 10, mode.options).slice(0, sec.count - k * 5).forEach(function (q) { q.section = si; qs.push(q); }); });
         return;
       }
       // Темы раздаём по кругу из перемешанного списка — так в варианте нет перекоса в одну тему.
-      var mPool = r.shuffle(Z.topicsFor(f.school, 'math')), lPool = r.shuffle(Z.topicsFor(f.school, 'logic')), mi = 0, li = 0;
+      // kinds[0] — основная часть раздела, kinds[1] — доля logicShare (логика у БИЛ и РФМШ).
+      var mPool = r.shuffle(Z.topicsFor(f.school, sec.kinds[0])), lPool = r.shuffle(Z.topicsFor(f.school, sec.kinds[1] || sec.kinds[0])), mi = 0, li = 0;
       [1, 2, 3, 4].forEach(function (lvl) {
-        var n = sec.mix[lvl] || 0, nLogic = Math.round(n * sec.logicShare), list = [];
+        var n = sec.mix[lvl] || 0, nLogic = Math.round(n * (sec.logicShare || 0)), list = [];
         for (var i = 0; i < n; i++) list.push(i < nLogic ? lPool[li++ % lPool.length].id : mPool[mi++ % mPool.length].id);
         r.shuffle(list).forEach(function (tid, i) {
           // Одинаковые задачи в одном варианте пересоздаём с другим seed.
@@ -343,20 +362,30 @@
         });
       });
     });
-    return { format: formatId, seed: seed, questions: qs, answers: {}, flags: {}, startedAt: Date.now(), minutes: f.minutes };
+    var ex = { format: formatId, seed: seed, questions: qs, answers: {}, flags: {}, startedAt: Date.now(), minutes: f.minutes };
+    // НИШ: у каждого раздела своё время; вернуться в закончившийся раздел нельзя.
+    if (f.sectionTimes) {
+      ex.secs = f.sections.map(function (sec, si) {
+        var idx = []; qs.forEach(function (q, i) { if (q.section === si) idx.push(i); });
+        return { from: idx[0], to: idx[idx.length - 1] + 1, minutes: sec.minutes };
+      });
+      ex.sec = 0; ex.secStartedAt = ex.startedAt;
+    }
+    return ex;
   }
 
   // Подсчёт по правилам школы: БИЛ +4/−1/0, РФМШ 3/5/7 за верный.
   function scoreExam(ex) {
-    var f = Z.examFormats[ex.format], res = { score: 0, max: 0, correct: 0, wrong: 0, skipped: 0, byTopic: {}, byLevel: {} };
+    var f = Z.examFormats[ex.format], res = { score: 0, max: 0, correct: 0, wrong: 0, skipped: 0, byTopic: {}, byLevel: {}, bySection: {} };
     ex.questions.forEach(function (q, i) {
       var r2 = check(q, ex.answers[i]);
       var pts = f.points ? f.points[q.lvl] : f.scoring.correct;
       res.max += pts;
       var bt = res.byTopic[q.topic] = res.byTopic[q.topic] || { ok: 0, n: 0 };
       var bl = res.byLevel[q.lvl] = res.byLevel[q.lvl] || { ok: 0, n: 0 };
-      bt.n++; bl.n++;
-      if (r2 === true) { res.correct++; res.score += pts; bt.ok++; bl.ok++; }
+      var bs = res.bySection[q.section || 0] = res.bySection[q.section || 0] || { ok: 0, n: 0, score: 0, max: 0 };
+      bt.n++; bl.n++; bs.n++; bs.max += pts;
+      if (r2 === true) { res.correct++; res.score += pts; bt.ok++; bl.ok++; bs.ok++; bs.score += pts; }
       else if (r2 === false) { res.wrong++; if (f.scoring) res.score += f.scoring.wrong; }
       else { res.skipped++; if (f.scoring) res.score += f.scoring.skip; }
     });
@@ -371,7 +400,7 @@
   }
 
   Z.engine = {
-    keyOf: keyOf, show: show, buildQuestion: buildQuestion, buildReading: buildReading, READ_STAGES: READ_STAGES, check: check, modeFor: modeFor,
+    keyOf: keyOf, show: show, findPassage: findPassage, buildQuestion: buildQuestion, buildReading: buildReading, READ_STAGES: READ_STAGES, check: check, modeFor: modeFor,
     newSession: newSession, mistakeSession: mistakeSession, answer: answer, advance: advance, sessionResult: sessionResult,
     buildExam: buildExam, scoreExam: scoreExam, SESSION_LEN: SESSION_LEN, QUICK_LEN: QUICK_LEN, HW_PLAN: HW_PLAN
   };

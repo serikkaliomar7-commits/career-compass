@@ -247,6 +247,14 @@ body.bare #view { max-width: 560px; padding: 40px 16px; }
 .qtbl { margin: 14px 0; border-radius: 0; }
 .qtbl .tbl { font-size: 14px; }
 .qtbl .tbl th { background: var(--soft); }
+/* «Сандық сипаттама»: колонки А и В */
+.qc { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line-2); margin: 14px 0 4px; font-weight: 400; }
+.qc-c { grid-column: 1 / -1; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--soft); text-align: center; }
+.qc-col { padding: 12px 14px 16px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; min-height: 92px; }
+.qc-col + .qc-col { border-left: 1px solid var(--line-2); }
+.qc-col > span { font: 600 11px var(--sans); letter-spacing: .1em; color: var(--muted); }
+.qc-col > div { font-size: 1.05rem; }
+.exh .title small { display: block; font: 400 13px var(--sans); color: var(--muted); }
 /* текст для чтения */
 .rsplit { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
 .passage { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 22px 26px; position: sticky; top: 72px; max-height: calc(100vh - 92px); overflow: auto; }

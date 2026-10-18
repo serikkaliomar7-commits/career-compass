@@ -42,9 +42,11 @@
 
   function testFor(state, info) {
     var sc = state.profile.school, mode = INTENSITY[state.profile.intensity || 'normal'];
-    if (info.mock) return sc + '_full';
+    // НИШ: пробные чередуют 1-й день (математика, сандық сипаттама, естествознание) и 2-й (языки).
+    if (info.mock) return sc === 'NIS' ? (mockDays(info.left).indexOf(info.idx % 7) % 2 ? 'NIS_full2' : 'NIS_full') : sc + '_full';
     if (mode.short === 'none' || (mode.short === 'alt' && info.idx % 2 === 1)) return null;
     if (sc === 'BIL') return info.idx % 4 < 2 ? 'BIL_read' : 'BIL_mini';
+    if (sc === 'NIS') return ['NIS_quant', 'NIS_mini', 'NIS_lang', 'NIS_sci'][info.idx % 4];
     return sc + '_mini';
   }
 
@@ -54,7 +56,9 @@
     var tasks = [];
     var nl = mode.logic, nm = mode.math;
     if (mode.alternate) { if (info.idx % 2) nl = 0; else nm = 0; }
-    var logic = pickTopics(state, 'logic', nl, []);
+    // У НИШ нет логики: второй слот по очереди — сандық сипаттама, естествознание, языки.
+    var second = state.profile.school === 'NIS' ? ['quant', 'science', 'reading'][info.idx % 3] : 'logic';
+    var logic = pickTopics(state, second, nl, []);
     var math = pickTopics(state, 'math', nm, []);
     logic.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
     math.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
@@ -125,7 +129,7 @@
    * с текстами (домашка или тест с чтением) поднимают уровень. Последняя домашка ниже 6/10 — ступень назад. */
   function readLevel(state) {
     var p = state.topics.r_read || {}, n = p.hw || 0;
-    state.exams.forEach(function (e) { if (e.format === 'BIL_full' || e.format === 'BIL_read') n++; });
+    state.exams.forEach(function (e) { if (/^(BIL_full|BIL_read|NIS_full2|NIS_lang)$/.test(e.format)) n++; });
     var lvl = 2 + Math.floor(n / 2);
     if (p.lastGrade && p.lastGrade < 6) lvl--;
     return Math.max(2, Math.min(4, lvl));

@@ -57,6 +57,8 @@
     var ru = q.ru, blocks = q.kk.match(/<div class="expr">[\s\S]*?<\/div>/g) || [];
     var fi = q.kk.indexOf('<div class="figs">');
     if (fi >= 0) blocks.push(q.kk.slice(fi));   // блок фигур всегда в конце текста
+    var ci = q.kk.indexOf('<div class="qc">');
+    if (ci >= 0) blocks.push(q.kk.slice(ci));   // колонки А/В — тоже в конце; убираем, если по-русски они те же
     blocks.forEach(function (b) { ru = ru.split(b).join(''); });
     return '<div class="q-main">' + q.kk + '</div><div class="q-alt">' + ru + '</div>';
   }
@@ -162,7 +164,7 @@
     var h = '<section class="dhead"><div><span class="label">' + longDate(d) + '</span><h1>' + t('today.hello', { name: esc(p.name) }) + '</h1><p class="sub">' + t('today.sub', { school: school().name }) + '</p></div>' +
       '<dl class="kpis">' + stats + '</dl></section>';
     if (S.activeExam) h += resumeBanner();
-    if (plan.mock) h += '<div class="note amber"><b>' + t('today.mockBadge') + '.</b> ' + (school().id === 'BIL' ? t('ex.rulesBIL') : t('ex.rulesRFMSH', { max: 150 })) + '</div>';
+    if (plan.mock) h += '<div class="note amber"><b>' + t('today.mockBadge') + '.</b> ' + rulesText(school().id) + '</div>';
     if (done === plan.tasks.length && done > 0) h += '<div class="note ok">' + t('today.allDone') + '</div>';
     h += '<section class="sec"><div class="sec-h"><h2>' + t('today.tasks') + '</h2><span class="muted small">' + done + ' / ' + plan.tasks.length + '</span></div>' +
       '<ol class="tasks">' + plan.tasks.map(taskCard).join('') + '</ol></section>';
@@ -196,7 +198,7 @@
       '<div class="tk-body"><span class="label">' + t('kind.' + tp.kind) + '</span><b><a href="#/topic/' + tp.id + '">' + tn(tp) + '</a></b><span class="meta">' + meta + '</span></div>' +
       '<div class="tk-act">' + act + '</div></li>';
   }
-  function sessionLen(tp) { return tp.kind === 'reading' ? 20 : tp.bank ? Z.bank[tp.bank].filter(function (q) { return school().answer !== 'int' || q.int; }).length : E.SESSION_LEN; }
+  function sessionLen(tp) { return tp.kind === 'reading' ? 20 : tp.bank ? Math.min(E.SESSION_LEN, Z.bank[tp.bank].filter(function (q) { return school().answer !== 'int' || q.int; }).length) : E.SESSION_LEN; }
   function weekStrip() {
     var wk = P.weekPreview(S, today()), names = I.lang() === 'ru' ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : ['Дс', 'Сс', 'Ср', 'Бс', 'Жм', 'Сн', 'Жс'];
     return '<section class="sec"><h2>' + t('today.week') + '</h2><div class="week">' + wk.map(function (d, i) {
@@ -214,7 +216,7 @@
 
   /* =================== ТАҚЫРЫПТАР / ТЕМЫ =================== */
   function vTopics() {
-    return ['math', 'logic', 'reading'].map(function (k) {
+    return ['math', 'quant', 'logic', 'science', 'reading'].map(function (k) {
       var list = Z.topicsFor(S.profile.school, k);
       if (!list.length) return '';
       return '<section class="sec"><h2>' + t('kind.' + k) + '</h2><div class="topics-grid">' + list.map(function (tp) {
@@ -323,7 +325,7 @@
     }).join('') + '</div>';
   }
   function passageBox(id) {
-    var p = Z.bank.reading.filter(function (x) { return x.id === id; })[0];
+    var p = E.findPassage(id);
     var body = p.html ? p.text : esc(p.text).split(/\n\s*\n/).map(function (x) { return '<p>' + x.replace(/\n/g, '<br>') + '</p>'; }).join('');
     return '<article class="passage"><span class="label">' + t('ex.passage') + '</span><h3>' + esc(p.title) + '</h3><div class="ptext">' + body + '</div></article>';
   }
@@ -369,7 +371,7 @@
   /* =================== СЫНАҚТАР / ТЕСТЫ =================== */
   function vTests() {
     var sc = S.profile.school;
-    var h = '<div class="sec"><h1>' + t('tests.title') + '</h1><p class="muted">' + t('tests.sub') + '</p></div><div class="note">' + (sc === 'BIL' ? t('ex.rulesBIL') : t('ex.rulesRFMSH', { max: 150 })) + '</div>';
+    var h = '<div class="sec"><h1>' + t('tests.title') + '</h1><p class="muted">' + t('tests.sub') + '</p></div><div class="note">' + rulesText(sc) + '</div>';
     if (S.activeExam) h += resumeBanner();
     h += '<div class="formats">' + Z.formatsFor(sc).map(function (f) {
       var n = S.exams.filter(function (e) { return e.format === f.id; }).length;
@@ -384,17 +386,31 @@
     return h;
   }
 
+  function rulesText(sc) { return sc === 'BIL' ? t('ex.rulesBIL') : sc === 'NIS' ? t('ex.rulesNIS') : t('ex.rulesRFMSH', { max: 150 }); }
+  // Границы вопросов, доступных сейчас: у НИШ — только текущий раздел.
+  function secRange(ex) { return ex.secs ? ex.secs[ex.sec] : { from: 0, to: ex.questions.length }; }
+  function nextSection() {
+    var ex = S.activeExam;
+    readExamInput();
+    if (!ex.secs || ex.sec >= ex.secs.length - 1) { finishExam(false); return; }
+    ex.sec++; ex.secStartedAt = Date.now(); ex.cur = ex.secs[ex.sec].from; mem.sheet = false;
+    save(); render();
+  }
   function answered(ex, i) { return ex.answers[i] !== undefined && ex.answers[i] !== ''; }
   function vExam() {
     var ex = S.activeExam;
     if (!ex) return vTests();
     var f = Z.examFormats[ex.format], q = ex.questions[ex.cur], n = ex.questions.length;
     var cnt = ex.questions.filter(function (qq, i) { return answered(ex, i); }).length;
-    var h = '<div class="exh"><span class="title">' + fname(f) + '</span><span class="timer" id="timer">--:--</span><span class="muted small">' + cnt + ' / ' + n + '</span>' +
+    var rg = secRange(ex), sec = f.sections[q.section || 0], lastQ = ex.cur === rg.to - 1, moreSecs = ex.secs && ex.sec < ex.secs.length - 1;
+    var title = fname(f) + (ex.secs ? '<small>' + t('ex.section', { i: ex.sec + 1, n: ex.secs.length }) + ' · ' + (I.lang() === 'ru' && sec.ru ? sec.ru : sec.kk) + '</small>' : '');
+    var h = (mem.secNote ? '<div class="note amber">' + t('ex.secTimeout') + '</div>' : '') +
+      '<div class="exh"><span class="title">' + title + '</span><span class="timer" id="timer">--:--</span><span class="muted small">' + cnt + ' / ' + n + '</span>' +
       '<button class="btn line sm" data-act="sheet">' + t('ex.sheet') + '</button><button class="btn primary sm" data-act="finishExam">' + t('c.finish') + '</button></div>';
     if (mem.sheet) {
       h += '<div class="sheet">' + ex.questions.map(function (qq, i) {
-        return '<button class="' + (i === ex.cur ? 'c' : '') + (ex.flags[i] ? ' f' : '') + '" data-act="goto" data-i="' + i + '">' + (i + 1) + ' <span class="bub' + (answered(ex, i) ? ' on' : '') + '"></span></button>';
+        var off = i < rg.from || i >= rg.to;
+        return '<button class="' + (i === ex.cur ? 'c' : '') + (ex.flags[i] ? ' f' : '') + '" data-act="goto" data-i="' + i + '"' + (off ? ' disabled' : '') + '>' + (i + 1) + ' <span class="bub' + (answered(ex, i) ? ' on' : '') + '"></span></button>';
       }).join('') + '</div>';
     }
     if (q.passage) h += '<div class="rsplit">' + passageBox(q.passage);
@@ -408,9 +424,9 @@
         return '<button class="opt' + (ex.answers[ex.cur] === o.key ? ' sel' : '') + '" data-act="exPick" data-key="' + esc(o.key) + '"><span class="L">' + LETTERS[i] + '</span><span class="ot">' + optText(o) + '</span></button>';
       }).join('') + '</div>';
     }
-    h += '<div class="exnav"><button class="btn line" data-act="exPrev"' + (ex.cur === 0 ? ' disabled' : '') + '>' + t('ex.prev') + '</button>' +
+    h += '<div class="exnav"><button class="btn line" data-act="exPrev"' + (ex.cur === rg.from ? ' disabled' : '') + '>' + t('ex.prev') + '</button>' +
       '<button class="btn line" data-act="exFlag">' + (ex.flags[ex.cur] ? t('ex.flagged') : t('ex.flag')) + '</button>' +
-      '<button class="btn primary" data-act="exNext">' + (ex.cur === n - 1 ? t('c.finish') : t('c.next')) + '</button></div></section>';
+      '<button class="btn primary" data-act="exNext">' + (lastQ ? (moreSecs ? t('ex.nextSec') : t('c.finish')) : t('c.next')) + '</button></div></section>';
     return h + (q.passage ? '</div>' : '');
   }
   function startTimer() {
@@ -418,8 +434,13 @@
     function tick() {
       var ex = S.activeExam, el = document.getElementById('timer');
       if (!ex) { clearInterval(mem.timer); return; }
-      var left = Math.round((ex.startedAt + ex.minutes * 60000 - Date.now()) / 1000);
-      if (left <= 0) { clearInterval(mem.timer); mem.timer = null; finishExam(true); return; }
+      var end = ex.secs ? ex.secStartedAt + ex.secs[ex.sec].minutes * 60000 : ex.startedAt + ex.minutes * 60000;
+      var left = Math.round((end - Date.now()) / 1000);
+      if (left <= 0) {
+        clearInterval(mem.timer); mem.timer = null;
+        if (ex.secs && ex.sec < ex.secs.length - 1) { mem.secNote = true; nextSection(); } else finishExam(true);
+        return;
+      }
       if (el) { el.textContent = U.pad2(Math.floor(left / 60)) + ':' + U.pad2(left % 60); el.classList.toggle('low', left < 300); }
     }
     tick(); mem.timer = setInterval(tick, 1000);
@@ -451,6 +472,12 @@
       '<div class="stats"><div class="stat"><b style="color:var(--ok)">' + r.correct + '</b><span>' + t('res.right') + '</span></div><div class="stat"><b style="color:var(--bad)">' + r.wrong + '</b><span>' + t('res.wrong') + '</span></div>' +
       '<div class="stat"><b>' + r.skipped + '</b><span>' + t('res.skip') + '</span></div></div></section>';
     if (r.lostBySkipping > 0) h += '<div class="note amber">' + t('res.guess', { n: r.skipped, ev: U.fmt(r.guessEV), lost: U.fmt(r.lostBySkipping) }) + '</div>';
+    if (f.sections.length > 1 && r.bySection) {
+      h += '<section class="sec"><h2>' + t('res.bySection') + '</h2><div class="tbl-wrap"><table class="tbl"><tbody>' + f.sections.map(function (sec, si) {
+        var b = r.bySection[si] || { ok: 0, n: 0, score: 0, max: 0 }, acc = b.n ? b.ok / b.n : 0;
+        return '<tr><td>' + (I.lang() === 'ru' && sec.ru ? sec.ru : sec.kk) + '</td><td class="num">' + b.ok + ' / ' + b.n + '</td><td class="meter"><i style="width:' + acc * 100 + '%" class="' + (acc < 0.6 ? 'lo' : '') + '"></i></td><td class="num">' + pct(acc) + '</td></tr>';
+      }).join('') + '</tbody></table></div></section>';
+    }
     var rows = Object.keys(r.byTopic).map(function (k) { return { k: k, ok: r.byTopic[k].ok, n: r.byTopic[k].n }; })
       .sort(function (a, b) { return a.ok / a.n - b.ok / b.n; });
     h += '<section class="sec"><h2>' + t('res.byTopic') + '</h2><div class="tbl-wrap"><table class="tbl"><tbody>' + rows.map(function (x) {
@@ -584,12 +611,15 @@
     },
     exNext: function () {
       readExamInput();
-      var ex = S.activeExam;
-      if (ex.cur < ex.questions.length - 1) { ex.cur++; save(); render(); } else A.finishExam();
+      var ex = S.activeExam, rg = secRange(ex);
+      mem.secNote = false;
+      if (ex.cur < rg.to - 1) { ex.cur++; save(); render(); }
+      else if (ex.secs && ex.sec < ex.secs.length - 1) ask(t('ex.nextSecAsk'), t('ex.nextSec'), nextSection);
+      else A.finishExam();
     },
-    exPrev: function () { readExamInput(); var ex = S.activeExam; if (ex.cur > 0) { ex.cur--; save(); render(); } },
+    exPrev: function () { readExamInput(); var ex = S.activeExam; mem.secNote = false; if (ex.cur > secRange(ex).from) { ex.cur--; save(); render(); } },
     exFlag: function () { var ex = S.activeExam; ex.flags[ex.cur] = !ex.flags[ex.cur]; save(); render(); },
-    goto: function (el) { readExamInput(); S.activeExam.cur = +el.dataset.i; save(); render(); },
+    goto: function (el) { readExamInput(); var ex = S.activeExam, i = +el.dataset.i, rg = secRange(ex); if (i >= rg.from && i < rg.to) { ex.cur = i; save(); render(); } },
     sheet: function () { readExamInput(); mem.sheet = !mem.sheet; render(); },
     finishExam: function () {
       readExamInput();
