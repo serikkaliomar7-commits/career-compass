@@ -247,6 +247,26 @@ body.bare #view { max-width: 560px; padding: 40px 16px; }
 .qtbl { margin: 14px 0; border-radius: 0; }
 .qtbl .tbl { font-size: 14px; }
 .qtbl .tbl th { background: var(--soft); }
+/* рисунки к задачам (SVG) */
+.svgfig { display: block; max-width: 100%; height: auto; color: var(--ink); overflow: visible; }
+.svgfig text { fill: currentColor; font: 500 13px var(--sans); }
+.svgfig text.ax { fill: var(--muted); font-size: 11px; }
+.svgfig text.big { font: 700 18px var(--serif); }
+.svgfig text.onp { fill: var(--paper); font-weight: 600; font-size: 12px; }
+.svgfig line { stroke: currentColor; stroke-width: 1.4; }
+.svgfig line.dim { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.svgfig line.grid { stroke: var(--line); stroke-width: 1; }
+.svgfig line.axis { stroke-width: 1.6; }
+.svgfig .arrow, .svgfig .dot { fill: currentColor; }
+.svgfig .sh { fill: var(--line-2); stroke: currentColor; stroke-width: 1.5; }
+.svgfig .sh2 { fill: var(--soft); stroke: currentColor; stroke-width: 1.5; }
+.svgfig .bg { fill: var(--card); stroke: currentColor; stroke-width: 1.5; }
+.svgfig .tri, .svgfig .face { fill: var(--card); stroke: currentColor; stroke-width: 1.5; }
+.svgfig .col { fill: var(--accent); }
+.svgfig .water { fill: var(--accent-bg); }
+.svgfig .glass { fill: none; stroke: currentColor; stroke-width: 2; }
+.svgfig .p1 { fill: var(--ink); } .svgfig .p2 { fill: var(--accent); } .svgfig .p3 { fill: var(--muted); } .svgfig .p4 { fill: var(--line-2); }
+.svgfig path.p1, .svgfig path.p2, .svgfig path.p3, .svgfig path.p4 { stroke: var(--card); stroke-width: 1.5; }
 /* «Сандық сипаттама»: колонки А и В */
 .qc { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line-2); margin: 14px 0 4px; font-weight: 400; }
 .qc-c { grid-column: 1 / -1; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--soft); text-align: center; }
