@@ -61,7 +61,7 @@ PASSAGES.forEach(function (p) {
 });
 
 // Пробные тесты: число вопросов и подсчёт баллов.
-var expectCount = { BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
+var expectCount = { BIL_diag: 25, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
 Object.keys(Z.examFormats).forEach(function (fid) {
   for (var s = 1; s <= 60; s++) {
     var ex = E.buildExam(fid, s * 13);
@@ -177,6 +177,21 @@ for (var dd = 0; dd < 14; dd++) {
   });
 }
 if (kindsSeen.logic || !kindsSeen.quant || !kindsSeen.science || !kindsSeen.reading || !kindsSeen.math) fail('NIS plan kinds: ' + Object.keys(kindsSeen));
+if (!testsSeen.NIS_diag) fail('first day must be the diagnostic');
+// Диагностика: темы с ошибкой идут первыми.
+var st2 = { profile: { school: 'BIL', intensity: 'normal', startDate: '2026-01-05', examDate: '2026-12-01' }, topics: {}, plans: {}, exams: [], activity: {}, mistakes: [] };
+var dex = E.buildExam('BIL_diag', 3);
+dex.questions.forEach(function (q, i) { dex.answers[i] = q.topic === 'm_volume' || q.topic === 'l_cal' ? q.options.filter(function (o) { return o.key !== q.ansKey; })[0].key : q.ansKey; });
+Z.planner.recordExam(st2, dex, E.scoreExam(dex), '2026-01-05');
+var p2 = Z.planner.planFor(st2, '2026-01-06').tasks.filter(function (x) { return x.type === 'topic'; }).map(function (x) { return x.topic; });
+if (p2.indexOf('m_volume') < 0 || p2.indexOf('l_cal') < 0) fail('after diagnostic weak topics must come first: ' + p2);
+// Повторение: освоенная тема возвращается через 3 дня.
+st2.topics.m_eq = { stars: 3, hw: 1, grade: 9, masteredAt: '2026-01-06', reviews: 0, level: 3 };
+if (Z.planner.dueReviews(st2, '2026-01-08', []).length) fail('review too early');
+var p3 = Z.planner.planFor(st2, '2026-01-09');
+if (!p3.tasks.some(function (x) { return x.type === 'review' && x.topic === 'm_eq'; })) fail('review must appear after 3 days');
+Z.planner.recordPractice(st2, 'm_eq', { mode: 'quick', grade: 9, stars: 3, acc: 0.9, correct: 9, total: 10, nextLevel: 3 }, '2026-01-09');
+if (st2.topics.m_eq.reviews !== 1) fail('review must advance');
 if (!testsSeen.NIS_full || !testsSeen.NIS_full2) fail('NIS plan must have both mock days: ' + Object.keys(testsSeen));
 
 var rfq = E.newSession('l_puzzles', 'RFMSH');

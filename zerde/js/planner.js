@@ -34,7 +34,11 @@
     var prog = state.topics;
     function st(t) { return prog[t.id] || null; }
     var started = list.filter(function (t) { return st(t) && st(t).stars < 3; });
-    var fresh = list.filter(function (t) { return !st(t); });
+    // Диагностика: сначала темы с ошибкой, потом непроверенные, а верно решённые — в конце новых.
+    var dg = state.diag || {};
+    function dgRank(t) { var d = dg[t.id]; return d === undefined ? 1 : d < 1 ? 0 : 2; }
+    var fresh = list.filter(function (t) { return !st(t); }).map(function (t, i) { return { t: t, i: i }; })
+      .sort(function (a, b) { return dgRank(a.t) - dgRank(b.t) || a.i - b.i; }).map(function (x) { return x.t; });
     var review = list.filter(function (t) { return st(t) && st(t).stars >= 3; })
       .sort(function (a, b) { return (st(a).lastDate || '') < (st(b).lastDate || '') ? -1 : 1; });
     return started.concat(fresh, review).slice(0, n).map(function (t) { return t.id; });
@@ -43,6 +47,7 @@
   function testFor(state, info) {
     var sc = state.profile.school, mode = INTENSITY[state.profile.intensity || 'normal'];
     // НИШ: пробные чередуют 1-й день (математика, сандық сипаттама, естествознание) и 2-й (языки).
+    if (!state.diag && info.idx === 0) return sc + '_diag';   // первый день — входная диагностика
     if (info.mock) return sc === 'NIS' ? (mockDays(info.left).indexOf(info.idx % 7) % 2 ? 'NIS_full2' : 'NIS_full') : sc + '_full';
     if (mode.short === 'none' || (mode.short === 'alt' && info.idx % 2 === 1)) return null;
     if (sc === 'BIL') return info.idx % 4 < 2 ? 'BIL_read' : 'BIL_mini';
@@ -62,12 +67,25 @@
     var math = pickTopics(state, 'math', nm, []);
     logic.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
     math.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
+    // Повторение: освоенная тема (≥ 8/10) возвращается через 3, 7 и 21 день — 10 задач.
+    var rev = dueReviews(state, date, tasks.map(function (t) { return t.topic; }))[0];
+    if (rev) tasks.push({ type: 'review', topic: rev, done: false });
     var test = testFor(state, info);
     if (test) tasks.push({ type: 'test', format: test, done: false });
     var plan = { date: date, tasks: tasks, mock: info.mock };
     state.plans[date] = plan;
     pruneOldPlans(state, date);
     return plan;
+  }
+
+  var REVIEW_GAPS = [3, 7, 21];
+  function dueReviews(state, date, exclude) {
+    return Object.keys(state.topics).filter(function (id) {
+      var p = state.topics[id];
+      if (!p.masteredAt || exclude.indexOf(id) >= 0 || !Z.topicById[id]) return false;
+      var k = p.reviews || 0;
+      return k < REVIEW_GAPS.length && U.daysBetween(p.masteredAt, date) >= REVIEW_GAPS[k];
+    }).sort(function (a, b) { return state.topics[a].masteredAt < state.topics[b].masteredAt ? -1 : 1; });
   }
 
   // Храним планы только за последние 60 дней — localStorage не резиновый.
@@ -97,6 +115,15 @@
     p.lastAcc = res.acc; p.best = Math.max(p.best, res.acc);
     p.stars = Math.max(p.stars, res.stars);
     if (res.mode === 'hw') { p.hw = (p.hw || 0) + 1; p.grade = Math.max(p.grade || 0, res.grade); p.lastGrade = res.grade; }
+    if (res.mode === 'hw' && res.grade >= 8 && !p.masteredAt) { p.masteredAt = date; p.reviews = 0; }
+    var plan0 = state.plans[date];
+    if (res.mode === 'quick' && plan0) plan0.tasks.forEach(function (t) {
+      if (t.type === 'review' && t.topic === topicId && !t.done) {
+        t.done = true;
+        // Повторение прошло плохо (< 7/10) — начинаем интервалы заново.
+        if (res.grade >= 7) p.reviews = (p.reviews || 0) + 1; else { p.masteredAt = date; p.reviews = 0; }
+      }
+    });
     p.level = res.nextLevel; p.lastDate = date;
     state.topics[topicId] = p;
     var plan = state.plans[date];
@@ -136,6 +163,10 @@
   }
 
   function recordExam(state, ex, res, date) {
+    if (Z.examFormats[ex.format].diag) {
+      state.diag = {};
+      Object.keys(res.byTopic).forEach(function (t) { state.diag[t] = res.byTopic[t].ok / res.byTopic[t].n; });
+    }
     state.exams.push({
       id: 'ex' + Date.now(), format: ex.format, date: date, score: res.score, max: res.max, pct: res.pct,
       correct: res.correct, wrong: res.wrong, skipped: res.skipped, byTopic: res.byTopic, secs: Math.round((Date.now() - ex.startedAt) / 1000)
@@ -170,6 +201,11 @@
     var full = state.exams.filter(function (e) { return Z.examFormats[e.format] && Z.examFormats[e.format].full && Z.examFormats[e.format].school === state.profile.school; });
     if (!full.length) return null;
     var last = full.slice(-3);
+    // НИШ: два разных дня с разными максимумами — прогноз в процентах.
+    if (state.profile.school === 'NIS') {
+      var pc = last.reduce(function (a, e) { return a + Math.max(0, e.score) / e.max; }, 0) / last.length;
+      return { score: Math.round(pc * 100), max: 100, pct: true, n: full.length };
+    }
     var s = last.reduce(function (a, e) { return a + e.score; }, 0) / last.length;
     return { score: Math.round(s), max: last[last.length - 1].max, n: full.length };
   }
@@ -190,6 +226,6 @@
 
   Z.planner = {
     INTENSITY: INTENSITY, planFor: planFor, weekPreview: weekPreview, dayInfo: dayInfo, recordPractice: recordPractice,
-    recordVideo: recordVideo, recordExam: recordExam, readLevel: readLevel, recordMistakes: recordMistakes, streak: streak, readiness: readiness, forecast: forecast, weakTopics: weakTopics
+    recordVideo: recordVideo, recordExam: recordExam, dueReviews: dueReviews, readLevel: readLevel, recordMistakes: recordMistakes, streak: streak, readiness: readiness, forecast: forecast, weakTopics: weakTopics
   };
 })(typeof window !== 'undefined' ? window : globalThis);

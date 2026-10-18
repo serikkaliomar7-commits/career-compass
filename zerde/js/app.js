@@ -160,10 +160,12 @@
     function kpi(v, l) { return '<div><dd>' + v + '</dd><dt>' + l + '</dt></div>'; }
     var done = plan.tasks.filter(function (x) { return x.done; }).length;
     var stats = (left !== null && left >= 0 ? kpi(left, t('today.stLeft')) : '') + kpi(done + '<small>/' + plan.tasks.length + '</small>', t('today.tasks')) +
-      kpi(streak, t('today.streak')) + kpi(pct(ready), t('today.ready')) + (fc ? kpi(fc.score + '<small>/' + fc.max + '</small>', t('today.forecast')) : '');
+      kpi(streak, t('today.streak')) + kpi(pct(ready), t('today.ready')) + (fc ? kpi(fc.score + '<small>' + (fc.pct ? '%' : '/' + fc.max) + '</small>', t('today.forecast') + ' · ' + t('tgt.short', { v: tgtText() })) : '');
     var h = '<section class="dhead"><div><span class="label">' + longDate(d) + '</span><h1>' + t('today.hello', { name: esc(p.name) }) + '</h1><p class="sub">' + t('today.sub', { school: school().name }) + '</p></div>' +
       '<dl class="kpis">' + stats + '</dl></section>';
     if (S.activeExam) h += resumeBanner();
+    if (!S.diag && !plan.tasks.some(function (x) { return x.format && Z.examFormats[x.format].diag; }))
+      h += '<div class="note teal row"><span>' + t('diag.note') + '</span><button class="btn primary sm" data-act="startExam" data-f="' + S.profile.school + '_diag">' + t('diag.go') + '</button></div>';
     if (plan.mock) h += '<div class="note amber"><b>' + t('today.mockBadge') + '.</b> ' + rulesText(school().id) + '</div>';
     if (done === plan.tasks.length && done > 0) h += '<div class="note ok">' + t('today.allDone') + '</div>';
     h += '<section class="sec"><div class="sec-h"><h2>' + t('today.tasks') + '</h2><span class="muted small">' + done + ' / ' + plan.tasks.length + '</span></div>' +
@@ -185,10 +187,15 @@
     if (task.type === 'test') {
       var f = Z.examFormats[task.format];
       return '<li class="task' + (task.done ? ' done' : '') + '">' + num + '<div class="tk-body">' +
-        '<span class="label">' + (f.full ? t('today.mock') : t('today.short')) + '</span><b>' + fname(f) + '</b><span class="meta">' + t('task.testSteps', { n: qCount(f), m: f.minutes }) + '</span></div>' +
+        '<span class="label">' + (f.diag ? t('diag.label') : f.full ? t('today.mock') : t('today.short')) + '</span><b>' + fname(f) + '</b><span class="meta">' + t('task.testSteps', { n: qCount(f), m: f.minutes }) + '</span></div>' +
         '<div class="tk-act">' + (task.done ? '<span class="done-mark">' + ic('check') + t('c.done') + '</span>' : '<button class="btn primary" data-act="startExam" data-f="' + f.id + '">' + t('c.start') + '</button>') + '</div></li>';
     }
     var tp = Z.topicById[task.topic], pr = S.topics[tp.id], hw = hwOf(tp.id);
+    if (task.type === 'review') {
+      return '<li class="task' + (task.done ? ' done' : '') + '">' + num + '<div class="tk-body"><span class="label">' + t('rev.label') + '</span><b><a href="#/topic/' + tp.id + '">' + tn(tp) + '</a></b>' +
+        '<span class="meta">' + t('rev.meta', { n: E.QUICK_LEN, k: ((pr && pr.reviews) || 0) + 1 }) + '</span></div><div class="tk-act">' +
+        (task.done ? '<span class="done-mark">' + ic('check') + t('c.done') + '</span>' : '<button class="btn primary" data-act="quick" data-topic="' + tp.id + '">' + t('c.start') + '</button>') + '</div></li>';
+    }
     var meta = '<span>' + t('hw.title') + ' · ' + t('hw.n', { n: hw ? hw.n : sessionLen(tp) }) + '</span>' + (hw ? '<span class="mini"><span class="bar"><i style="width:' + (hw.idx / hw.n * 100) + '%"></i></span>' + hw.idx + ' / ' + hw.n + '</span>' : '') +
       (pr && pr.grade ? '<span>' + gradeHtml(pr.grade) + '</span>' : '');
     var act = task.done ? '<span class="done-mark">' + ic('check') + t('c.done') + '</span>' :
@@ -375,7 +382,7 @@
     if (S.activeExam) h += resumeBanner();
     h += '<div class="formats">' + Z.formatsFor(sc).map(function (f) {
       var n = S.exams.filter(function (e) { return e.format === f.id; }).length;
-      return '<div class="card fmt' + (f.full ? ' full' : '') + '"><span class="label">' + (f.full ? t('today.mock') : t('today.short')) + '</span><h3>' + fname(f) + '</h3><p class="muted">' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</p>' +
+      return '<div class="card fmt' + (f.full ? ' full' : '') + '"><span class="label">' + (f.diag ? t('diag.label') : f.full ? t('today.mock') : t('today.short')) + '</span><h3>' + fname(f) + '</h3><p class="muted">' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</p>' +
         '<small class="muted">' + t('tests.done', { n: n }) + '</small><button class="btn ' + (f.full ? 'primary' : 'line') + '" data-act="startExam" data-f="' + f.id + '">' + t('c.start') + '</button></div>';
     }).join('') + '</div>';
     var hist = S.exams.slice(-10).reverse();
@@ -386,6 +393,14 @@
     return h;
   }
 
+  // Проходной ориентир: сколько не хватает (или запас).
+  function tgtText() { var g = school().target; return g.pct ? g.pct + '%' : g.score + '/' + g.max; }
+  function gapNote(score, pctv) {
+    var g = school().target, have = g.pct ? pctv : score, need = g.pct ? g.pct : g.score, low = g.pct ? g.minPct : g.min;
+    if (have === null || have === undefined) return '';
+    var unitS = g.pct ? '%' : '', cls = have >= need ? 'ok' : have >= low ? 'amber' : '';
+    return '<div class="note ' + cls + '">' + t('tgt.line', { v: tgtText() }) + ' ' + (have >= need ? t('tgt.above', { d: (have - need) + unitS }) : t('tgt.below', { d: (need - have) + unitS })) + '</div>';
+  }
   function rulesText(sc) { return sc === 'BIL' ? t('ex.rulesBIL') : sc === 'NIS' ? t('ex.rulesNIS') : t('ex.rulesRFMSH', { max: 150 }); }
   // Границы вопросов, доступных сейчас: у НИШ — только текущий раздел.
   function secRange(ex) { return ex.secs ? ex.secs[ex.sec] : { from: 0, to: ex.questions.length }; }
@@ -471,6 +486,7 @@
       '<div class="result-big"><b' + (r.score < 0 ? ' class="neg"' : '') + '>' + U.fmt(r.score) + '</b><span>/ ' + r.max + '</span></div>' +
       '<div class="stats"><div class="stat"><b style="color:var(--ok)">' + r.correct + '</b><span>' + t('res.right') + '</span></div><div class="stat"><b style="color:var(--bad)">' + r.wrong + '</b><span>' + t('res.wrong') + '</span></div>' +
       '<div class="stat"><b>' + r.skipped + '</b><span>' + t('res.skip') + '</span></div></div></section>';
+    if (f.full) h += f.school === 'NIS' ? gapNote(null, Math.round(Math.max(0, r.score) / r.max * 100)) : gapNote(r.score, null);
     if (r.lostBySkipping > 0) h += '<div class="note amber">' + t('res.guess', { n: r.skipped, ev: U.fmt(r.guessEV), lost: U.fmt(r.lostBySkipping) }) + '</div>';
     if (f.sections.length > 1 && r.bySection) {
       h += '<section class="sec"><h2>' + t('res.bySection') + '</h2><div class="tbl-wrap"><table class="tbl"><tbody>' + f.sections.map(function (sec, si) {
@@ -501,7 +517,7 @@
   function vProgress() {
     var fc = P.forecast(S);
     var h = '<section class="card"><span class="label">' + t('prog.forecast') + '</span>' +
-      (fc ? '<div class="result-big"><b>' + fc.score + '</b><span>/ ' + fc.max + '</span></div><p class="muted">' + t('prog.forecastNote', { n: Math.min(3, fc.n) }) + '</p>' : '<p class="muted">' + t('prog.noMocks') + '</p>') + '</section>';
+      (fc ? '<div class="result-big"><b>' + fc.score + '</b><span>' + (fc.pct ? '%' : '/ ' + fc.max) + '</span></div><p class="muted">' + t('prog.forecastNote', { n: Math.min(3, fc.n) }) + '</p>' + gapNote(fc.pct ? null : fc.score, fc.pct ? fc.score : null) : '<p class="muted">' + t('prog.noMocks') + '</p>') + '<p class="small muted">' + t('tgt.about') + '</p></section>';
     h += chart();
     var weak = P.weakTopics(S);
     if (weak.length) h += '<section class="sec"><h2>' + t('prog.weak') + '</h2><div class="row">' + weak.map(function (w) { return '<a class="btn line sm" href="#/topic/' + w.topic + '">' + tn(Z.topicById[w.topic]) + ' · ' + pct(w.acc) + '</a>'; }).join('') + '</div></section>';

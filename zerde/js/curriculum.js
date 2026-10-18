@@ -10,6 +10,12 @@
     NIS: { id: 'NIS', name: 'НЗМ', full: 'Назарбаев Зияткерлік мектептері', color: '#2E5AAC', answer: 'mc', options: 4, active: true }
   };
 
+  /* Проходной ориентир (materials/CUTOFFS.md): БИЛ — по данным 2024 г. (низкая достоверность),
+   * РФМШ — официальные проходные 2025–2026 по Астане/Алматы, НИШ — % верных (шкала Cito нелинейна). */
+  Z.schools.BIL.target = { score: 190, min: 160, max: 240 };
+  Z.schools.RFMSH.target = { score: 115, min: 90, max: 150 };
+  Z.schools.NIS.target = { pct: 85, minPct: 75 };
+
   var BOTH = ['BIL', 'RFMSH'], ALL = ['BIL', 'RFMSH', 'NIS'], NIS = ['NIS'];
   /* kind: math | logic | reading. gen — генератор в Z.gen, bank — банк задач.
    * theory — короткая памятка перед практикой (что нужно знать). */
@@ -137,6 +143,19 @@
                { kk: 'Орыс тілі', kinds: ['reading'], bank: 'reading_ru', count: 5 },
                { kk: 'Ағылшын тілі', kinds: ['reading'], bank: 'reading_en', count: 5 }],
     answer: 'mc', options: 4, points: NIS_PTS };
+
+  /* Входная диагностика: по одной задаче уровня B на каждую тему (кроме чтения).
+   * По её итогам планировщик начинает со слабых тем, а знакомые откладывает. */
+  ['BIL', 'RFMSH', 'NIS'].forEach(function (sc) {
+    var secs = [], n = 0;
+    [['math', 'Математика', 'Математика'], ['logic', 'Логика', 'Логика'], ['quant', 'Сандық сипаттама', 'Количественные характеристики'], ['science', 'Жаратылыстану', 'Естествознание']].forEach(function (k) {
+      var c = Z.topicsFor(sc, k[0]).length;
+      if (c) { secs.push({ kk: k[1], ru: k[2], kinds: [k[0]], mix: { 2: c * (k[0] === 'quant' || k[0] === 'science' ? 4 : 1) } }); n += c; }
+    });
+    var f = Z.examFormats[sc + '_full'] || Z.examFormats.NIS_full;
+    Z.examFormats[sc + '_diag'] = { id: sc + '_diag', school: sc, diag: true, kk: Z.schools[sc].name + ': бастапқы диагностика', ru: Z.schools[sc].name + ': входная диагностика',
+      minutes: 40, sections: secs, answer: f.answer, options: f.options, points: { 1: 1, 2: 1, 3: 1, 4: 1 } };
+  });
 
   Z.formatsFor = function (school) {
     return Object.keys(Z.examFormats).map(function (k) { return Z.examFormats[k]; }).filter(function (f) { return f.school === school; });
