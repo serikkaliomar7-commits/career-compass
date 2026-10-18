@@ -253,10 +253,12 @@
         return '<a class="vid" href="' + esc(v.url) + '" target="_blank" rel="noopener" data-act="video" data-topic="' + id + '"><span class="play">' + ic('play') + '</span><span class="vt">' + esc(v.title) + '<small>YouTube</small></span></a>';
       }).join('') + '</div>' : '<p class="muted">' + t('topic.noVideo') + '</p>') +
       '<a class="back" href="' + esc(searchUrl(tp)) + '" target="_blank" rel="noopener">' + ic('search') + t('topic.search') + '</a></div></div>';
+    var ls = Z.lessons && Z.lessons[id];
+    if (ls) h += lessonSteps(id, ls);
     // 2. Теория
-    h += '<div class="step"><div><h3>' + t('topic.s2') + '</h3><ul class="theory">' + tp.theory.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div></div>';
-    // 3. Решённый пример (генерируется, уровень B)
-    if (tp.kind !== 'reading') {
+    else h += '<div class="step"><div><h3>' + t('topic.s2') + '</h3><ul class="theory">' + tp.theory.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div></div>';
+    // 3. Решённый пример (генерируется, уровень B) — если нет готового урока
+    if (tp.kind !== 'reading' && !ls) {
       var ex = E.buildQuestion(id, 2, 777 + id.length, E.modeFor(S.profile.school));
       h += '<div class="step"><div><h3>' + t('topic.s3') + '</h3><div class="example">' + qText(ex) +
         '<details><summary>' + t('topic.showSol') + '</summary><div class="fb ok"><b>' + t('pr.answer') + ': ' + E.show(ex.ansValue, ex.unit, ql()) + '</b><div class="sol">' + solText(ex) + '</div></div></details></div></div></div>';
@@ -271,6 +273,30 @@
         '<div class="stat"><b>' + pr.solved + '</b><span>' + t('topic.solved') + '</span></div><div class="stat"><b>' + pct(pr.best) + '</b><span>' + t('topic.best') + '</span></div></div>';
     }
     return h;
+  }
+  /* Урок по теме: правило и типичные ошибки → 3 разобранных примера (A, B, C) → проверка понимания.
+   * Проверка — 3 вопроса прямо на странице, ответ сразу с объяснением. */
+  function lessonSteps(id, ls) {
+    var ru = ql() === 'ru';
+    var rules = ru ? ls.rule_ru : ls.rule_kk, mist = ru ? ls.mistakes_ru : ls.mistakes_kk;
+    var h = '<div class="step"><div><h3>' + t('topic.s2') + '</h3><ul class="theory">' + rules.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>' +
+      '<div class="mist"><span class="label">' + t('les.mistakes') + '</span><ul>' + mist.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul></div></div></div>';
+    h += '<div class="step"><div><h3>' + t('les.examples') + '</h3>' + ls.examples.map(function (e, i) {
+      return '<div class="example"><div class="row">' + lvPill(e.lvl || i + 1) + '</div><div class="q-main">' + (ru ? e.ru : e.kk) + '</div>' +
+        '<details><summary>' + t('topic.showSol') + '</summary><ol class="steps">' + (ru ? e.steps_ru : e.steps_kk).map(function (s) { return '<li>' + s + '</li>'; }).join('') + '</ol>' +
+        '<div class="fb ok"><b>' + t('pr.answer') + ': ' + e.ans + '</b></div></details></div>';
+    }).join('') + '</div></div>';
+    var st = (mem.chk && mem.chk[id]) || {}, done = 0, right = 0;
+    var qs = ls.check.map(function (c, i) {
+      var r = U.rng(id.length * 97 + i * 13), opts = r.shuffle([c.ans].concat(c.wrong)), sel = st[i];
+      if (sel !== undefined) { done++; if (sel === c.ans) right++; }
+      return '<div class="chk"><div class="q-main">' + (i + 1) + '. ' + (ru ? c.ru : c.kk) + '</div><div class="opts">' + opts.map(function (o, k) {
+        var cls = 'opt' + (sel !== undefined ? (o === c.ans ? ' right' : o === sel ? ' wrong' : '') : '');
+        return '<button class="' + cls + '" data-act="chk" data-t="' + id + '" data-i="' + i + '" data-v="' + esc(o) + '"' + (sel !== undefined ? ' disabled' : '') + '><span class="L">' + LETTERS[k] + '</span><span class="ot">' + o + '</span></button>';
+      }).join('') + '</div>' + (sel !== undefined ? '<div class="fb ' + (sel === c.ans ? 'ok' : 'no') + '"><div class="sol">' + (ru ? c.why_ru : c.why_kk) + '</div></div>' : '') + '</div>';
+    }).join('');
+    return h + '<div class="step' + (done === ls.check.length && right === done ? ' done' : '') + '"><div><h3>' + t('les.check') + '</h3>' + qs +
+      (done === ls.check.length ? '<div class="note ' + (right === done ? 'ok' : 'amber') + '">' + (right === done ? t('les.allRight') : t('les.someWrong', { r: right, n: done })) + '</div>' : '') + '</div></div>';
   }
   // Лесенка домашки в виде строк бланка: кружок на каждую задачу.
   function ladder(hw) {
@@ -683,6 +709,11 @@
       }
       if (s.mode === 'hw' || s.done) save();
       render();
+    },
+    chk: function (el) {
+      mem.chk = mem.chk || {}; var m = mem.chk[el.dataset.t] = mem.chk[el.dataset.t] || {};
+      m[+el.dataset.i] = el.dataset.v;
+      var y = window.scrollY; render(); window.scrollTo(0, y);
     },
     print: function () { try { window.print(); } catch (e) { ask(t('print.blocked'), 'OK', null, false); } },
     printKey: function (el) { mem.printKey = el.checked; render(); },

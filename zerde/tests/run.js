@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;
@@ -206,6 +206,16 @@ if (qs.n !== 10 || qs.maxLevel !== 4) fail('quick session: n=' + qs.n + ' maxLev
 var q1 = E.buildQuestion('m_work', 3, 4242, E.modeFor('BIL'));
 var ms = E.mistakeSession([{ id: 'x', topic: 'm_work', lvl: 3, seed: 4242 }], 'BIL');
 if (ms.current.kk !== q1.kk || ms.current.ansKey !== q1.ansKey) fail('mistake replay must rebuild the same problem');
+
+// Уроки: у каждой темы есть урок; 3 примера, 3 вопроса проверки с одним верным ответом.
+Z.topics.forEach(function (t) {
+  var L = Z.lessons[t.id];
+  checks++;
+  if (!L) { fail('no lesson for ' + t.id); return; }
+  if (L.rule_kk.length !== L.rule_ru.length || L.examples.length !== 3 || L.check.length !== 3) fail('lesson shape ' + t.id);
+  L.check.forEach(function (c) { if (new Set([c.ans].concat(c.wrong)).size !== 4 || !c.why_kk || !c.why_ru) fail('lesson check ' + t.id); });
+  if (bad(JSON.stringify(L))) fail('lesson text ' + t.id);
+});
 
 console.log((fails ? 'FAILED ' + fails : 'OK') + ' — ' + checks + ' checks');
 process.exit(fails ? 1 : 0);
