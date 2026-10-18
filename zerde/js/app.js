@@ -23,13 +23,15 @@
     reading: '<path d="M3 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/>',
     test: '<circle cx="7" cy="7" r="2"/><circle cx="7" cy="13" r="2"/><circle cx="7" cy="19" r="2"/><path d="M12 7h8M12 13h8M12 19h5"/>',
     check: '<path d="m5 12 4 4 10-10"/>',
+    report: '<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/>',
+    class: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 4.5a3 3 0 0 1 0 6M18 14c2 .7 3 2.6 3 6"/>',
     back: '<path d="M15 6l-6 6 6 6"/>',
     close: '<path d="M6 6l12 12M18 6 6 18"/>',
     search: '<circle cx="11" cy="11" r="6"/><path d="m20 20-4.5-4.5"/>'
   };
   function ic(n) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + IC[n] + '</svg>'; }
 
-  function save() { Z.store.save(S); }
+  function save() { S.savedAt = Date.now(); Z.store.save(S); if (Z.cloud) Z.cloud.push(S); }
   function today() { return U.todayKey(); }
   function go(h) { if (location.hash === h) render(); else location.hash = h; }
   function tn(tp) { return I.lang() === 'ru' ? tp.ru : tp.kk; }
@@ -79,7 +81,7 @@
   function closeModal() { document.getElementById('modal').innerHTML = ''; mem.modalYes = null; }
 
   /* =================== ОБОЛОЧКА =================== */
-  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings' };
+  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings', report: 'nav.report', class: 'nav.class', print: 'nav.tests', paper: 'nav.tests' };
   function shell(route) {
     var cur = route === 'topic' || route === 'practice' ? 'topics' : route === 'exam' || route === 'result' ? 'tests' : route;
     var mc = (S.mistakes || []).length;
@@ -87,7 +89,7 @@
       return '<a href="#/' + id + '" class="' + (cur === id ? 'on' : '') + '">' + ic(id) + t('nav.' + id) + (cnt ? '<span class="cnt">' + cnt + '</span>' : '') + '</a>';
     }
     document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('tests') +
-      '<div class="label">' + t('nav.secCheck') + '</div>' + link('mistakes', mc) + link('progress') + link('settings');
+      '<div class="label">' + t('nav.secCheck') + '</div>' + link('mistakes', mc) + link('progress') + link('report') + link('class') + link('settings');
     var p = S.profile;
     document.getElementById('me').innerHTML = '<span class="avatar">' + esc(p.name.charAt(0).toUpperCase()) + '</span><span><b>' + esc(p.name) + '</b><small>' + school().name + ' · ' + t('ob.grade', { n: p.grade }) + '</small></span>';
     document.getElementById('page-title').textContent = t(TITLES[route] || 'nav.today');
@@ -117,6 +119,8 @@
       case 'progress': html = vProgress(); break;
       case 'settings': html = vSettings(); break;
       case 'print': html = vPrint(parts[1]); break;
+      case 'report': html = vReport(); break;
+      case 'class': html = vClass(); break;
       case 'paper': html = vPaper(parts[1]); break;
       default: route = 'today'; html = vToday();
     }
@@ -666,9 +670,56 @@
       Z.topicsFor(p.school).map(function (tp) {
         return '<label class="field"><span>' + tn(tp) + '</span><input id="vid-' + tp.id + '" type="url" placeholder="' + esc(tp.videos && tp.videos[0] ? tp.videos[0].url : 'https://www.youtube.com/watch?v=…') + '" data-video="' + tp.id + '" value="' + esc(S.videos[tp.id] || '') + '"></label>';
       }).join('') + '</details>' +
+      '<section class="card"><h2>' + t('sync.title') + '</h2><p class="muted">' + (Z.cloud.state.on ? t('sync.cloudOn') : t('sync.cloudOff')) + '</p>' +
+      (mem.transfer ? '<textarea class="code" readonly id="trCode">' + mem.transfer + '</textarea><div class="row"><button class="btn primary" data-act="copy" data-src="trCode">' + t('c.copy') + '</button></div>' : '<button class="btn line" data-act="makeTransfer">' + t('sync.make') + '</button>') +
+      '</section><form class="card form" data-form="applyTransfer"><label class="field"><span>' + t('sync.paste') + '</span><textarea class="code" name="code" placeholder="ZT1:…"></textarea></label><button class="btn line" type="submit">' + t('sync.apply') + '</button></form>' +
       '<section class="card"><h2>' + t('set.data') + '</h2><div class="row"><button class="btn line" data-act="export">' + t('set.export') + '</button>' +
       '<label class="btn line">' + t('set.import') + '<input type="file" accept="application/json" id="importFile" hidden></label>' +
       '<button class="btn danger" data-act="reset">' + t('set.reset') + '</button></div></section>';
+  }
+
+  /* =================== ЕСЕП / ОТЧЁТ И СЫНЫП / КЛАСС =================== */
+  function sumRow(x) {
+    var sc = Z.schools[x.school] || Z.schools.BIL, g = sc.target, left = x.examDate ? U.daysBetween(today(), x.examDate) : null;
+    var fcTxt = x.fc ? (x.fc.pct ? x.fc.score + '%' : x.fc.score + '/' + x.fc.max) : '—';
+    var risk = !x.fc ? 1 : (x.fc.pct ? x.fc.score < g.minPct : x.fc.score < g.min) ? 2 : (x.fc.pct ? x.fc.score < g.pct : x.fc.score < g.score) ? 1 : 0;
+    var weak = (x.weak || []).map(function (id) { return Z.topicById[id] ? tn(Z.topicById[id]) : id; }).join(', ');
+    return { risk: risk, html: '<td><b>' + esc(x.name || '—') + '</b><br><small class="muted">' + sc.name + (x.grade ? ' · ' + t('ob.grade', { n: x.grade }) : '') + (left !== null ? ' · ' + left + ' ' + t('c.days') : '') + '</small></td>' +
+      '<td class="num">' + x.active7 + '/7</td><td class="num">' + x.hw7 + '</td><td class="num">' + (x.mocks7 || 0) + '</td><td class="num">' + x.ready + '%</td>' +
+      '<td class="num"><span class="' + (risk === 2 ? 'no' : risk === 1 ? '' : 'yes') + '">' + fcTxt + '</span><br><small class="muted">' + t('tgt.short', { v: g.pct ? g.pct + '%' : g.score + '/' + g.max }) + '</small></td>' +
+      '<td class="small">' + (weak || '—') + '</td><td class="num">' + x.mistakes + '</td><td class="small muted">' + new Date(x.updatedAt).toISOString().slice(0, 10) + '</td>' };
+  }
+  // Отчёт ученика за неделю — для родителей (можно распечатать) и код для учителя.
+  function vReport() {
+    var x = Z.cloud.summary(S), r = sumRow(x);
+    var h = '<section class="sec"><h1>' + t('rep.title') + '</h1><p class="muted">' + t('rep.sub') + '</p></section>' +
+      '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>' + t('cls.student') + '</th><th class="num">' + t('cls.active') + '</th><th class="num">' + t('cls.hw') + '</th><th class="num">' + t('cls.mocks') + '</th><th class="num">' + t('today.ready') + '</th><th class="num">' + t('today.forecast') + '</th><th>' + t('prog.weak') + '</th><th class="num">' + t('nav.mistakes') + '</th><th>' + t('cls.upd') + '</th></tr></thead><tbody><tr>' + r.html + '</tr></tbody></table></div>';
+    h += '<section class="card"><h2>' + t('rep.advice') + '</h2><ul class="theory">' + repAdvice(x).map(function (a) { return '<li>' + a + '</li>'; }).join('') + '</ul></section>';
+    h += '<section class="card noprint"><h2>' + t('rep.codeTitle') + '</h2><p class="muted">' + t('rep.codeNote') + '</p><textarea class="code" readonly id="repCode">' + Z.cloud.reportCode(S) + '</textarea>' +
+      '<div class="row"><button class="btn primary" data-act="copy" data-src="repCode">' + t('c.copy') + '</button><button class="btn line" data-act="print">' + t('print.go') + '</button></div></section>';
+    return h;
+  }
+  function repAdvice(x) {
+    var out = [], g = (Z.schools[x.school] || Z.schools.BIL).target;
+    if (x.active7 < 5) out.push(t('rep.a.active', { n: x.active7 }));
+    if (!x.mocks7) out.push(t('rep.a.mock'));
+    if (x.mistakes > 20) out.push(t('rep.a.mist', { n: x.mistakes }));
+    if ((x.weak || []).length) out.push(t('rep.a.weak', { list: x.weak.map(function (id) { return Z.topicById[id] ? tn(Z.topicById[id]) : id; }).join(', ') }));
+    if (x.fc && (x.fc.pct ? x.fc.score >= g.pct : x.fc.score >= g.score)) out.push(t('rep.a.good'));
+    if (!out.length) out.push(t('rep.a.keep'));
+    return out;
+  }
+  // Кабинет учителя / родителя: ученики из облака (для редакторов сайта) и вставленные коды отчётов.
+  function vClass() {
+    var local = S.cls || {}, rows = Object.keys(local).map(function (k) { var x = local[k]; x.key = k; x.src = 'code'; return x; }).concat(mem.cloudStudents || []);
+    rows.sort(function (a, b) { return sumRow(b).risk - sumRow(a).risk; });
+    var h = '<section class="sec"><h1>' + t('cls.title') + '</h1><p class="muted">' + t('cls.sub') + '</p></section>' +
+      '<form class="card form" data-form="addReport"><label class="field"><span>' + t('cls.paste') + '</span><textarea class="code" name="code" placeholder="ZR1:…"></textarea></label><div class="row"><button class="btn primary" type="submit">' + t('cls.add') + '</button>' +
+      (Z.cloud.state.on && Z.cloud.state.teacher ? '<button class="btn line" type="button" data-act="loadCloud">' + t('cls.cloud') + '</button>' : '') + '</div></form>';
+    if (!rows.length) return h + '<p class="muted">' + t('cls.empty') + '</p>';
+    return h + '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>' + t('cls.student') + '</th><th class="num">' + t('cls.active') + '</th><th class="num">' + t('cls.hw') + '</th><th class="num">' + t('cls.mocks') + '</th><th class="num">' + t('today.ready') + '</th><th class="num">' + t('today.forecast') + '</th><th>' + t('prog.weak') + '</th><th class="num">' + t('nav.mistakes') + '</th><th>' + t('cls.upd') + '</th><th></th></tr></thead><tbody>' +
+      rows.map(function (x) { var r = sumRow(x); return '<tr class="risk' + r.risk + '">' + r.html + '<td>' + (x.src === 'code' ? '<button class="btn line sm" data-act="delStudent" data-k="' + esc(x.key) + '">×</button>' : '<small class="muted">☁</small>') + '</td></tr>'; }).join('') +
+      '</tbody></table></div><p class="small muted">' + t('cls.legend') + '</p>';
   }
 
   /* =================== ДЕЙСТВИЯ =================== */
@@ -710,6 +761,17 @@
       if (s.mode === 'hw' || s.done) save();
       render();
     },
+    copy: function (el) {
+      var ta = document.getElementById(el.dataset.src);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { /* старый браузер */ }
+      if (navigator.clipboard) navigator.clipboard.writeText(ta.value).then(function () { el.textContent = t('c.copied'); }, function () { if (ok) el.textContent = t('c.copied'); });
+      else if (ok) el.textContent = t('c.copied');
+    },
+    makeTransfer: function () { mem.transfer = Z.cloud.transferCode(S); render(); },
+    loadCloud: function () { Z.cloud.students().then(function (list) { mem.cloudStudents = list; render(); }); },
+    delStudent: function (el) { ask(t('cls.delQ'), t('cls.del'), function () { delete S.cls[el.dataset.k]; save(); render(); }); },
     chk: function (el) {
       mem.chk = mem.chk || {}; var m = mem.chk[el.dataset.t] = mem.chk[el.dataset.t] || {};
       m[+el.dataset.i] = el.dataset.v;
@@ -799,6 +861,21 @@
     if (!form) return;
     e.preventDefault();
     var d = new FormData(f);
+    if (form === 'addReport') {
+      var rep = Z.cloud.readReport(d.get('code'));
+      if (!rep) { ask(t('cls.bad'), 'OK', null, false); return; }
+      S.cls = S.cls || {};
+      S.cls[rep.rid || rep.name || ('s' + Date.now())] = rep; save(); render();
+      return;
+    }
+    if (form === 'applyTransfer') {
+      var code = d.get('code');
+      ask(t('sync.applyQ'), t('sync.apply'), function () {
+        if (Z.cloud.applyTransfer(S, code)) { S.hw = {}; S.activeExam = null; save(); I.setLang((S.profile && S.profile.uiLang) || I.lang()); go('#/today'); }
+        else ask(t('sync.bad'), 'OK', null, false);
+      });
+      return;
+    }
     if (form === 'paper') {
       var pp = paperOf(f.dataset.id), ex = E.buildExam(pp.fid, pp.seed, { readLevel: pp.rl });
       ex.questions.forEach(function (q, i) { var v = d.get('a' + i); if (v !== null && String(v).trim() !== '') ex.answers[i] = String(v).trim(); });
@@ -811,7 +888,7 @@
     }
     if (form === 'onboard') {
       S.profile = { name: String(d.get('name')).trim() || 'Оқушы', school: d.get('school'), grade: +d.get('grade'), examDate: d.get('examDate') || null,
-        intensity: d.get('intensity') || 'normal', qLang: 'both', uiLang: I.lang(), startDate: today() };
+        intensity: d.get('intensity') || 'normal', qLang: 'both', uiLang: I.lang(), startDate: today(), rid: 'r' + U.newSeed() };
       save(); go('#/today');
     } else if (form === 'settings') {
       var p = S.profile, oldSchool = p.school, oldInt = p.intensity;
@@ -827,6 +904,8 @@
   });
 
   window.addEventListener('hashchange', render);
+  // Облако: подтянуть более свежий прогресс с другого устройства (если платформа даёт хранилище).
+  if (Z.cloud) Z.cloud.init(S, function (ev) { if (ev === 'pulled') { Z.store.save(S); if (S.profile && S.profile.uiLang) I.setLang(S.profile.uiLang); } if (ev !== 'error' && !/^#\/(exam|practice)/.test(location.hash)) render(); });
   I.setLang((S.profile && S.profile.uiLang) || 'kk');
   render();
 })();

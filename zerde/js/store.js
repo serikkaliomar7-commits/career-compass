@@ -6,7 +6,7 @@
   var KEY = 'zerde.v1';
 
   function blank() {
-    return { v: 1, profile: null, topics: {}, plans: {}, exams: [], activeExam: null, activity: {}, videos: {}, mistakes: [], hw: {} };
+    return { v: 1, profile: null, topics: {}, plans: {}, exams: [], activeExam: null, activity: {}, videos: {}, mistakes: [], hw: {}, cls: {}, paper: [] };
   }
   function load() {
     try {

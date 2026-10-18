@@ -166,7 +166,7 @@ var d2 = E.buildExam('NIS_full2', 9, { readLevel: 3 });
   if (d2.questions.slice(k * 20, k * 20 + 20).some(function (q) { return q.topic !== tp; })) fail('NIS day 2 section ' + k + ' must be ' + tp);
 });
 // Планировщик НИШ: без логики, второй слот — сандық сипаттама / естествознание / языки.
-vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'planner.js'), 'utf8'), ctx, { filename: 'planner.js' });
+['planner.js', 'cloud.js'].forEach(function (f) { vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f }); });
 var st = { profile: { school: 'NIS', intensity: 'normal', startDate: '2026-01-05', examDate: '2026-12-01' }, topics: {}, plans: {}, exams: [], activity: {}, mistakes: [] };
 var kindsSeen = {}, testsSeen = {};
 for (var dd = 0; dd < 14; dd++) {
@@ -216,6 +216,17 @@ Z.topics.forEach(function (t) {
   L.check.forEach(function (c) { if (new Set([c.ans].concat(c.wrong)).size !== 4 || !c.why_kk || !c.why_ru) fail('lesson check ' + t.id); });
   if (bad(JSON.stringify(L))) fail('lesson text ' + t.id);
 });
+
+// Обмен без сервера: код переноса и код отчёта читаются обратно.
+ctx.btoa = function (x) { return Buffer.from(x, 'binary').toString('base64'); };
+ctx.atob = function (x) { return Buffer.from(x, 'base64').toString('binary'); };
+ctx.escape = escape; ctx.unescape = unescape;
+st2.profile.name = 'Әлия'; st2.profile.rid = 'r1';
+var code = Z.cloud.transferCode(st2), st3 = { profile: null, topics: {}, plans: {}, exams: [], activity: {}, mistakes: [] };
+if (!Z.cloud.applyTransfer(st3, code) || st3.profile.name !== 'Әлия' || st3.exams.length !== st2.exams.length) fail('transfer code roundtrip');
+var rep = Z.cloud.readReport(Z.cloud.reportCode(st2));
+if (!rep || rep.name !== 'Әлия' || rep.rid !== 'r1' || typeof rep.ready !== 'number') fail('report code roundtrip');
+if (Z.cloud.readReport('garbage') !== null) fail('bad report code must be rejected');
 
 console.log((fails ? 'FAILED ' + fails : 'OK') + ' — ' + checks + ' checks');
 process.exit(fails ? 1 : 0);
