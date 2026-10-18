@@ -116,12 +116,15 @@
       case 'mistakes': html = vMistakes(); break;
       case 'progress': html = vProgress(); break;
       case 'settings': html = vSettings(); break;
+      case 'print': html = vPrint(parts[1]); break;
+      case 'paper': html = vPaper(parts[1]); break;
       default: route = 'today'; html = vToday();
     }
     shell(route);
     view.innerHTML = html;
     document.body.classList.toggle('focus', route === 'exam' || route === 'practice');
-    if (route === 'exam') startTimer();
+    if (route === 'exam') { startTimer(); mem.qStart = Date.now(); mem.qIdx = S.activeExam ? S.activeExam.cur : -1; }
+    document.body.classList.toggle('printing', route === 'print');
     var inp = view.querySelector('[data-autofocus]'); if (inp) inp.focus();
     window.scrollTo(0, 0);
   }
@@ -383,7 +386,7 @@
     h += '<div class="formats">' + Z.formatsFor(sc).map(function (f) {
       var n = S.exams.filter(function (e) { return e.format === f.id; }).length;
       return '<div class="card fmt' + (f.full ? ' full' : '') + '"><span class="label">' + (f.diag ? t('diag.label') : f.full ? t('today.mock') : t('today.short')) + '</span><h3>' + fname(f) + '</h3><p class="muted">' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</p>' +
-        '<small class="muted">' + t('tests.done', { n: n }) + '</small><button class="btn ' + (f.full ? 'primary' : 'line') + '" data-act="startExam" data-f="' + f.id + '">' + t('c.start') + '</button></div>';
+        '<small class="muted">' + t('tests.done', { n: n }) + '</small><div class="row"><button class="btn ' + (f.full ? 'primary' : 'line') + '" data-act="startExam" data-f="' + f.id + '">' + t('c.start') + '</button><a class="btn line" href="#/print/' + f.id + '" title="' + t('print.go') + '">' + t('print.short') + '</a></div></div>';
     }).join('') + '</div>';
     var hist = S.exams.slice(-10).reverse();
     h += '<section class="sec"><h2>' + t('tests.history') + '</h2>' + (hist.length ? '<div class="tbl-wrap"><table class="tbl"><tbody>' + hist.map(function (e) {
@@ -473,7 +476,74 @@
   }
   function readExamInput() {
     var el = document.getElementById('exans'), ex = S.activeExam;
+    if (ex && mem.qStart && mem.qIdx === ex.cur) {
+      ex.times = ex.times || {};
+      ex.times[ex.cur] = (ex.times[ex.cur] || 0) + Math.round((Date.now() - mem.qStart) / 1000);
+      mem.qStart = Date.now();
+    }
     if (el && ex) { ex.answers[ex.cur] = el.value.trim(); save(); }
+  }
+
+  // Время по вопросам: средний темп против нормы и 5 самых «долгих» вопросов.
+  function timeReport(ex, f) {
+    var tm = ex.times || {}, ids = Object.keys(tm);
+    if (!ids.length) return '';
+    var total = ids.reduce(function (a, k) { return a + tm[k]; }, 0), n = ex.questions.length;
+    var norm = Math.round(f.minutes * 60 / n), avg = Math.round(total / Math.max(1, ids.length));
+    var top = ids.sort(function (a, b) { return tm[b] - tm[a]; }).slice(0, 5);
+    function mmss(s) { return Math.floor(s / 60) + ':' + U.pad2(s % 60); }
+    return '<section class="sec"><h2>' + t('time.title') + '</h2><p class="muted" style="margin-top:10px">' + t('time.pace', { avg: mmss(avg), norm: mmss(norm) }) + '</p>' +
+      '<div class="tbl-wrap" style="margin-top:10px"><table class="tbl"><thead><tr><th>№</th><th>' + t('time.topic') + '</th><th class="num">' + t('time.spent') + '</th><th class="num"></th></tr></thead><tbody>' + top.map(function (k) {
+        var q = ex.questions[k], ok = E.check(q, ex.answers[k]);
+        return '<tr><td>' + (+k + 1) + '</td><td>' + tn(Z.topicById[q.topic]) + ' ' + lvPill(q.lvl) + '</td><td class="num">' + mmss(tm[k]) + (tm[k] > norm * 2 ? ' <span class="no">⚠</span>' : '') + '</td><td class="num">' + (ok === true ? '✓' : ok === false ? '✗' : '—') + '</td></tr>';
+      }).join('') + '</tbody></table></div><p class="small muted" style="margin-top:8px">' + t('time.tip') + '</p></section>';
+  }
+
+  /* =================== БАСЫП ШЫҒАРУ / ПЕЧАТЬ =================== */
+  // Вариант для печати: сохраняем формат и seed, чтобы потом ввести ответы с бумажного бланка.
+  function paperOf(id) { return (S.paper || []).filter(function (p) { return p.id === id; })[0]; }
+  function vPrint(fid) {
+    var f = Z.examFormats[fid];
+    if (!f) return vTests();
+    if (!mem.print || mem.print.fid !== fid) {
+      var seed = U.newSeed();
+      mem.print = { id: 'p' + seed, fid: fid, seed: seed, rl: P.readLevel(S), date: today() };
+      S.paper = (S.paper || []).concat([mem.print]).slice(-12); save();
+    }
+    var pp = mem.print, ex = E.buildExam(fid, pp.seed, { readLevel: pp.rl }), seenP = {};
+    var h = '<div class="noprint row"><a class="back" href="#/tests">' + ic('back') + t('nav.tests') + '</a><span style="flex:1"></span>' +
+      '<label class="radio"><input type="checkbox" id="pkey"' + (mem.printKey ? ' checked' : '') + ' data-act="printKey"> ' + t('print.key') + '</label>' +
+      '<a class="btn line" href="#/paper/' + pp.id + '">' + t('print.enter') + '</a><button class="btn primary" data-act="print">' + t('print.go') + '</button></div>' +
+      '<p class="noprint note">' + t('print.how', { id: pp.id.slice(1, 7) }) + '</p>';
+    h += '<article class="pdoc"><header class="ph-h"><div><b>Зерде · ' + fname(f) + '</b><br><span>' + t('print.variant') + ' ' + pp.id.slice(1, 7) + ' · ' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</span></div>' +
+      '<div class="ph-name">' + t('print.name') + ' ____________________</div></header><p class="small">' + rulesText(f.school) + '</p>';
+    var curSec = -1;
+    ex.questions.forEach(function (q, i) {
+      if (f.sections.length > 1 && q.section !== curSec) { curSec = q.section; var sc = f.sections[curSec]; h += '<h3 class="psec">' + (I.lang() === 'ru' && sc.ru ? sc.ru : sc.kk) + (sc.minutes ? ' · ' + sc.minutes + ' ' + t('c.min') : '') + '</h3>'; }
+      if (q.passage && !seenP[q.passage]) { seenP[q.passage] = 1; h += passageBox(q.passage); }
+      h += '<div class="pq"><span class="pn">' + (i + 1) + '.</span><div>' + qText(q) + (q.type === 'mc' ? '<ol class="popts">' + q.options.map(function (o, k) { return '<li><b>' + LETTERS[k] + ')</b> ' + optText(o) + '</li>'; }).join('') + '</ol>' : '<p class="small">' + t('pr.input') + ': ________</p>') + '</div></div>';
+    });
+    // бланк ответов
+    h += '<section class="psheet"><h3>' + t('print.sheet') + ' · ' + t('print.variant') + ' ' + pp.id.slice(1, 7) + '</h3><div class="ps-grid">' + ex.questions.map(function (q, i) {
+      return '<div class="ps-row"><span>' + (i + 1) + '</span>' + (q.type === 'mc' ? q.options.map(function (o, k) { return '<i>' + LETTERS[k] + '</i>'; }).join('') : '<u></u>') + '</div>';
+    }).join('') + '</div></section>';
+    if (mem.printKey) h += '<section class="psheet"><h3>' + t('print.keyTitle') + '</h3><div class="ps-key">' + ex.questions.map(function (q, i) {
+      var k = q.type === 'mc' ? LETTERS[q.options.map(function (o) { return o.key; }).indexOf(q.ansKey)] : E.show(q.ansValue, null, ql());
+      return '<span>' + (i + 1) + ' — <b>' + k + '</b></span>';
+    }).join('') + '</div></section>';
+    return h + '</article>';
+  }
+  // Ввод ответов с бумажного бланка → обычный разбор, как после теста на сайте.
+  function vPaper(id) {
+    var pp = paperOf(id);
+    if (!pp) return vTests();
+    var f = Z.examFormats[pp.fid], ex = E.buildExam(pp.fid, pp.seed, { readLevel: pp.rl });
+    return '<a class="back" href="#/print/' + pp.fid + '">' + ic('back') + t('print.back') + '</a><section class="sec"><h1>' + t('print.enter') + '</h1><p class="muted">' + fname(f) + ' · ' + t('print.variant') + ' ' + id.slice(1, 7) + '</p></section>' +
+      '<form class="card paper-form" data-form="paper" data-id="' + id + '">' + ex.questions.map(function (q, i) {
+        return '<div class="pf-row"><span>' + (i + 1) + '</span>' + (q.type === 'mc' ? q.options.map(function (o, k) {
+          return '<label><input type="radio" name="a' + i + '" value="' + esc(o.key) + '"><i>' + LETTERS[k] + '</i></label>';
+        }).join('') : '<input name="a' + i + '" inputmode="numeric" autocomplete="off">') + '</div>';
+      }).join('') + '<button class="btn primary wide" type="submit">' + t('print.check') + '</button></form>';
   }
 
   /* =================== НӘТИЖЕ / РЕЗУЛЬТАТ =================== */
@@ -501,6 +571,7 @@
       return '<tr><td><a href="#/topic/' + x.k + '">' + tn(tp) + '</a></td><td class="num">' + x.ok + ' / ' + x.n + '</td><td class="meter"><i style="width:' + acc * 100 + '%" class="' + (acc < 0.6 ? 'lo' : '') + '"></i></td>' +
         '<td class="num">' + (acc < 1 ? '<button class="btn line sm" data-act="quick" data-topic="' + x.k + '">' + t('res.train') + '</button>' : '') + '</td></tr>';
     }).join('') + '</tbody></table></div></section>';
+    h += timeReport(ex, f);
     var wrongs = ex.questions.map(function (q, i) { return { q: q, i: i, ok: E.check(q, ex.answers[i]) }; }).filter(function (x) { return x.ok !== true; });
     if (wrongs.length) {
       h += '<section class="sec"><h2>' + t('res.review') + ' (' + wrongs.length + ')</h2>' + wrongs.map(function (x) {
@@ -613,6 +684,8 @@
       if (s.mode === 'hw' || s.done) save();
       render();
     },
+    print: function () { try { window.print(); } catch (e) { ask(t('print.blocked'), 'OK', null, false); } },
+    printKey: function (el) { mem.printKey = el.checked; render(); },
     startExam: function (el) {
       var fid = el.dataset.f;
       function start() { var ex = E.buildExam(fid, U.newSeed(), { readLevel: P.readLevel(S) }); ex.cur = 0; S.activeExam = ex; mem.sheet = false; save(); go('#/exam'); }
@@ -695,6 +768,16 @@
     if (!form) return;
     e.preventDefault();
     var d = new FormData(f);
+    if (form === 'paper') {
+      var pp = paperOf(f.dataset.id), ex = E.buildExam(pp.fid, pp.seed, { readLevel: pp.rl });
+      ex.questions.forEach(function (q, i) { var v = d.get('a' + i); if (v !== null && String(v).trim() !== '') ex.answers[i] = String(v).trim(); });
+      ex.paper = true;
+      var res = E.scoreExam(ex);
+      P.recordExam(S, ex, res, today());
+      mem.lastExam = S.lastExam = { ex: ex, res: res, timeout: false };
+      save(); go('#/result');
+      return;
+    }
     if (form === 'onboard') {
       S.profile = { name: String(d.get('name')).trim() || 'Оқушы', school: d.get('school'), grade: +d.get('grade'), examDate: d.get('examDate') || null,
         intensity: d.get('intensity') || 'normal', qLang: 'both', uiLang: I.lang(), startDate: today() };

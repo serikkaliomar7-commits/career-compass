@@ -353,6 +353,40 @@ body.focus #burger { display: none; }
 details.card > summary { cursor: pointer; list-style: none; }
 details.card > summary::-webkit-details-marker { display: none; }
 
+/* ---------- печать и бумажный бланк ---------- */
+.pdoc { background: var(--card); border: 1px solid var(--line); padding: 28px 32px; display: flex; flex-direction: column; gap: 14px; }
+.ph-h { display: flex; justify-content: space-between; gap: 16px; border-bottom: 2px solid var(--ink); padding-bottom: 10px; font-size: 14px; }
+.psec { border-bottom: 1px solid var(--line-2); padding-bottom: 4px; margin-top: 8px; }
+.pq { display: grid; grid-template-columns: 30px 1fr; gap: 6px; break-inside: avoid; }
+.pq .pn { font-weight: 700; }
+.pq .q-main { font-size: 1rem; }
+.popts { list-style: none; margin: 8px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 18px; }
+.pdoc .passage { position: static; max-height: none; }
+.psheet { break-before: page; }
+.pdoc .tbl-wrap { display: inline-block; max-width: 100%; }
+.pdoc .tbl td, .pdoc .tbl th { padding: 3px 12px; }
+.ps-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 4px 18px; margin-top: 10px; }
+.ps-row { display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.ps-row span { width: 24px; text-align: right; font-weight: 600; }
+.ps-row i, .pf-row i { width: 20px; height: 20px; border: 1px solid var(--ink); border-radius: 50%; display: inline-grid; place-items: center; font: 600 10px var(--sans); font-style: normal; }
+.ps-row u { display: inline-block; width: 70px; border-bottom: 1px solid var(--ink); height: 16px; }
+.ps-key { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 4px 12px; font-size: 13px; margin-top: 10px; }
+.paper-form { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px 22px; }
+.paper-form > .btn { grid-column: 1 / -1; }
+.pf-row { display: flex; align-items: center; gap: 6px; }
+.pf-row > span { width: 26px; text-align: right; font-weight: 600; font-size: 13px; }
+.pf-row label { cursor: pointer; }
+.pf-row input[type=radio] { position: absolute; opacity: 0; }
+.pf-row input[type=radio]:checked + i { background: var(--ink); color: var(--paper); }
+.pf-row input:not([type=radio]) { width: 90px; padding: 4px 8px; border: 1px solid var(--line-2); border-radius: 3px; font: inherit; background: var(--card); color: var(--ink); }
+@media print {
+  #side, #top, .noprint { display: none !important; }
+  #main { margin: 0 !important; }
+  #view { padding: 0 !important; max-width: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .pdoc { border: 0; padding: 0; }
+}
+
 /* ---------- окно подтверждения ---------- */
 .modal-bg { position: fixed; inset: 0; z-index: 60; background: rgba(12, 14, 16, .45); display: grid; place-items: center; padding: 16px; }
 .modal { max-width: 420px; width: 100%; }
