@@ -3,7 +3,7 @@
 (function (root) {
   'use strict';
   var Z = root.Z;
-  var KEY = 'zerde.v1';
+  var BASE = 'zerde.v1', KEY = BASE;
 
   function blank() {
     return { v: 1, profile: null, topics: {}, plans: {}, exams: [], activeExam: null, activity: {}, videos: {}, mistakes: [], hw: {}, cls: {}, paper: [] };
@@ -22,5 +22,15 @@
   }
   function reset() { try { root.localStorage.removeItem(KEY); } catch (e) { /* приватный режим */ } return blank(); }
 
-  Z.store = { load: load, save: save, reset: reset, blank: blank, KEY: KEY };
+  /* У каждого аккаунта на устройстве — своя запись. Прогресс, сохранённый до появления аккаунтов,
+   * достаётся первому вошедшему ученику. */
+  function setUser(id) {
+    KEY = id ? BASE + '.' + id : BASE;
+    try {
+      var ls = root.localStorage;
+      if (id && !ls.getItem(KEY) && ls.getItem(BASE) && !ls.getItem(BASE + '.claimed')) { ls.setItem(KEY, ls.getItem(BASE)); ls.setItem(BASE + '.claimed', id); }
+    } catch (e) { /* приватный режим */ }
+  }
+
+  Z.store = { load: load, save: save, reset: reset, blank: blank, setUser: setUser, key: function () { return KEY; } };
 })(typeof window !== 'undefined' ? window : globalThis);

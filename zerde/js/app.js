@@ -4,8 +4,9 @@
 (function () {
   'use strict';
   var Z = window.Z, U = Z.util, E = Z.engine, P = Z.planner, I = Z.i18n, t = I.t, esc = U.esc;
+  var B = Z.backend;
   var S = Z.store.load();
-  var mem = { session: null, sel: null, fb: null, timer: null, sheet: false, lastExam: S.lastExam || null, res: null };
+  var mem = { user: undefined,  session: null, sel: null, fb: null, timer: null, sheet: false, lastExam: S.lastExam || null, res: null };
   var LETTERS = ['A', 'B', 'C', 'D', 'E'];
   var LV = { 1: 'A', 2: 'B', 3: 'C', 4: '★' };
 
@@ -23,6 +24,13 @@
     reading: '<path d="M3 5h6a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H3z"/><path d="M21 5h-6a3 3 0 0 0-3 3v12a2 2 0 0 1 2-2h7z"/>',
     test: '<circle cx="7" cy="7" r="2"/><circle cx="7" cy="13" r="2"/><circle cx="7" cy="19" r="2"/><path d="M12 7h8M12 13h8M12 19h5"/>',
     check: '<path d="m5 12 4 4 10-10"/>',
+    cards: '<rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/>',
+    game: '<path d="M6 9h12a4 4 0 0 1 0 8l-2-2H8l-2 2a4 4 0 0 1 0-8z"/><path d="M8 11v4M6 13h4M16 12h.01M18 14h.01"/>',
+    leaders: '<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3a3 3 0 0 1-3 4M7 5H4a3 3 0 0 0 3 4"/>',
+    account: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/>',
+    admin: '<path d="M12 3 4 6v6c0 5 3.4 8.3 8 9 4.6-.7 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>',
+    kids: '<circle cx="8" cy="8" r="3"/><circle cx="17" cy="10" r="2.5"/><path d="M2 20c0-3.3 2.7-6 6-6s6 2.7 6 6M14 20c0-2.5 1.3-4.5 3-4.5s4 2 4 4.5"/>',
+    pricing: '<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
     report: '<path d="M7 3h8l4 4v14H7z"/><path d="M15 3v4h4M10 12h6M10 16h6"/>',
     class: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 4.5a3 3 0 0 1 0 6M18 14c2 .7 3 2.6 3 6"/>',
     back: '<path d="M15 6l-6 6 6 6"/>',
@@ -31,7 +39,40 @@
   };
   function ic(n) { return '<svg class="i" viewBox="0 0 24 24" aria-hidden="true">' + IC[n] + '</svg>'; }
 
-  function save() { S.savedAt = Date.now(); Z.store.save(S); if (Z.cloud) Z.cloud.push(S); }
+  function save() {
+    S.savedAt = Date.now(); Z.store.save(S);
+    if (Z.cloud) Z.cloud.push(S);
+    // Аккаунт ученика: прогресс уходит на сервер (с задержкой, чтобы не слать на каждый клик).
+    if (mem.user && mem.user.role !== 'parent' && S.profile) {
+      clearTimeout(mem.syncT);
+      mem.syncT = setTimeout(function () { B.saveProgress(Z.cloud.compact(S), Z.cloud.summary(S)).catch(function () { /* офлайн — сохранится позже */ }); }, 4000);
+    }
+  }
+  // Баллы за сделанное: сервер ограничивает сумму и не засчитывает одно действие дважды.
+  function award(kind, ref, amount) {
+    if (!mem.user || mem.user.role === 'parent' || amount <= 0) return;
+    B.addPoints(kind, ref, amount).then(function (r) {
+      if (r && r.amount > 0) { toast('+' + r.amount + ' ' + t('pts.unit')); if (Z.views) Z.views.refresh(); }
+    }).catch(function () { /* без сети баллы не начисляются */ });
+  }
+  function examPoints(ex, res) {
+    var f = Z.examFormats[ex.format], p = Math.max(0, res.score) / (res.max || 1);
+    if (f.diag) award('diag', 'diag', 50);
+    else award(f.full ? 'mock' : 'test', ex.format + ':' + ex.seed, Math.round(p * (f.full ? 150 : 50)));
+    dayBonus();
+  }
+  // Весь план дня выполнен — бонус (один раз в день).
+  function dayBonus() {
+    var pl = S.plans[today()];
+    if (pl && pl.tasks.length && pl.tasks.every(function (x) { return x.done; })) award('day', today(), 30);
+  }
+  function toast(msg) {
+    var el = document.createElement('div');
+    el.className = 'toast'; el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(function () { el.classList.add('out'); }, 1800);
+    setTimeout(function () { el.remove(); }, 2300);
+  }
   function today() { return U.todayKey(); }
   function go(h) { if (location.hash === h) render(); else location.hash = h; }
   function tn(tp) { return I.lang() === 'ru' ? tp.ru : tp.kk; }
@@ -81,20 +122,31 @@
   function closeModal() { document.getElementById('modal').innerHTML = ''; mem.modalYes = null; }
 
   /* =================== ОБОЛОЧКА =================== */
-  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings', report: 'nav.report', class: 'nav.class', print: 'nav.tests', paper: 'nav.tests' };
+  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings', pricing: 'nav.pricing', account: 'nav.account', leaders: 'nav.leaders', cards: 'nav.cards', deck: 'nav.cards', game: 'nav.game', admin: 'nav.admin', report: 'nav.report', class: 'nav.class', print: 'nav.tests', paper: 'nav.tests' };
   function shell(route) {
     var cur = route === 'topic' || route === 'practice' ? 'topics' : route === 'exam' || route === 'result' ? 'tests' : route;
     var mc = (S.mistakes || []).length;
     function link(id, cnt) {
       return '<a href="#/' + id + '" class="' + (cur === id ? 'on' : '') + '">' + ic(id) + t('nav.' + id) + (cnt ? '<span class="cnt">' + cnt + '</span>' : '') + '</a>';
     }
-    document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('tests') +
-      '<div class="label">' + t('nav.secCheck') + '</div>' + link('mistakes', mc) + link('progress') + link('report') + link('class') + link('settings');
+    var u = mem.user || {};
+    document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('cards') + link('game') + link('tests') +
+      '<div class="label">' + t('nav.secCheck') + '</div>' + link('mistakes', mc) + link('progress') + link('leaders') + link('report') +
+      '<div class="label">' + t('nav.secAcc') + '</div>' + link('account') + link('settings') + (u.role === 'admin' ? link('admin') + link('class') : '');
     var p = S.profile;
     document.getElementById('me').innerHTML = '<span class="avatar">' + esc(p.name.charAt(0).toUpperCase()) + '</span><span><b>' + esc(p.name) + '</b><small>' + school().name + ' · ' + t('ob.grade', { n: p.grade }) + '</small></span>';
     document.getElementById('page-title').textContent = t(TITLES[route] || 'nav.today');
     var left = p.examDate ? U.daysBetween(today(), p.examDate) : null;
     document.getElementById('top-right').innerHTML = left !== null && left >= 0 ? '<span class="chip-exam">' + school().name + ' · <b>' + left + '</b> ' + t('c.days') + '</span>' : '';
+    document.documentElement.lang = I.lang();
+  }
+
+  function shellParent(route) {
+    function link(id) { return '<a href="#/' + id + '" class="' + (route === id ? 'on' : '') + '">' + ic(id) + t('nav.' + id) + '</a>'; }
+    document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secParent') + '</div>' + link('kids') + link('leaders') + link('account');
+    document.getElementById('me').innerHTML = '<span class="avatar">' + esc((mem.user.name || '?').charAt(0).toUpperCase()) + '</span><span><b>' + esc(mem.user.name) + '</b><small>' + t('role.parent') + '</small></span>';
+    document.getElementById('page-title').textContent = t('nav.' + route);
+    document.getElementById('top-right').innerHTML = '';
     document.documentElement.lang = I.lang();
   }
 
@@ -105,10 +157,35 @@
     var parts = location.hash.replace(/^#\/?/, '').split('/');
     var view = document.getElementById('view'), html;
     document.body.classList.remove('menu-open');
+    var V = Z.views, u = mem.user, route = parts[0] || 'today';
+    if (u === undefined) { view.innerHTML = '<p class="muted" style="padding:40px;text-align:center">…</p>'; return; }
+    // Гость: лендинг и вход/регистрация.
+    if (!u) {
+      document.body.classList.add('bare', 'landing');
+      view.innerHTML = route === 'auth' ? V.auth(parts[1]) : V.landing();
+      window.scrollTo(0, 0);
+      return;
+    }
+    document.body.classList.remove('landing');
+    // Родитель: только просмотр результатов ребёнка, рейтинг и аккаунт.
+    if (u.role === 'parent') {
+      document.body.classList.remove('bare');
+      if (['kids', 'leaders', 'account'].indexOf(route) < 0) route = 'kids';
+      shellParent(route);
+      view.innerHTML = V[route](parts[1]);
+      window.scrollTo(0, 0);
+      return;
+    }
     if (!S.profile) { document.body.classList.add('bare'); view.innerHTML = vOnboarding(); return; }
     document.body.classList.remove('bare');
-    var route = parts[0] || 'today';
+    // Нет подписки: открыты тарифы, аккаунт, рейтинг и входная диагностика.
+    var FREE = ['pricing', 'account', 'leaders', 'result', 'settings'];
+    var diagOpen = route === 'exam' && S.activeExam && Z.examFormats[S.activeExam.format].diag;
+    if (!B.hasAccess(u) && FREE.indexOf(route) < 0 && !diagOpen) route = 'pricing';
     switch (route) {
+      case 'pricing': case 'account': case 'leaders': case 'cards': case 'deck': case 'game': case 'admin':
+        if (route === 'admin' && u.role !== 'admin') { route = 'today'; html = vToday(); break; }
+        html = V[route](parts[1]); break;
       case 'topics': html = vTopics(); break;
       case 'topic': html = vTopic(parts[1]); break;
       case 'practice': html = vPractice(); break;
@@ -135,16 +212,16 @@
 
   /* =================== ОНБОРДИНГ =================== */
   function vOnboarding() {
-    var def = U.addDays(today(), 120);
+    var def = U.addDays(today(), 120), mu = mem.user || {};
     var sch = Object.keys(Z.schools).map(function (k, i) {
       var s = Z.schools[k];
-      return '<label class="pick' + (s.active ? '' : ' off') + '"><input type="radio" name="school" value="' + k + '"' + (i === 0 ? ' checked' : '') + (s.active ? '' : ' disabled') + '>' +
+      return '<label class="pick' + (s.active ? '' : ' off') + '"><input type="radio" name="school" value="' + k + '"' + ((mu.school ? mu.school === k : i === 0) ? ' checked' : '') + (s.active ? '' : ' disabled') + '>' +
         '<b>' + s.name + '</b><small>' + t('sch.' + k) + (s.active ? '' : ' — ' + t('ob.soon')) + '</small></label>';
     }).join('');
-    var grades = [4, 5, 6, 7].map(function (g) { return '<option value="' + g + '"' + (g === 6 ? ' selected' : '') + '>' + t('ob.grade', { n: g }) + '</option>'; }).join('');
+    var grades = [4, 5, 6, 7].map(function (g) { return '<option value="' + g + '"' + (g === (mu.grade || 6) ? ' selected' : '') + '>' + t('ob.grade', { n: g }) + '</option>'; }).join('');
     return '<form class="card form onb" data-form="onboard"><span class="brand"><span class="brand-mark">З</span><span class="brand-name">Зерде</span><span class="brand-tag">EDU</span></span>' +
       '<div><h1>' + t('ob.title') + '</h1><p class="muted">' + t('ob.sub') + '</p></div>' +
-      '<label class="field"><span>' + t('set.name') + '</span><input id="ob-name" name="name" required maxlength="30" autocomplete="given-name"></label>' +
+      '<label class="field"><span>' + t('set.name') + '</span><input id="ob-name" name="name" required maxlength="30" autocomplete="given-name" value="' + esc(mu.name || '') + '"></label>' +
       '<div class="field"><span>' + t('set.school') + '</span><div class="picks">' + sch + '</div></div>' +
       '<div class="row2"><label class="field"><span>' + t('set.grade') + '</span><select id="ob-grade" name="grade">' + grades + '</select></label>' +
       '<label class="field"><span>' + t('set.date') + '</span><input id="ob-date" type="date" name="examDate" value="' + def + '" min="' + today() + '"></label></div>' +
@@ -498,7 +575,7 @@
     if (!ex) return;
     readExamInput();
     var res = E.scoreExam(ex);
-    P.recordExam(S, ex, res, today());
+    P.recordExam(S, ex, res, today()); examPoints(ex, res);
     mem.lastExam = S.lastExam = { ex: ex, res: res, timeout: !!timeout };
     S.activeExam = null; mem.sheet = false;
     save();
@@ -754,7 +831,13 @@
       E.advance(s); mem.sel = null; mem.fb = null;
       if (s.done) {
         mem.res = E.sessionResult(s);
-        if (s.topic) P.recordPractice(S, s.topic, mem.res, today());
+        if (s.topic) {
+          var wasRev = (S.plans[today()] || { tasks: [] }).tasks.some(function (x) { return x.type === 'review' && x.topic === s.topic && !x.done; });
+          P.recordPractice(S, s.topic, mem.res, today());
+          if (s.mode === 'hw') award('hw', s.topic + ':' + s.seed, mem.res.grade * 10);
+          else if (s.mode === 'quick') award(wasRev ? 'review' : 'quick', s.topic + ':' + s.seed, wasRev ? (mem.res.grade >= 7 ? 30 : 10) : (mem.res.grade >= 7 ? 20 : 5));
+          dayBonus();
+        }
         P.recordMistakes(S, s.hist, today());
         if (s.mode === 'hw' && S.hw) delete S.hw[s.topic];
       }
@@ -822,9 +905,10 @@
 
   document.addEventListener('click', function (e) {
     var el = e.target.closest('[data-act]');
-    if (el && A[el.dataset.act]) {
+    var fn = el && (A[el.dataset.act] || (Z.viewActs && Z.viewActs[el.dataset.act]));
+    if (fn) {
       if (el.dataset.act !== 'video') e.preventDefault();   // видео открывается по обычной ссылке
-      A[el.dataset.act](el, e);
+      fn(el, e);
       return;
     }
     if (e.target.closest('#burger')) document.body.classList.toggle('menu-open');
@@ -861,6 +945,7 @@
     if (!form) return;
     e.preventDefault();
     var d = new FormData(f);
+    if (Z.viewForms && Z.viewForms[form]) { Z.viewForms[form](d, f); return; }
     if (form === 'addReport') {
       var rep = Z.cloud.readReport(d.get('code'));
       if (!rep) { ask(t('cls.bad'), 'OK', null, false); return; }
@@ -881,7 +966,7 @@
       ex.questions.forEach(function (q, i) { var v = d.get('a' + i); if (v !== null && String(v).trim() !== '') ex.answers[i] = String(v).trim(); });
       ex.paper = true;
       var res = E.scoreExam(ex);
-      P.recordExam(S, ex, res, today());
+      P.recordExam(S, ex, res, today()); examPoints(ex, res);
       mem.lastExam = S.lastExam = { ex: ex, res: res, timeout: false };
       save(); go('#/result');
       return;
@@ -889,6 +974,7 @@
     if (form === 'onboard') {
       S.profile = { name: String(d.get('name')).trim() || 'Оқушы', school: d.get('school'), grade: +d.get('grade'), examDate: d.get('examDate') || null,
         intensity: d.get('intensity') || 'normal', qLang: 'both', uiLang: I.lang(), startDate: today(), rid: 'r' + U.newSeed() };
+      if (mem.user) B.updateProfile({ name: S.profile.name, school: S.profile.school, grade: S.profile.grade }).then(function (u) { mem.user = u; }).catch(function () {});
       save(); go('#/today');
     } else if (form === 'settings') {
       var p = S.profile, oldSchool = p.school, oldInt = p.intensity;
@@ -898,6 +984,7 @@
       // Сменили школу или нагрузку — план на сегодня пересобираем.
       if (oldSchool !== p.school || oldInt !== p.intensity) delete S.plans[today()];
       if (oldSchool !== p.school) { S.activeExam = null; S.hw = {}; }
+      if (mem.user) B.updateProfile({ name: p.name, school: p.school, grade: p.grade }).then(function (u) { mem.user = u; }).catch(function () {});
       save(); render();
       var s2 = document.getElementById('saved'); if (s2) s2.textContent = t('c.saved');
     }
@@ -905,7 +992,27 @@
 
   window.addEventListener('hashchange', render);
   // Облако: подтянуть более свежий прогресс с другого устройства (если платформа даёт хранилище).
-  if (Z.cloud) Z.cloud.init(S, function (ev) { if (ev === 'pulled') { Z.store.save(S); if (S.profile && S.profile.uiLang) I.setLang(S.profile.uiLang); } if (ev !== 'error' && !/^#\/(exam|practice)/.test(location.hash)) render(); });
+  // Вход: у каждого аккаунта своя запись на устройстве; более свежий прогресс с сервера заменяет локальный.
+  function setUser(u) {
+    mem.user = u || null;
+    Z.store.setUser(u ? u.id : null);
+    S = Z.store.load();
+    mem.lastExam = S.lastExam || null; mem.session = null;
+    if (!u || u.role === 'parent') { render(); return Promise.resolve(); }
+    return B.loadProgress().then(function (remote) {
+      if (remote && (remote.savedAt || 0) > (S.savedAt || 0) && remote.profile) {
+        Object.keys(remote).forEach(function (k) { S[k] = remote[k]; });
+        Z.store.save(S);
+      }
+      if (S.profile && S.profile.uiLang) I.setLang(S.profile.uiLang);
+    }).catch(function () { /* офлайн */ }).then(render);
+  }
+  // Общие функции для экранов из views.js.
+  Z.ui = {
+    S: function () { return S; }, mem: mem, save: save, go: go, render: render, t: t, esc: esc, ic: ic, tn: tn, fname: fname, ask: ask, toast: toast,
+    pct: pct, today: today, lvPill: lvPill, award: award, setUser: setUser, qCount: qCount, LETTERS: LETTERS
+  };
   I.setLang((S.profile && S.profile.uiLang) || 'kk');
-  render();
+  // Старт после загрузки всех скриптов (views.js подключается после app.js).
+  window.addEventListener('DOMContentLoaded', function () { B.session().then(setUser, function () { setUser(null); }); });
 })();

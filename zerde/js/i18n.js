@@ -149,5 +149,5 @@
     if (vars) s = s.replace(/\{(\w+)\}/g, function (m, k) { return vars[k] !== undefined ? vars[k] : m; });
     return s;
   }
-  Z.i18n = { t: t, setLang: function (l) { lang = D[l] ? l : 'kk'; }, lang: function () { return lang; }, langs: Object.keys(D) };
+  Z.i18n = { t: t, setLang: function (l) { lang = D[l] ? l : 'kk'; }, lang: function () { return lang; }, langs: Object.keys(D), dict: function (l) { return D[l]; } };
 })(typeof window !== 'undefined' ? window : globalThis);
