@@ -74,14 +74,22 @@
     return String(html == null ? '' : html).split(/(<[^>]+>)/).map(function (seg, i) { return i % 2 ? seg : fracText(seg); }).join('');
   }
   function fracText(s) {
-    var out = '', i = 0;
+    // Сначала находим «(…)/…»: дробь внутри такой скобки — часть большой дроби, её разбираем рекурсивно.
+    var groups = [], k, j, d;
+    for (k = s.indexOf(')/'); k >= 0; k = s.indexOf(')/', k + 1)) {
+      for (j = k - 1, d = 1; j >= 0; j--) { if (s[j] === ')') d++; else if (s[j] === '(' && !--d) break; }
+      if (j >= 0) groups.push([j, k]);
+    }
+    function inside(x) { return groups.some(function (g) { return x > g[0] && x < g[1]; }); }
+    var out = '', i = 0, from = 0;
     while (i < s.length) {
-      var k = s.indexOf('/', i);
+      k = s.indexOf('/', Math.max(i, from));
       if (k < 0) { out += s.slice(i); break; }
+      if (inside(k)) { from = k + 1; continue; }   // дробь внутри скобки большой дроби — разберём вместе с ней
       var res = fracAt(s, k, i);
-      if (!res) { out += s.slice(i, k + 1); i = k + 1; continue; }
-      out += s.slice(i, res.start) + '<span class="frac"><span>' + res.num + '</span><span>' + res.den + '</span></span>';
-      i = res.end;
+      if (!res) { out += s.slice(i, k + 1); i = from = k + 1; continue; }
+      out += s.slice(i, res.start) + '<span class="frac"><span>' + fracText(res.num) + '</span><span>' + fracText(res.den) + '</span></span>';
+      i = from = res.end;
     }
     return out;
   }
