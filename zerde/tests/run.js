@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'gen_ktl.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'gen_ktl.js', 'gen_visual.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;
@@ -61,7 +61,7 @@ PASSAGES.forEach(function (p) {
 });
 
 // Пробные тесты: число вопросов и подсчёт баллов.
-var expectCount = { BIL_diag: 26, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
+var expectCount = { BIL_diag: 27, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
 Object.keys(Z.examFormats).forEach(function (fid) {
   for (var s = 1; s <= 60; s++) {
     var ex = E.buildExam(fid, s * 13);
