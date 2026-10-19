@@ -379,9 +379,9 @@
     if (st.i >= n) {
       return h + '<div class="flash done"><b>' + tt('c.done', { k: st.know }) + '</b></div><div class="row center"><button class="btn pill" data-act="dkRestart">' + tt('c.restart') + '</button><a class="btn pill dark" href="#/cards">' + tt('c.back') + '</a></div>';
     }
-    var c = d.cards[st.order[st.i]];
+    var c = d.cards[st.order[st.i]], F = U.mathFrac;
     h += '<button class="flash' + (st.flip ? ' back' : '') + '" data-act="dkFlip"><span class="label">' + (st.flip ? tt('c.a') : tt('c.q')) + '</span>' +
-      (st.flip ? '<b class="ans">' + (ru ? c.b_ru : c.b_kk) + '</b>' + ((ru ? c.n_ru : c.n_kk) ? '<span class="note-t">' + (ru ? c.n_ru : c.n_kk) + '</span>' : '') : '<b>' + (ru ? c.f_ru : c.f_kk) + '</b><small>' + tt('c.show') + '</small>') + '</button>';
+      (st.flip ? '<b class="ans">' + F(ru ? c.b_ru : c.b_kk) + '</b>' + ((ru ? c.n_ru : c.n_kk) ? '<span class="note-t">' + F(ru ? c.n_ru : c.n_kk) + '</span>' : '') : '<b>' + F(ru ? c.f_ru : c.f_kk) + '</b><small>' + tt('c.show') + '</small>') + '</button>';
     h += '<div class="row center dk-nav"><button class="btn pill icon" data-act="dkPrev"' + (st.i === 0 ? ' disabled' : '') + '>‹</button>' +
       (st.flip ? '<button class="btn pill" data-act="dkMark" data-ok="0">' + tt('c.again') + '</button><button class="btn pill dark" data-act="dkMark" data-ok="1">' + tt('c.know') + '</button>' : '<button class="btn pill" data-act="dkRestart">↻ ' + tt('c.restart') + '</button>') +
       '<button class="btn pill icon" data-act="dkNext">›</button></div>';

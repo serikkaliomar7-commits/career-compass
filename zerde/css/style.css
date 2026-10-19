@@ -671,3 +671,8 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 
 .form.row { flex-direction: row; align-items: flex-end; flex-wrap: wrap; }
 .form.row > .field { margin: 0; }
+
+/* дроби в формулах: в карточках и уроках — крупнее и с воздухом */
+.flash .frac, .theory .frac, ol.steps .frac, .mist .frac, .chk .frac, .example .frac { font-size: .92em; margin: 0 3px; vertical-align: middle; }
+.flash .frac > span:first-child { padding: 0 4px 1px; }
+.flash .frac > span:last-child { padding: 1px 4px 0; }

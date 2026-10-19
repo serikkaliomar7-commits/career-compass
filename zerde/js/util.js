@@ -66,6 +66,54 @@
     return (neg ? '−' : '') + whole +
       '<span class="frac"><span>' + n + '</span><span>' + f.d + '</span></span>';
   }
+  /* Формулы в тексте: «p/100», «(a+b)/2», «1/t₁» → дробь «в столбик» (числитель над чертой).
+   * Дети читают так, как в учебнике, а не строку со слэшем. Не трогаем: единицы измерения
+   * (км/сағ, м/с — кириллица), буквы вариантов (A/B/C/D), слэш с пробелами и текст внутри тегов. */
+  var MATH_CH = /[0-9A-Za-z.,πα-ωΑ-Ω²³¹⁰⁴-⁹ⁿ₀-₉′]/;
+  function mathFrac(html) {
+    return String(html == null ? '' : html).split(/(<[^>]+>)/).map(function (seg, i) { return i % 2 ? seg : fracText(seg); }).join('');
+  }
+  function fracText(s) {
+    var out = '', i = 0;
+    while (i < s.length) {
+      var k = s.indexOf('/', i);
+      if (k < 0) { out += s.slice(i); break; }
+      var res = fracAt(s, k, i);
+      if (!res) { out += s.slice(i, k + 1); i = k + 1; continue; }
+      out += s.slice(i, res.start) + '<span class="frac"><span>' + res.num + '</span><span>' + res.den + '</span></span>';
+      i = res.end;
+    }
+    return out;
+  }
+  function fracAt(s, k, from) {
+    if (k === 0 || k === s.length - 1 || s[k - 1] === ' ' || s[k + 1] === ' ') return null;
+    var start, num, end, den, j, d;
+    if (s[k - 1] === ')') {
+      for (j = k - 2, d = 1; j >= from; j--) { if (s[j] === ')') d++; else if (s[j] === '(' && !--d) break; }
+      if (j < from) return null;
+      start = j; num = s.slice(j + 1, k - 1);
+    } else {
+      for (j = k - 1; j >= from && MATH_CH.test(s[j]); j--);
+      start = j + 1; num = s.slice(start, k);
+      while (/^[.,]/.test(num)) { num = num.slice(1); start++; }
+      if (j >= from && /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(s[j])) return null;   // часть слова или единицы
+    }
+    if (s[k + 1] === '(') {
+      for (j = k + 2, d = 1; j < s.length; j++) { if (s[j] === '(') d++; else if (s[j] === ')' && !--d) break; }
+      if (j >= s.length) return null;
+      den = s.slice(k + 2, j); end = j + 1;
+    } else {
+      for (j = k + 1; j < s.length && MATH_CH.test(s[j]); j++);
+      den = s.slice(k + 1, j);
+      while (/[.,]$/.test(den)) { den = den.slice(0, -1); j--; }
+      end = j;
+      if (j < s.length && /[А-Яа-яЁёӘәҒғҚқҢңӨөҰұҮүҺһІі]/.test(s[j])) return null;
+    }
+    if (!num || !den) return null;
+    if (/^[A-Z]$/.test(num) && /^[A-Z]$/.test(den)) return null;                 // A/B — буквы ответов
+    return { start: start, num: num, den: den, end: end };
+  }
+
   function fr(n, d) { return fracHtml(frac(n, d), false); }
 
   // Время: минуты → «2 сағ 05 мин» и «14:05».
@@ -94,7 +142,7 @@
 
   Z.util = {
     rng: rng, newSeed: newSeed, gcd: gcd, lcm: lcm, frac: frac, fmt: fmt,
-    fracHtml: fracHtml, fr: fr, hm: hm, hmRu: hmRu, clock: clock, pad2: pad2,
+    fracHtml: fracHtml, mathFrac: mathFrac, fr: fr, hm: hm, hmRu: hmRu, clock: clock, pad2: pad2,
     esc: esc, todayKey: todayKey, daysBetween: daysBetween, addDays: addDays
   };
 })(typeof window !== 'undefined' ? window : globalThis);
