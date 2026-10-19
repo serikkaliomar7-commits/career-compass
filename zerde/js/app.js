@@ -940,10 +940,29 @@
       rd.readAsText(el.files[0]);
     }
   });
-  document.addEventListener('submit', function (e) {
-    var f = e.target, form = f.dataset.form;
-    if (!form) return;
+  /* Формы обрабатываем сами — по кнопке и по Enter. На claude.ai страница живёт в защищённой рамке
+   * (sandbox без allow-forms): там браузер блокирует отправку формы, и событие submit не приходит вовсе. */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest && e.target.closest('form[data-form] button[type=submit], form[data-form] input[type=submit]');
+    if (!btn) return;
     e.preventDefault();
+    handleForm(btn.form);
+  }, true);
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.isComposing) return;
+    var el = e.target, f = el.form;
+    if (!f || !f.dataset.form || el.tagName === 'TEXTAREA' || el.tagName === 'BUTTON') return;
+    e.preventDefault();
+    handleForm(f);
+  }, true);
+  document.addEventListener('submit', function (e) {
+    if (e.target.dataset && e.target.dataset.form) { e.preventDefault(); handleForm(e.target); }
+  });
+  function handleForm(f) {
+    var form = f.dataset.form;
+    if (!form) return;
+    // Проверку полей (обязательные, почта, длина пароля) браузер сам не сделает — просим показать подсказки.
+    if (f.checkValidity && !f.checkValidity()) { if (f.reportValidity) f.reportValidity(); return; }
     var d = new FormData(f);
     if (Z.viewForms && Z.viewForms[form]) { Z.viewForms[form](d, f); return; }
     if (form === 'addReport') {
@@ -988,7 +1007,7 @@
       save(); render();
       var s2 = document.getElementById('saved'); if (s2) s2.textContent = t('c.saved');
     }
-  });
+  }
 
   window.addEventListener('hashchange', render);
   // Облако: подтянуть более свежий прогресс с другого устройства (если платформа даёт хранилище).

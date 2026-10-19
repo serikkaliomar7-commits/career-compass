@@ -32,10 +32,11 @@
 
   /* =================== ДЕМО (localStorage) =================== */
   function demo() {
-    var KEY = 'zerde.accounts';
+    var KEY = 'zerde.accounts', memDb = null;   // memDb — запасная копия, если браузер не даёт localStorage
     function db() {
-      var d;
+      var d = null;
       try { d = JSON.parse(root.localStorage.getItem(KEY) || 'null'); } catch (e) { d = null; }
+      if (!d && memDb) d = JSON.parse(JSON.stringify(memDb));
       if (!d) {
         d = { users: {}, session: null, promos: {}, redemptions: {}, payments: [], points: [], links: [], progress: {}, settings: JSON.parse(JSON.stringify(DEFAULTS)) };
         // Демо-промокоды, чтобы можно было сразу всё попробовать. В боевом режиме их нет — коды создаёт админ.
@@ -44,7 +45,7 @@
       }
       return d;
     }
-    function put(d) { try { root.localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { /* приватный режим */ } }
+    function put(d) { memDb = d; try { root.localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { /* приватный режим — живём на memDb */ } }
     function hash(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return 'h' + (h >>> 0).toString(36); }
     function pub(u) { if (!u) return null; var o = {}; for (var k in u) if (k !== 'pass') o[k] = u[k]; return o; }
     function me(d) { return d.session && d.users[d.session]; }
