@@ -676,3 +676,8 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .flash .frac, .theory .frac, ol.steps .frac, .mist .frac, .chk .frac, .example .frac { font-size: .92em; margin: 0 3px; vertical-align: middle; }
 .flash .frac > span:first-child { padding: 0 4px 1px; }
 .flash .frac > span:last-child { padding: 1px 4px 0; }
+
+/* числовая пирамида */
+.pyr { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 14px 0; }
+.pyr > div { display: flex; gap: 4px; }
+.pyr span { width: 46px; height: 36px; border: 1.5px solid var(--ink); border-radius: 8px; display: grid; place-items: center; font: 700 1rem var(--sans); background: var(--card); }
