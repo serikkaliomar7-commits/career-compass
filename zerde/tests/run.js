@@ -61,7 +61,7 @@ PASSAGES.forEach(function (p) {
 });
 
 // Пробные тесты: число вопросов и подсчёт баллов.
-var expectCount = { BIL_diag: 25, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
+var expectCount = { BIL_diag: 26, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
 Object.keys(Z.examFormats).forEach(function (fid) {
   for (var s = 1; s <= 60; s++) {
     var ex = E.buildExam(fid, s * 13);
