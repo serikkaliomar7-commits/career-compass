@@ -746,3 +746,8 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .pdoc.booklet { font-family: "Times New Roman", Times, "Liberation Serif", serif; }
 .pdoc.booklet .q-main, .pdoc.booklet .q-alt { font-family: inherit; }
 .pdoc.booklet .q-alt { margin-top: .6em; }
+.amap { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 10px; }
+.amap span { display: grid; place-items: center; padding: 6px 0 4px; border-radius: 8px; font: 700 .85rem var(--sans); color: #fff; line-height: 1.1; }
+.amap span small { font-weight: 600; opacity: .85; font-size: .7rem; }
+.amap .ok { background: #17A34A; } .amap .no { background: #E6483D; } .amap .sk { background: #EBB305; }
+@media (max-width: 520px) { .amap { grid-template-columns: repeat(6, 1fr); } }

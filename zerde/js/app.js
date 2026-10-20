@@ -690,10 +690,15 @@
     if (!L) return vTests();
     var ex = L.ex, r = L.res, f = Z.examFormats[ex.format];
     var h = (L.timeout ? '<div class="note amber">' + t('ex.timeout') + '</div>' : '') +
-      '<section class="card"><span class="label">' + fname(f) + '</span><h1>' + t('res.title') + '</h1>' +
+      '<section class="card"><span class="label">' + (ex.practice ? t('mk.test', { n: U.pad2(ex.practice) }) + ' · ' : '') + fname(f) + '</span><h1>' + t('res.title') + '</h1>' +
       '<div class="result-big"><b' + (r.score < 0 ? ' class="neg"' : '') + '>' + U.fmt(r.score) + '</b><span>/ ' + r.max + '</span></div>' +
       '<div class="stats"><div class="stat"><b style="color:var(--ok)">' + r.correct + '</b><span>' + t('res.right') + '</span></div><div class="stat"><b style="color:var(--bad)">' + r.wrong + '</b><span>' + t('res.wrong') + '</span></div>' +
       '<div class="stat"><b>' + r.skipped + '</b><span>' + t('res.skip') + '</span></div></div></section>';
+    // Практика: карта ответов 1–60 (зелёный — верно, красный — неверно, жёлтый — без ответа), как на экране разбора экзамена.
+    if (ex.practice) h += '<section class="sec"><h2>' + t('mk.map') + '</h2><div class="amap">' + ex.questions.map(function (q, i) {
+      var ok = E.check(q, ex.answers[i]), li = function (k) { var j = (q.options || []).map(function (o) { return o.key; }).indexOf(k); return j >= 0 ? LETTERS[j] : '—'; };
+      return '<span class="' + (ok === true ? 'ok' : ok === false ? 'no' : 'sk') + '" title="' + esc(t('mk.cell', { r: li(q.ansKey), y: li(ex.answers[i]) })) + '">' + (i + 1) + '<small>' + li(q.ansKey) + '</small></span>';
+    }).join('') + '</div></section>';
     if (f.full) h += f.school === 'NIS' ? gapNote(null, Math.round(Math.max(0, r.score) / r.max * 100)) : gapNote(r.score, null);
     if (r.lostBySkipping > 0) h += '<div class="note amber">' + t('res.guess', { n: r.skipped, ev: U.fmt(r.guessEV), lost: U.fmt(r.lostBySkipping) }) + '</div>';
     if (f.sections.length > 1 && r.bySection) {
