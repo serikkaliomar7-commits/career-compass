@@ -8,13 +8,14 @@
   'use strict';
   var Z = root.Z;
   function S(t, l, f, alt) { var o = { t: t, l: l }; if (f) o.f = f; if (alt) o.alt = alt; return o; }
+  function P(t, l, f) { var o = S(t, l, f); o.same = true; return o; }   // вторая задача общего условия
 
   Z.blueprints = Z.blueprints || {};
 
   // БИЛ 2023 (онлайн сынақ, нұсқа 2001): 50 задач «математика және логика» по возрастанию трудности.
   Z.blueprints.BIL_2023 = { year: 2023, slots: [
     S('m_order', 1, 'bil.compare_expr'), S('m_order', 1, null, ['m_neg']), S('m_frac', 2, 'bil.frac_between'), S('l_seq', 1, 'bil.odd_word'),
-    S('l_seq', 1), S('l_seq', 1), S('l_visual', 2), S('m_ratio', 2),
+    S('l_seq', 1), S('l_seq', 1), S('l_visual', 2, 'vis.odd'), S('m_ratio', 2),
     S('m_frac', 1, null, ['m_dec']), S('m_word', 2), S('m_time', 1), S('m_order', 2, 'bil.subst'),
     S('l_puzzles', 1), S('m_ratio', 1), S('l_visual', 2, 'bil.top_view'), S('m_geom', 1, 'bil.ruler'),
     S('m_time', 1, 'bil.units_chain'), S('l_seq', 2, 'bil.figurate'), S('m_divis', 1), S('l_count', 2, 'bil.prob_letter'),
@@ -23,9 +24,27 @@
     S('l_visual', 3, 'bil.net_remove'), S('m_percent', 2, 'bil.pie_table'), S('m_geom', 2, 'bil.grid_areas'), S('m_frac', 1, null, ['m_dec', 'm_order']),
     S('l_cal', 3, 'bil.clock_hands'), S('m_angles', 3, 'bil.fold'), S('l_count', 3, 'bil.beads'), S('m_geom', 2, 'bil.l_shape'),
     S('l_visual', 3, 'bil.slab_holes'), S('m_order', 2, 'bil.alt_sum'), S('l_seq', 2, 'bil.odd_squares'), S('m_volume', 3, 'bil.box_paint'),
-    S('m_ratio', 2, null, ['m_percent']), S('l_visual', 3), S('m_word', 2, null, ['m_setup']), S('l_fig', 3, 'bil.table_rule'),
-    S('m_time', 3, 'bil.units_chain'), S('l_op', 2, 'bil.triangle_op'), S('l_fig', 2, 'ktl.pyramid'), S('l_visual', 3),
-    S('l_digits', 3, 'ktl.last_digit'), S('l_visual', 4)
+    S('m_ratio', 2, null, ['m_percent']), S('l_visual', 3, 'vis.odd'), S('m_word', 2, null, ['m_setup']), S('l_fig', 3, 'bil.table_rule'),
+    S('m_time', 3, 'bil.units_chain'), S('l_op', 2, 'bil.triangle_op'), S('l_fig', 2, 'ktl.pyramid'), S('l_visual', 3, 'vis.squares'),
+    S('l_digits', 3, 'ktl.last_digit'), S('l_visual', 4, 'vis.overlay')
+  ] };
+
+  // БИЛ 2024 (онлайн сынақ): сложность ровная (2,0–2,4 по десяткам), больше алгебры и геометрии
+  // с окружностями при π = 3; появились пары задач с общим условием (9–10, 14–15, 25–26, 31–32).
+  Z.blueprints.BIL_2024 = { year: 2024, slots: [
+    S('l_visual', 2, 'vis.squares'), S('m_eq', 2, 'b24.frac_eq'), S('l_visual', 2, 'vis.odd'), S('l_op', 2, 'b24.digit_ops'),
+    S('m_frac', 2, 'b24.shaded_part'), S('l_visual', 2, 'b24.rotate_sectors'), S('m_frac', 1, 'b24.frac_chain'), S('m_time', 1, 'bil.units_chain'),
+    S('m_ratio', 3, 'b24.bolts1'), P('m_ratio', 3, 'b24.bolts2'), S('m_eq', 2, 'b24.ineq_frac'), S('l_op', 2, 'b24.student_error'),
+    S('m_divis', 1, 'b24.multiples_between'), S('m_eq', 3, 'b24.towers1'), P('m_volume', 3, 'b24.towers2'), S('l_visual', 3, 'b24.painted_shape'),
+    S('l_op', 2, 'b24.symbol_ops'), S('l_count', 3, 'b24.pattern_string'), S('m_frac', 3, 'b24.sticks'), S('m_motion', 2, 'b24.catch_up'),
+    S('m_eq', 3, 'ktl.cont_frac'), S('m_percent', 2, 'b24.hist_pie'), S('m_frac', 2, 'b24.complex_frac'), S('m_geom', 2, 'b24.park_path'),
+    S('m_geom', 3, 'b24.quarter_rows1'), P('m_geom', 4, 'b24.quarter_rows2'), S('m_frac', 2, 'b24.mixed_numbers'), S('m_geom', 2, 'b24.tri_squares'),
+    S('m_percent', 1, 'b24.percent_simple'), S('m_divis', 3, 'b24.ab_bc_sum'), S('m_word', 2, 'b24.files1'), P('m_word', 2, 'b24.promo'),
+    S('m_geom', 2, 'b24.tri_area_grid'), S('l_visual', 2, 'b24.not_net'), S('m_frac', 2, 'b24.two_storey_sum'), S('m_geom', 1, 'b24.cross_perimeter'),
+    S('m_geom', 3, 'b24.corner_square'), S('m_geom', 3, 'b24.semicircle_chain'), S('m_divis', 2, 'b24.consec_odd'), S('m_eq', 2, 'b24.lin_ineq'),
+    S('m_abs', 3, 'b24.abs_int_count'), S('m_abs', 2, 'b24.abs_eq_dec'), S('m_frac', 1, 'b24.quarter_shaded'), S('l_op', 2, 'b24.place_digits'),
+    S('m_dec', 1, 'b24.numray'), S('m_ratio', 2, 'b24.fruit_prices'), S('l_visual', 3, 'b24.dice_rotate'), S('m_volume', 3, 'b24.box_on_side'),
+    S('l_digits', 2, 'b24.rebus_add'), S('l_visual', 3, 'b24.vessels')
   ] };
 
   // БИЛ 2025 (онлайн сынақ, нұсқа 20251001): трудные задачи в середине («горб» 1,9 → 2,8 → 1,8),

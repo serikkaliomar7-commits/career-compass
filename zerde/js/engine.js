@@ -390,15 +390,22 @@
   /* Раздел «по образцу экзамена»: задача № k варианта повторяет слот № k оригинала (тема, уровень,
    * формат), но с другими числами. Каждый вариант немного труднее: часть слотов поднимается на уровень
    * (sec.harder — доля), часть получает соседний тип той же темы (slot.alt). */
+  function hasFormat(tid, fmt, lvl) {
+    var t = Z.topicById[tid];
+    return !!(fmt && t && (Z.formats[t.gen] || []).some(function (fm) { return fm.id === fmt && fm.lv.indexOf(lvl) >= 0; }));
+  }
   function blueprintSection(sec, si, f, r, seed, mode, qs, seen) {
-    var bp = Z.blueprints[sec.blueprint];
+    var bp = Z.blueprints[sec.blueprint], prevSeed = 0;
     bp.slots.forEach(function (sl, k) {
-      var lvl = sl.l, fmt = sl.f, tid = sl.t;
-      if (r() < (sec.harder || 0) && lvl < 4) { lvl++; fmt = null; }
-      if (sl.alt && r() < 0.3) { tid = r.pick(sl.alt); fmt = null; }
-      if (!Z.topicById[tid] || Z.topicById[tid].schools.indexOf(f.school) < 0 && !sl.any) tid = sl.t;
-      var q, s2 = seed + k * 7919 + si, tries = 0;
-      do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false, fmt: fmt }); } while (seen[q.kk] && ++tries < 25);
+      var lvl = sl.l, fmt = sl.f, tid = sl.t, bump = r(), alt = r(), next = bp.slots[k + 1];
+      if (next && next.same) bump = alt = 1;   // первая задача пары тоже не меняется
+      // same — вторая задача общего условия: тот же seed, без усложнения (иначе условие разойдётся)
+      if (!sl.same && bump < (sec.harder || 0) && lvl < 4) { lvl++; fmt = null; }
+      if (!sl.same && sl.alt && alt < 0.3) { tid = sl.alt[Math.floor(alt / 0.3 * sl.alt.length)]; fmt = null; }
+      var same = sl.same && hasFormat(tid, fmt, lvl);   // нет формата — обычная задача со своим seed
+      var q, s2 = same ? prevSeed : seed + k * 7919 + si, tries = 0;
+      do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false, fmt: fmt }); } while (seen[q.kk] && !same && ++tries < 25);
+      prevSeed = q.seed;
       q.vary = false; seen[q.kk] = 1; q.section = si; q.slotN = k + 1;
       qs.push(q);
     });
@@ -432,6 +439,6 @@
   Z.engine = {
     keyOf: keyOf, show: show, findPassage: findPassage, buildQuestion: buildQuestion, buildReading: buildReading, READ_STAGES: READ_STAGES, check: check, modeFor: modeFor,
     newSession: newSession, mistakeSession: mistakeSession, answer: answer, advance: advance, sessionResult: sessionResult,
-    buildExam: buildExam, scoreExam: scoreExam, SESSION_LEN: SESSION_LEN, QUICK_LEN: QUICK_LEN, HW_PLAN: HW_PLAN
+    buildExam: buildExam, hasFormat: hasFormat, scoreExam: scoreExam, SESSION_LEN: SESSION_LEN, QUICK_LEN: QUICK_LEN, HW_PLAN: HW_PLAN
   };
 })(typeof window !== 'undefined' ? window : globalThis);
