@@ -1,6 +1,6 @@
 /* Зерде — планировщик: что ученик делает сегодня.
  *
- * Каждый день: темы (видеоурок → домашка на 50 задач A → B → C → ★) и тест.
+ * Каждый день: темы (видеоурок → домашка на 20 задач A → B → C → ★) и тест.
  * Незаконченная домашка переходит на следующий день и продолжается с того же места.
  * Полные пробные тесты 2 раза в неделю, а за 60 дней до экзамена — 3 раза.
  * В остальные дни — короткий тест (мини-тест или чтение для БИЛ).
@@ -9,7 +9,7 @@
   'use strict';
   var Z = root.Z, U = Z.util;
 
-  // Нагрузка в темах (каждая — 50 задач). light: одна тема, по очереди логика/математика.
+  // Нагрузка в темах (каждая — 20 задач). light: одна тема, по очереди логика/математика.
   var INTENSITY = {
     light: { logic: 1, math: 1, alternate: true, short: 'none' },
     normal: { logic: 1, math: 1, short: 'alt' },
@@ -139,7 +139,7 @@
       if (h.ok || h.passage || !h.topic || h.mistakeId) return;
       var id = h.topic + ':' + h.lvl + ':' + h.seed;
       if (state.mistakes.some(function (m) { return m.id === id; })) return;
-      state.mistakes.push({ id: id, topic: h.topic, lvl: h.lvl, seed: h.seed, vary: h.vary !== false, date: date });
+      state.mistakes.push({ id: id, topic: h.topic, lvl: h.lvl, seed: h.seed, slot: h.slot, vary: h.vary !== false, date: date });
     });
     hist.forEach(function (h) {
       if (h.mistakeId && h.ok) state.mistakes = state.mistakes.filter(function (m) { return m.id !== h.mistakeId; });

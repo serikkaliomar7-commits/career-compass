@@ -63,13 +63,14 @@
    * reading-вопросы собираются отдельно (buildReading), т.к. идут блоком к тексту. */
   /* Выбор формата: базовая задача темы или один из дополнительных форматов (gen_formats.js).
    * opts.vary = false — только базовый генератор и форматы без общих преобразований (для пробных). */
-  function generate(t, lvl, r, needInt, vary) {
+  function generate(t, lvl, r, needInt, vary, slot) {
     var opt = { int: needInt };
     if (t.bank) return pickBank(Z.bank[t.bank], lvl, r, needInt);
     if (lvl === 4 && Z.gen4[t.gen]) return Z.gen4[t.gen](r, lvl, opt);
     var pool = [function () { return Z.gen[t.gen](r, Math.min(lvl, 3), opt); }];
     (Z.formats[t.gen] || []).forEach(function (fm) { if (fm.lv.indexOf(lvl) >= 0) pool.push(function () { return fm.f(r, lvl, opt); }); });
-    var raw = r.pick(pool)();
+    // slot — номер задачи в домашке: форматы идут по кругу, чтобы в 20 задачах не было повторов типа
+    var raw = (slot >= 0 ? pool[slot % pool.length] : r.pick(pool))();
     if (vary && r() < 0.2) raw = transform(t, lvl, r, needInt, raw) || raw;
     return raw;
   }
@@ -122,17 +123,20 @@
   function buildQuestion(topicId, lvl, seed, mode, opts) {
     var t = Z.topicById[topicId];
     if (!t) throw new Error('unknown topic ' + topicId);
-    var needInt = mode.answer === 'int', vary = !opts || opts.vary !== false;
+    var needInt = mode.answer === 'int', vary = !opts || opts.vary !== false, slot = opts && opts.slot >= 0 ? opts.slot : -1;
     var raw, s = seed, tries = 0, r;
     for (;;) {
       r = U.rng(s);
-      raw = generate(t, lvl, r, needInt, vary);
+      raw = generate(t, lvl, r, needInt, vary, slot);
       var a = norm(raw.ans);
       if (!needInt || (typeof a === 'number' && a % 1 === 0)) break;
+      if (slot >= 0 && tries % 10 === 9) slot++;   // этот формат не даёт целого ответа (РФМШ) — следующий
       if (++tries > 60) throw new Error('topic ' + topicId + ' lvl ' + lvl + ' cannot produce integer answers');
       s = (s * 31 + 7) % 2147483646 + 1;
     }
-    return finishQuestion(topicId, lvl, seed, mode, raw, r);
+    var q = finishQuestion(topicId, lvl, seed, mode, raw, r);
+    if (slot >= 0) q.slot = slot;
+    return q;
   }
   function finishQuestion(topicId, lvl, seed, mode, raw, r) {
     var q = {
@@ -202,14 +206,15 @@
 
   /* ---------- тренировки по теме ----------
    * Два режима:
-   *  hw    — домашнее задание на 50 задач: лесенка A → B → C → ★ (олимпиада).
+   *  hw    — домашнее задание на 20 задач: лесенка A → B → C → ★ (олимпиада);
+   *          внутри уровня форматы идут по кругу — меньше задач, но без повторов типа.
    *          Ошибка → сразу «повторная» задача того же типа (до 10 штук на задание),
    *          чтобы ученик закрепил исправленный способ. Оценка — по первым попыткам.
    *  quick — короткое повторение на 10 задач с адаптивным уровнем
    *          (2 верных подряд → выше, ошибка → ниже). */
-  var HW_PLAN = { 1: 12, 2: 16, 3: 14, 4: 8 };     // 50 задач
+  var HW_PLAN = { 1: 4, 2: 6, 3: 6, 4: 4 };     // 20 задач
   var QUICK_LEN = 10, MAX_RETRY = 10;
-  var SESSION_LEN = 50;
+  var SESSION_LEN = 20;
 
   function hwLevels() {
     var out = [];
@@ -243,7 +248,7 @@
       return out;
     }
     var items = Z.bank[t.bank].filter(function (q) { return mode.answer !== 'int' || q.int; });
-    items = r.shuffle(items).slice(0, SESSION_LEN).sort(function (a, b) { return a.lvl - b.lvl; });   // большой банк — 50 случайных
+    items = r.shuffle(items).slice(0, SESSION_LEN).sort(function (a, b) { return a.lvl - b.lvl; });   // большой банк — 20 случайных
     return items.map(function (it, k) {
       var q = { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru, ruMap: ruMapOf(it) };
       return finishQuestion(t.id, it.lvl, seed + k, mode, q, r);
@@ -275,7 +280,7 @@
   function mistakeSession(list, school) {
     var mode = modeFor(school);
     var s = { topic: null, school: school, mode: 'mistakes', idx: 0, seed: U.newSeed(), hist: [], extra: 0, retry: false, level: 1, streak: 0, done: false, startedAt: Date.now() };
-    s.queue = list.map(function (m) { var q = buildQuestion(m.topic, m.lvl, m.seed, mode, { vary: m.vary !== false }); q.mistakeId = m.id; return q; });
+    s.queue = list.map(function (m) { var q = buildQuestion(m.topic, m.lvl, m.seed, mode, { vary: m.vary !== false, slot: m.slot }); q.mistakeId = m.id; return q; });
     s.n = s.queue.length; s.maxLevel = 1;
     s.current = s.queue[0] || null;
     if (!s.current) s.done = true;
@@ -285,12 +290,14 @@
   function levelFor(s) { return s.plan ? s.plan[s.idx] : s.level; }
   function nextQuestion(s) {
     if (s.queue) return s.queue[s.idx];
-    return buildQuestion(s.topic, levelFor(s), s.seed + s.idx * 7919 + s.extra * 104729, modeFor(s.school));
+    var lvl = levelFor(s), opts;
+    if (s.plan) { var k = 0; for (var i = 0; i < s.idx; i++) if (s.plan[i] === lvl) k++; opts = { slot: k + s.seed % 7 }; }
+    return buildQuestion(s.topic, lvl, s.seed + s.idx * 7919 + s.extra * 104729, modeFor(s.school), opts);
   }
 
   function answer(s, given) {
     var q = s.current, ok = check(q, given) === true;
-    s.hist.push({ topic: q.topic, lvl: q.lvl, seed: q.seed, vary: q.vary !== false, ok: ok, given: given, retry: !!q.isRetry, passage: q.passage || null, mistakeId: q.mistakeId || null });
+    s.hist.push({ topic: q.topic, lvl: q.lvl, seed: q.seed, slot: q.slot, vary: q.vary !== false, ok: ok, given: given, retry: !!q.isRetry, passage: q.passage || null, mistakeId: q.mistakeId || null });
     if (s.mode === 'quick' && !s.queue) {
       if (ok) { s.streak++; if (s.streak >= 2 && s.level < 4) { s.level++; s.streak = 0; } }
       else { s.streak = 0; if (s.level > 1) s.level--; }
@@ -304,7 +311,7 @@
   function advance(s) {
     if (s.retry) {
       s.extra++; s.retry = false;
-      var q = buildQuestion(s.current.topic, s.current.lvl, s.seed + 900000 + s.extra * 7907, modeFor(s.school));
+      var q = buildQuestion(s.current.topic, s.current.lvl, s.seed + 900000 + s.extra * 7907, modeFor(s.school), { slot: s.current.slot });   // тот же формат
       q.isRetry = true; s.current = q;
       return;
     }

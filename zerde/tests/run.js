@@ -83,13 +83,13 @@ if (E.scoreExam(bil).score !== -60) fail('BIL all wrong must score −60');
 if (E.buildExam('BIL_full', 1).questions.length && E.scoreExam(E.buildExam('RFMSH_full', 3)).max !== 150) fail('RFMSH max must be 150');
 if (E.scoreExam(E.buildExam('BIL_full', 3)).max !== 240) fail('BIL max must be 240');
 
-// Домашка: 50 задач лесенкой A→B→C→★, всё верно — 10/10 и ★★★.
+// Домашка: 20 задач лесенкой A→B→C→★, всё верно — 10/10 и ★★★.
 var hw = E.newSession('m_percent', 'BIL');
-if (hw.n !== 50) fail('homework must have 50 problems, got ' + hw.n);
+if (hw.n !== 20) fail('homework must have 20 problems, got ' + hw.n);
 while (!hw.done) { E.answer(hw, hw.current.ansKey); E.advance(hw); }
 var hr = E.sessionResult(hw);
-if (hr.grade !== 10 || hr.stars !== 3 || hr.total !== 50) fail('homework all-correct: grade ' + hr.grade + ', stars ' + hr.stars);
-if (hr.byLevel[4].n !== 8) fail('homework must end with 8 olympiad problems');
+if (hr.grade !== 10 || hr.stars !== 3 || hr.total !== 20) fail('homework all-correct: grade ' + hr.grade + ', stars ' + hr.stars);
+if (hr.byLevel[4].n !== 4) fail('homework must end with 4 olympiad problems');
 
 // Ошибка в домашке → следующая задача «повторная» того же уровня и темы, в оценку не идёт.
 var hw2 = E.newSession('m_frac', 'RFMSH'), lvl0 = hw2.current.lvl;
@@ -109,13 +109,13 @@ Z.topics.forEach(function (t) {
     // У «Сандық сипаттама» общая первая фраза — смотрим на содержимое колонок.
     for (var i = 0; i < ss.n; i++) kinds[ss.current ? ss.current.kk.replace('А және В бағандарын салыстырыңыз.', '').replace(/<[^>]+>/g, '').replace(/[\d−,.\s]+/g, ' ').slice(0, 22) : ''] = 1, E.advance(ss);
     var nk = Object.keys(kinds).length;
-    if (nk < 4) fail('variety: ' + t.id + ' ' + sc + ' has only ' + nk + ' problem types in a 50-problem homework');
+    if (nk < 4) fail('variety: ' + t.id + ' ' + sc + ' has only ' + nk + ' problem types in a 20-problem homework');
   });
 });
 
 // Банковые темы и чтение: очередь из банка, без повторов.
 var bq = E.newSession('l_puzzles', 'BIL');
-if (bq.n !== Z.bank.logic.length) fail('logic bank homework must use every bank item');
+if (bq.n !== Math.min(E.SESSION_LEN, Z.bank.logic.length)) fail('logic bank homework must take ' + E.SESSION_LEN + ' bank items');
 var rq = E.newSession('r_read', 'BIL');
 if (rq.n !== 20) fail('reading homework must be 4 passages × 5 = 20, got ' + rq.n);
 // Тексты: у каждого 5 вопросов, верный ответ отличается от неверных, 4 варианта.
@@ -152,7 +152,7 @@ if (Object.keys(qcSeen).length !== 4) fail('q_compare must use all four answers'
 // Естествознание: русские варианты на месте.
 var sq = E.buildQuestion('s_science', 2, 11, E.modeFor('NIS'));
 if (sq.options.some(function (o) { return !o.ru || o.ru === o.kk && /[әіңғүұқөһ]/i.test(o.kk); })) fail('science options must have Russian text');
-if (E.newSession('s_science', 'NIS').n !== 50) fail('science homework must be 50 problems');
+if (E.newSession('s_science', 'NIS').n !== 20) fail('science homework must be 20 problems');
 // 1-й день: три раздела со своим временем, вопросы раздела идут подряд.
 var d1 = E.buildExam('NIS_full', 5);
 if (!d1.secs || d1.secs.length !== 3 || d1.secs[0].to !== 40 || d1.secs[1].to !== 100 || d1.secs[2].to !== 120 || d1.secs[1].minutes !== 30) fail('NIS day 1 sections: ' + JSON.stringify(d1.secs));
