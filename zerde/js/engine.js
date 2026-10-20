@@ -63,10 +63,14 @@
    * reading-вопросы собираются отдельно (buildReading), т.к. идут блоком к тексту. */
   /* Выбор формата: базовая задача темы или один из дополнительных форматов (gen_formats.js).
    * opts.vary = false — только базовый генератор и форматы без общих преобразований (для пробных). */
-  function generate(t, lvl, r, needInt, vary, slot) {
+  function generate(t, lvl, r, needInt, vary, slot, fmt) {
     var opt = { int: needInt };
     if (t.bank) return pickBank(Z.bank[t.bank], lvl, r, needInt);
     if (lvl === 4 && Z.gen4[t.gen]) return Z.gen4[t.gen](r, lvl, opt);
+    if (fmt) {   // пробный по образцу экзамена просит конкретный формат (id из gen_bil.js и др.)
+      var want = (Z.formats[t.gen] || []).filter(function (fm) { return fm.id === fmt && fm.lv.indexOf(lvl) >= 0; })[0];
+      if (want) return want.f(r, lvl, opt);
+    }
     var pool = [function () { return Z.gen[t.gen](r, Math.min(lvl, 3), opt); }];
     (Z.formats[t.gen] || []).forEach(function (fm) { if (fm.lv.indexOf(lvl) >= 0) pool.push(function () { return fm.f(r, lvl, opt); }); });
     // slot — номер задачи в домашке: форматы идут по кругу, чтобы в 20 задачах не было повторов типа
@@ -123,11 +127,11 @@
   function buildQuestion(topicId, lvl, seed, mode, opts) {
     var t = Z.topicById[topicId];
     if (!t) throw new Error('unknown topic ' + topicId);
-    var needInt = mode.answer === 'int', vary = !opts || opts.vary !== false, slot = opts && opts.slot >= 0 ? opts.slot : -1;
+    var needInt = mode.answer === 'int', vary = !opts || opts.vary !== false, slot = opts && opts.slot >= 0 ? opts.slot : -1, fmt = opts && opts.fmt;
     var raw, s = seed, tries = 0, r;
     for (;;) {
       r = U.rng(s);
-      raw = generate(t, lvl, r, needInt, vary, slot);
+      raw = generate(t, lvl, r, needInt, vary, slot, fmt);
       var a = norm(raw.ans);
       if (!needInt || (typeof a === 'number' && a % 1 === 0)) break;
       if (slot >= 0 && tries % 10 === 9) slot++;   // этот формат не даёт целого ответа (РФМШ) — следующий
@@ -136,6 +140,7 @@
     }
     var q = finishQuestion(topicId, lvl, seed, mode, raw, r);
     if (slot >= 0) q.slot = slot;
+    if (fmt) q.fmt = fmt;
     return q;
   }
   function finishQuestion(topicId, lvl, seed, mode, raw, r) {
@@ -280,7 +285,7 @@
   function mistakeSession(list, school) {
     var mode = modeFor(school);
     var s = { topic: null, school: school, mode: 'mistakes', idx: 0, seed: U.newSeed(), hist: [], extra: 0, retry: false, level: 1, streak: 0, done: false, startedAt: Date.now() };
-    s.queue = list.map(function (m) { var q = buildQuestion(m.topic, m.lvl, m.seed, mode, { vary: m.vary !== false, slot: m.slot }); q.mistakeId = m.id; return q; });
+    s.queue = list.map(function (m) { var q = buildQuestion(m.topic, m.lvl, m.seed, mode, { vary: m.vary !== false, slot: m.slot, fmt: m.fmt }); q.mistakeId = m.id; return q; });
     s.n = s.queue.length; s.maxLevel = 1;
     s.current = s.queue[0] || null;
     if (!s.current) s.done = true;
@@ -297,7 +302,7 @@
 
   function answer(s, given) {
     var q = s.current, ok = check(q, given) === true;
-    s.hist.push({ topic: q.topic, lvl: q.lvl, seed: q.seed, slot: q.slot, vary: q.vary !== false, ok: ok, given: given, retry: !!q.isRetry, passage: q.passage || null, mistakeId: q.mistakeId || null });
+    s.hist.push({ topic: q.topic, lvl: q.lvl, seed: q.seed, slot: q.slot, fmt: q.fmt, vary: q.vary !== false, ok: ok, given: given, retry: !!q.isRetry, passage: q.passage || null, mistakeId: q.mistakeId || null });
     if (s.mode === 'quick' && !s.queue) {
       if (ok) { s.streak++; if (s.streak >= 2 && s.level < 4) { s.level++; s.streak = 0; } }
       else { s.streak = 0; if (s.level > 1) s.level--; }
@@ -353,6 +358,7 @@
         ids.forEach(function (id, k) { buildReading(id, seed + 500 + si * 1000 + k * 10, mode.options).slice(0, sec.count - k * 5).forEach(function (q) { q.section = si; qs.push(q); }); });
         return;
       }
+      if (sec.blueprint) { blueprintSection(sec, si, f, r, seed, mode, qs, seen); return; }
       // Темы раздаём по кругу из перемешанного списка — так в варианте нет перекоса в одну тему.
       // kinds[0] — основная часть раздела, kinds[1] — доля logicShare (логика у БИЛ и РФМШ).
       var mPool = r.shuffle(Z.topicsFor(f.school, sec.kinds[0])), lPool = r.shuffle(Z.topicsFor(f.school, sec.kinds[1] || sec.kinds[0])), mi = 0, li = 0;
@@ -379,6 +385,23 @@
       ex.sec = 0; ex.secStartedAt = ex.startedAt;
     }
     return ex;
+  }
+
+  /* Раздел «по образцу экзамена»: задача № k варианта повторяет слот № k оригинала (тема, уровень,
+   * формат), но с другими числами. Каждый вариант немного труднее: часть слотов поднимается на уровень
+   * (sec.harder — доля), часть получает соседний тип той же темы (slot.alt). */
+  function blueprintSection(sec, si, f, r, seed, mode, qs, seen) {
+    var bp = Z.blueprints[sec.blueprint];
+    bp.slots.forEach(function (sl, k) {
+      var lvl = sl.l, fmt = sl.f, tid = sl.t;
+      if (r() < (sec.harder || 0) && lvl < 4) { lvl++; fmt = null; }
+      if (sl.alt && r() < 0.3) { tid = r.pick(sl.alt); fmt = null; }
+      if (!Z.topicById[tid] || Z.topicById[tid].schools.indexOf(f.school) < 0 && !sl.any) tid = sl.t;
+      var q, s2 = seed + k * 7919 + si, tries = 0;
+      do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false, fmt: fmt }); } while (seen[q.kk] && ++tries < 25);
+      q.vary = false; seen[q.kk] = 1; q.section = si; q.slotN = k + 1;
+      qs.push(q);
+    });
   }
 
   // Подсчёт по правилам школы: БИЛ +4/−1/0, РФМШ 3/5/7 за верный.

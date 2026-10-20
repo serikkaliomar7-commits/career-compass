@@ -160,7 +160,7 @@
   });
 
   Z.formatsFor = function (school) {
-    return Object.keys(Z.examFormats).map(function (k) { return Z.examFormats[k]; }).filter(function (f) { return f.school === school; });
+    return Object.keys(Z.examFormats).map(function (k) { return Z.examFormats[k]; }).filter(function (f) { return f.school === school && !f.practice; });
   };
 })(typeof window !== 'undefined' ? window : globalThis);
 

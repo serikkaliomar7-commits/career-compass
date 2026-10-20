@@ -139,7 +139,7 @@
       if (h.ok || h.passage || !h.topic || h.mistakeId) return;
       var id = h.topic + ':' + h.lvl + ':' + h.seed;
       if (state.mistakes.some(function (m) { return m.id === id; })) return;
-      state.mistakes.push({ id: id, topic: h.topic, lvl: h.lvl, seed: h.seed, slot: h.slot, vary: h.vary !== false, date: date });
+      state.mistakes.push({ id: id, topic: h.topic, lvl: h.lvl, seed: h.seed, slot: h.slot, fmt: h.fmt, vary: h.vary !== false, date: date });
     });
     hist.forEach(function (h) {
       if (h.mistakeId && h.ok) state.mistakes = state.mistakes.filter(function (m) { return m.id !== h.mistakeId; });
@@ -169,11 +169,12 @@
     }
     state.exams.push({
       id: 'ex' + Date.now(), format: ex.format, date: date, score: res.score, max: res.max, pct: res.pct,
-      correct: res.correct, wrong: res.wrong, skipped: res.skipped, byTopic: res.byTopic, secs: Math.round((Date.now() - ex.startedAt) / 1000)
+      correct: res.correct, wrong: res.wrong, skipped: res.skipped, byTopic: res.byTopic, secs: Math.round((Date.now() - ex.startedAt) / 1000),
+      practice: ex.practice || undefined, seed: ex.seed
     });
     if (state.exams.length > 200) state.exams.shift();
     recordMistakes(state, ex.questions.map(function (q, i) {
-      return { topic: q.topic, lvl: q.lvl, seed: q.seed, vary: false, passage: q.passage || null, ok: Z.engine.check(q, ex.answers[i]) === true };
+      return { topic: q.topic, lvl: q.lvl, seed: q.seed, fmt: q.fmt, vary: false, passage: q.passage || null, ok: Z.engine.check(q, ex.answers[i]) === true };
     }), date);
     var plan = state.plans[date];
     // Полный пробный засчитывает и короткий тест дня — он заведомо больше.

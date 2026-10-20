@@ -700,3 +700,49 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .svgfig.osv { margin: 2px auto; }
 .opt:has(.osv) .ot { flex: 1; }
 .opts:has(.osv) { grid-template-columns: 1fr 1fr; }
+
+/* ---------- Практика: карточки вариантов ---------- */
+.mk-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 6px 0 16px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 1.5px solid var(--line-2); background: var(--card); color: var(--ink); border-radius: 999px; padding: 7px 14px; font: 600 .9rem var(--sans); cursor: pointer; }
+.chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+.mk { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+.mk.done { border-color: var(--line-2); }
+.mk-top { display: flex; align-items: center; justify-content: space-between; }
+.mk-no { font: 700 1.6rem var(--serif); letter-spacing: -.02em; }
+.mk h3 { margin: 0; font-size: 1.05rem; }
+.mk-score b { font: 700 1.2rem var(--serif); }
+.mk .row { margin-top: auto; padding-top: 6px; }
+
+/* ---------- Практика: вид бумажного буклета ---------- */
+.paperx { --pp: #fffefb; --pi: #15171c; }
+.paperx .qcard { background: var(--pp); color: var(--pi); border: 1px solid #d9d6cf; border-radius: 4px; box-shadow: 0 1px 0 #e7e3da, 0 8px 22px rgba(0,0,0,.08);
+  font-family: "Times New Roman", Times, "Liberation Serif", serif; padding: 28px 30px; }
+.paperx .qcard .q-main, .paperx .qcard .q-alt { font: 400 1.12rem/1.5 "Times New Roman", Times, "Liberation Serif", serif; color: var(--pi); }
+.paperx .qcard .q-alt { margin-top: 1em; opacity: 1; font-style: normal; }
+.paperx .qcard .expr { text-align: center; font-family: "Cambria Math", "Times New Roman", serif; }
+.paperx .qcard .svgfig { color: var(--pi); }
+.paperx .qtop .qnum { font: 700 1rem "Times New Roman", serif; color: var(--pi); }
+.paperx .opts { display: block; margin-top: 14px; }
+.paperx .opt { display: flex; align-items: center; gap: 10px; width: 100%; border: 0; background: none; box-shadow: none; padding: 5px 4px; border-radius: 4px; color: var(--pi);
+  font: 400 1.12rem "Times New Roman", Times, serif; text-align: left; min-height: 0; }
+.paperx .opt:hover { background: #f1eee6; }
+.paperx .opt .L { width: 22px; height: 22px; border: 1.4px solid var(--pi); border-radius: 50%; display: inline-grid; place-items: center; font: 600 .78rem var(--sans); background: none; color: var(--pi); flex: none; }
+.paperx .opt .ot::before { content: none; }
+.paperx .opt.sel { background: none; }
+.paperx .opt.sel .L { background: var(--pi); color: var(--pp); }
+.paperx .opts:has(.osv) { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.paperx .opts:has(.osv) .opt { flex-direction: column-reverse; }
+.paperx .exnav .btn { font-family: var(--sans); }
+@media (min-width: 1000px) {
+  .paperx.withsheet { display: grid; grid-template-columns: minmax(0, 1fr) 230px; gap: 18px; align-items: start; }
+  .paperx.withsheet > .exh, .paperx.withsheet > .note { grid-column: 1 / -1; }
+  .paperx.withsheet > .sheet { grid-column: 2; grid-row: 2 / span 3; position: sticky; top: 12px; margin: 0; }
+  .paperx.withsheet > .qcard, .paperx.withsheet > .rsplit { grid-column: 1; grid-row: 2; }
+}
+.paperx .sheet { background: var(--pp); color: var(--pi); border: 1px solid #d9d6cf; border-radius: 4px; }
+.paperx .sheet button { color: var(--pi); }
+.pdoc.booklet { font-family: "Times New Roman", Times, "Liberation Serif", serif; }
+.pdoc.booklet .q-main, .pdoc.booklet .q-alt { font-family: inherit; }
+.pdoc.booklet .q-alt { margin-top: .6em; }

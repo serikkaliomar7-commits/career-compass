@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'gen_ktl.js', 'gen_visual.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'gen_ktl.js', 'gen_visual.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'practice.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;
@@ -61,7 +61,7 @@ PASSAGES.forEach(function (p) {
 });
 
 // Пробные тесты: число вопросов и подсчёт баллов.
-var expectCount = { BIL_diag: 27, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
+var expectCount = { BIL_P2023: 60, BIL_diag: 27, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
 Object.keys(Z.examFormats).forEach(function (fid) {
   for (var s = 1; s <= 60; s++) {
     var ex = E.buildExam(fid, s * 13);
@@ -227,6 +227,19 @@ if (!Z.cloud.applyTransfer(st3, code) || st3.profile.name !== 'Әлия' || st3.
 var rep = Z.cloud.readReport(Z.cloud.reportCode(st2));
 if (!rep || rep.name !== 'Әлия' || rep.rid !== 'r1' || typeof rep.ready !== 'number') fail('report code roundtrip');
 if (Z.cloud.readReport('garbage') !== null) fail('bad report code must be rejected');
+
+// Практика: вариант по образцу экзамена — 50 задач по слотам + 10 чтения, воспроизводится по seed.
+(function () {
+  var pt = Z.practice.test(1), ex = E.buildExam(pt.format, pt.seed), ex2 = E.buildExam(pt.format, pt.seed);
+  if (ex.questions.length !== 60) fail('practice test must have 60 questions, got ' + ex.questions.length);
+  if (ex.questions.map(function (q) { return q.kk; }).join() !== ex2.questions.map(function (q) { return q.kk; }).join()) fail('practice test must be reproducible');
+  if (E.scoreExam(ex).max !== 240) fail('practice max must be 240');
+  for (var n = 1; n <= Z.practice.count; n++) {
+    var p = Z.practice.test(n), e = E.buildExam(p.format, p.seed);
+    e.questions.forEach(function (q, i) { checks++; if (bad(q.kk) || bad(q.ru) || (q.options && q.options.length !== 4)) fail('practice ' + n + ' q' + (i + 1) + ' bad'); });
+  }
+  if (Z.formatsFor('BIL').some(function (f) { return f.practice; })) fail('practice formats must be hidden from the tests list');
+})();
 
 console.log((fails ? 'FAILED ' + fails : 'OK') + ' — ' + checks + ' checks');
 process.exit(fails ? 1 : 0);

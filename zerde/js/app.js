@@ -15,6 +15,7 @@
     today: '<path d="M3 10.5 12 4l9 6.5"/><path d="M5 9.5V20h14V9.5"/><path d="M10 20v-5h4v5"/>',
     topics: '<path d="m12 3 9 4.5-9 4.5-9-4.5z"/><path d="m3 12 9 4.5 9-4.5"/><path d="m3 16.5 9 4.5 9-4.5"/>',
     tests: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/>',
+    mocks: '<path d="M7 3h10l3 3v15H7z"/><path d="M4 6v15h13"/><path d="M11 10h5M11 14h5M11 18h3"/>',
     mistakes: '<path d="M6 3h11a2 2 0 0 1 2 2v16l-3-2-3 2-3-2-3 2V5a2 2 0 0 1 2-2z"/><path d="m10 9 4 4M14 9l-4 4"/>',
     progress: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
     settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
@@ -122,7 +123,7 @@
   function closeModal() { document.getElementById('modal').innerHTML = ''; mem.modalYes = null; }
 
   /* =================== ОБОЛОЧКА =================== */
-  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings', pricing: 'nav.pricing', account: 'nav.account', leaders: 'nav.leaders', cards: 'nav.cards', deck: 'nav.cards', game: 'nav.game', admin: 'nav.admin', report: 'nav.report', class: 'nav.class', print: 'nav.tests', paper: 'nav.tests' };
+  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', mocks: 'nav.mocks', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings', pricing: 'nav.pricing', account: 'nav.account', leaders: 'nav.leaders', cards: 'nav.cards', deck: 'nav.cards', game: 'nav.game', admin: 'nav.admin', report: 'nav.report', class: 'nav.class', print: 'nav.tests', paper: 'nav.tests' };
   function shell(route) {
     var cur = route === 'topic' || route === 'practice' ? 'topics' : route === 'exam' || route === 'result' ? 'tests' : route;
     var mc = (S.mistakes || []).length;
@@ -130,7 +131,7 @@
       return '<a href="#/' + id + '" class="' + (cur === id ? 'on' : '') + '">' + ic(id) + t('nav.' + id) + (cnt ? '<span class="cnt">' + cnt + '</span>' : '') + '</a>';
     }
     var u = mem.user || {};
-    document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('cards') + link('game') + link('tests') +
+    document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('cards') + link('game') + (S.profile.school === 'BIL' ? link('mocks') : '') + link('tests') +
       '<div class="label">' + t('nav.secCheck') + '</div>' + link('mistakes', mc) + link('progress') + link('leaders') + link('report') +
       '<div class="label">' + t('nav.secAcc') + '</div>' + link('account') + link('settings') + (u.role === 'admin' ? link('admin') + link('class') : '');
     var p = S.profile;
@@ -195,7 +196,8 @@
       case 'mistakes': html = vMistakes(); break;
       case 'progress': html = vProgress(); break;
       case 'settings': html = vSettings(); break;
-      case 'print': html = vPrint(parts[1]); break;
+      case 'print': html = vPrint(parts[1], +parts[2] || 0); break;
+      case 'mocks': html = vMocks(); break;
       case 'report': html = vReport(); break;
       case 'class': html = vClass(); break;
       case 'paper': html = vPaper(parts[1]); break;
@@ -486,6 +488,29 @@
   }
 
   /* =================== СЫНАҚТАР / ТЕСТЫ =================== */
+  /* =================== ПРАКТИКА / ПРАКТИКА =================== */
+  // Серия вариантов по образцу настоящих экзаменов БИЛ: карточки «Нұсқа 01…30», как в IELTS-тренажёрах.
+  function vMocks() {
+    var ys = Z.practice.years(), yf = mem.mkYear || 0, best = {};
+    S.exams.forEach(function (e) { if (e.practice && (!best[e.practice] || e.score > best[e.practice].score)) best[e.practice] = e; });
+    var done = Object.keys(best).length;
+    var h = '<div class="sec"><h1>' + t('mk.title') + '</h1><p class="muted">' + t('mk.sub', { n: Z.practice.count, years: ys.join(', ') }) + '</p></div>';
+    if (S.activeExam) h += resumeBanner();
+    h += '<div class="mk-bar"><div class="chips">' + [0].concat(ys).map(function (y) {
+      return '<button class="chip' + (yf === y ? ' on' : '') + '" data-act="mkYear" data-y="' + y + '">' + (y ? t('mk.like', { y: y }) : t('mk.all')) + '</button>';
+    }).join('') + '</div><span class="muted small">' + t('mk.done', { d: done, n: Z.practice.count }) + '</span></div><div class="mk-grid">';
+    for (var n = 1; n <= Z.practice.count; n++) {
+      var pt = Z.practice.test(n), b = best[n];
+      if (yf && pt.year !== yf) continue;
+      h += '<div class="mk' + (b ? ' done' : '') + '"><div class="mk-top"><span class="mk-no">' + U.pad2(n) + '</span><span class="pill">' + t('mk.like', { y: pt.year }) + '</span></div>' +
+        '<h3>' + t('mk.test', { n: U.pad2(n) }) + '</h3><p class="muted small">60 ' + t('c.q') + ' · 110 ' + t('c.min') + ' · +4 / −1</p>' +
+        (b ? '<div class="mk-score"><b>' + b.score + '</b> / ' + b.max + ' <span class="muted small">' + b.date + '</span></div>' : '<div class="mk-score muted small">' + t('mk.new') + '</div>') +
+        '<div class="row"><button class="btn ' + (b ? 'line' : 'primary') + ' sm" data-act="startPractice" data-n="' + n + '">' + t(b ? 'mk.retry' : 'c.start') + '</button>' +
+        '<a class="btn line sm" href="#/print/' + pt.format + '/' + n + '">' + t('print.short') + '</a></div></div>';
+    }
+    return h + '</div>';
+  }
+
   function vTests() {
     var sc = S.profile.school;
     var h = '<div class="sec"><h1>' + t('tests.title') + '</h1><p class="muted">' + t('tests.sub') + '</p></div><div class="note">' + rulesText(sc) + '</div>';
@@ -528,7 +553,7 @@
     var f = Z.examFormats[ex.format], q = ex.questions[ex.cur], n = ex.questions.length;
     var cnt = ex.questions.filter(function (qq, i) { return answered(ex, i); }).length;
     var rg = secRange(ex), sec = f.sections[q.section || 0], lastQ = ex.cur === rg.to - 1, moreSecs = ex.secs && ex.sec < ex.secs.length - 1;
-    var title = fname(f) + (ex.secs ? '<small>' + t('ex.section', { i: ex.sec + 1, n: ex.secs.length }) + ' · ' + (I.lang() === 'ru' && sec.ru ? sec.ru : sec.kk) + '</small>' : '');
+    var title = (ex.practice ? t('mk.test', { n: U.pad2(ex.practice) }) + ' · ' : '') + fname(f) + (ex.secs ? '<small>' + t('ex.section', { i: ex.sec + 1, n: ex.secs.length }) + ' · ' + (I.lang() === 'ru' && sec.ru ? sec.ru : sec.kk) + '</small>' : '');
     var h = (mem.secNote ? '<div class="note amber">' + t('ex.secTimeout') + '</div>' : '') +
       '<div class="exh"><span class="title">' + title + '</span><span class="timer" id="timer">--:--</span><span class="muted small">' + cnt + ' / ' + n + '</span>' +
       '<button class="btn line sm" data-act="sheet">' + t('ex.sheet') + '</button><button class="btn primary sm" data-act="finishExam">' + t('c.finish') + '</button></div>';
@@ -552,7 +577,9 @@
     h += '<div class="exnav"><button class="btn line" data-act="exPrev"' + (ex.cur === rg.from ? ' disabled' : '') + '>' + t('ex.prev') + '</button>' +
       '<button class="btn line" data-act="exFlag">' + (ex.flags[ex.cur] ? t('ex.flagged') : t('ex.flag')) + '</button>' +
       '<button class="btn primary" data-act="exNext">' + (lastQ ? (moreSecs ? t('ex.nextSec') : t('c.finish')) : t('c.next')) + '</button></div></section>';
-    return h + (q.passage ? '</div>' : '');
+    h += q.passage ? '</div>' : '';
+    // «Практика»: вид бумажного буклета (Times, «A) …», бланк с кружками сбоку).
+    return ex.look === 'paper' ? '<div class="paperx' + (mem.sheet ? ' withsheet' : '') + '">' + h + '</div>' : h;
   }
   function startTimer() {
     if (mem.timer) clearInterval(mem.timer);
@@ -609,20 +636,24 @@
   /* =================== БАСЫП ШЫҒАРУ / ПЕЧАТЬ =================== */
   // Вариант для печати: сохраняем формат и seed, чтобы потом ввести ответы с бумажного бланка.
   function paperOf(id) { return (S.paper || []).filter(function (p) { return p.id === id; })[0]; }
-  function vPrint(fid) {
+  function vPrint(fid, n) {
     var f = Z.examFormats[fid];
     if (!f) return vTests();
-    if (!mem.print || mem.print.fid !== fid) {
+    if (n && (!mem.print || mem.print.practice !== n)) {   // вариант «Практики»: seed фиксирован номером
+      var pt = Z.practice.test(n);
+      mem.print = paperOf('p' + pt.seed) || { id: 'p' + pt.seed, fid: pt.format, seed: pt.seed, rl: 3, date: today(), practice: n };
+      if (!paperOf(mem.print.id)) { S.paper = (S.paper || []).concat([mem.print]).slice(-12); save(); }
+    } else if (!n && (!mem.print || mem.print.fid !== fid || mem.print.practice)) {
       var seed = U.newSeed();
       mem.print = { id: 'p' + seed, fid: fid, seed: seed, rl: P.readLevel(S), date: today() };
       S.paper = (S.paper || []).concat([mem.print]).slice(-12); save();
     }
     var pp = mem.print, ex = E.buildExam(fid, pp.seed, { readLevel: pp.rl }), seenP = {};
-    var h = '<div class="noprint row"><a class="back" href="#/tests">' + ic('back') + t('nav.tests') + '</a><span style="flex:1"></span>' +
+    var h = '<div class="noprint row"><a class="back" href="#/' + (pp.practice ? 'mocks' : 'tests') + '">' + ic('back') + t(pp.practice ? 'nav.mocks' : 'nav.tests') + '</a><span style="flex:1"></span>' +
       '<label class="radio"><input type="checkbox" id="pkey"' + (mem.printKey ? ' checked' : '') + ' data-act="printKey"> ' + t('print.key') + '</label>' +
       '<a class="btn line" href="#/paper/' + pp.id + '">' + t('print.enter') + '</a><button class="btn primary" data-act="print">' + t('print.go') + '</button></div>' +
       '<p class="noprint note">' + t('print.how', { id: pp.id.slice(1, 7) }) + '</p>';
-    h += '<article class="pdoc"><header class="ph-h"><div><b>Зерде · ' + fname(f) + '</b><br><span>' + t('print.variant') + ' ' + pp.id.slice(1, 7) + ' · ' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</span></div>' +
+    h += '<article class="pdoc' + (pp.practice ? ' booklet' : '') + '"><header class="ph-h"><div><b>Зерде · ' + (pp.practice ? t('mk.test', { n: U.pad2(pp.practice) }) + ' · ' : '') + fname(f) + '</b><br><span>' + t('print.variant') + ' ' + (pp.practice ? U.pad2(pp.practice) : pp.id.slice(1, 7)) + ' · ' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</span></div>' +
       '<div class="ph-name">' + t('print.name') + ' ____________________</div></header><p class="small">' + rulesText(f.school) + '</p>';
     var curSec = -1;
     ex.questions.forEach(function (q, i) {
@@ -645,7 +676,7 @@
     var pp = paperOf(id);
     if (!pp) return vTests();
     var f = Z.examFormats[pp.fid], ex = E.buildExam(pp.fid, pp.seed, { readLevel: pp.rl });
-    return '<a class="back" href="#/print/' + pp.fid + '">' + ic('back') + t('print.back') + '</a><section class="sec"><h1>' + t('print.enter') + '</h1><p class="muted">' + fname(f) + ' · ' + t('print.variant') + ' ' + id.slice(1, 7) + '</p></section>' +
+    return '<a class="back" href="#/print/' + pp.fid + (pp.practice ? '/' + pp.practice : '') + '">' + ic('back') + t('print.back') + '</a><section class="sec"><h1>' + t('print.enter') + '</h1><p class="muted">' + fname(f) + ' · ' + t('print.variant') + ' ' + id.slice(1, 7) + '</p></section>' +
       '<form class="card paper-form" data-form="paper" data-id="' + id + '">' + ex.questions.map(function (q, i) {
         return '<div class="pf-row"><span>' + (i + 1) + '</span>' + (q.type === 'mc' ? q.options.map(function (o, k) {
           return '<label><input type="radio" name="a' + i + '" value="' + esc(o.key) + '"><i>' + LETTERS[k] + '</i></label>';
@@ -869,6 +900,13 @@
       else start();
     },
     abandonExam: function () { S.activeExam = null; save(); render(); },
+    startPractice: function (el) {
+      var n = +el.dataset.n, pt = Z.practice.test(n);
+      function start() { var ex = E.buildExam(pt.format, pt.seed, { readLevel: 3 }); ex.cur = 0; ex.practice = n; ex.look = 'paper'; S.activeExam = ex; mem.sheet = window.innerWidth >= 1000; save(); go('#/exam'); }
+      if (S.activeExam) ask(t('ex.resume') + '. ' + t('ex.abandon') + '?', t('ex.abandon'), start, t('c.cancel'));
+      else start();
+    },
+    mkYear: function (el) { mem.mkYear = +el.dataset.y || 0; render(); },
     exPick: function (el) {
       var ex = S.activeExam, k = el.dataset.key;
       ex.answers[ex.cur] = ex.answers[ex.cur] === k ? '' : k;   // повторный клик снимает ответ
@@ -982,6 +1020,7 @@
     }
     if (form === 'paper') {
       var pp = paperOf(f.dataset.id), ex = E.buildExam(pp.fid, pp.seed, { readLevel: pp.rl });
+      if (pp.practice) ex.practice = pp.practice;
       ex.questions.forEach(function (q, i) { var v = d.get('a' + i); if (v !== null && String(v).trim() !== '') ex.answers[i] = String(v).trim(); });
       ex.paper = true;
       var res = E.scoreExam(ex);
