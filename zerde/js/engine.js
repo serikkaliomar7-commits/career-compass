@@ -63,7 +63,7 @@
    * reading-вопросы собираются отдельно (buildReading), т.к. идут блоком к тексту. */
   /* Выбор формата: базовая задача темы или один из дополнительных форматов (gen_formats.js).
    * opts.vary = false — только базовый генератор и форматы без общих преобразований (для пробных). */
-  function generate(t, lvl, r, needInt, vary, slot, fmt) {
+  function generate(t, lvl, r, needInt, vary, slot, fmt, avoid) {
     var opt = { int: needInt };
     if (t.bank) return pickBank(Z.bank[t.bank], lvl, r, needInt);
     if (fmt) {   // пробный по образцу экзамена просит конкретный формат (id из gen_bil.js и др.) — раньше уровня ★
@@ -72,11 +72,24 @@
     }
     if (lvl === 4 && Z.gen4[t.gen]) return Z.gen4[t.gen](r, lvl, opt);
     var pool = [function () { return Z.gen[t.gen](r, Math.min(lvl, 3), opt); }];
-    (Z.formats[t.gen] || []).forEach(function (fm) { if (fm.lv.indexOf(lvl) >= 0) pool.push(function () { return fm.f(r, lvl, opt); }); });
+    (Z.formats[t.gen] || []).forEach(function (fm) { if (fm.lv.indexOf(lvl) >= 0 && !pairFormat(fm.id) && !(avoid && avoid[fm.id])) pool.push(function () { return fm.f(r, lvl, opt); }); });
     // slot — номер задачи в домашке: форматы идут по кругу, чтобы в 20 задачах не было повторов типа
     var raw = (slot >= 0 ? pool[slot % pool.length] : r.pick(pool))();
     if (vary && r() < 0.2) raw = transform(t, lvl, r, needInt, raw) || raw;
     return raw;
+  }
+
+  // Задачи пары с общим условием («ответьте на оба вопроса») сами по себе не выдаются — только в своей паре.
+  var PAIRF = null;
+  function pairFormat(id) {
+    if (!PAIRF) {
+      PAIRF = {};
+      Object.keys(Z.blueprints || {}).forEach(function (b) {
+        var sl = Z.blueprints[b].slots || [];
+        sl.forEach(function (x, k) { if (x.f && (x.same || (sl[k + 1] && sl[k + 1].same))) PAIRF[x.f] = 1; });
+      });
+    }
+    return !!(id && PAIRF[id]);
   }
 
   /* Общие преобразования — меняют то, ЧТО спрашивают, а не только числа:
@@ -127,11 +140,11 @@
   function buildQuestion(topicId, lvl, seed, mode, opts) {
     var t = Z.topicById[topicId];
     if (!t) throw new Error('unknown topic ' + topicId);
-    var needInt = mode.answer === 'int', vary = !opts || opts.vary !== false, slot = opts && opts.slot >= 0 ? opts.slot : -1, fmt = opts && opts.fmt;
+    var needInt = mode.answer === 'int', vary = !opts || opts.vary !== false, slot = opts && opts.slot >= 0 ? opts.slot : -1, fmt = opts && opts.fmt, avoid = opts && opts.avoid;
     var raw, s = seed, tries = 0, r;
     for (;;) {
       r = U.rng(s);
-      raw = generate(t, lvl, r, needInt, vary, slot, fmt);
+      raw = generate(t, lvl, r, needInt, vary, slot, fmt, avoid);
       var a = norm(raw.ans);
       if (!needInt || (typeof a === 'number' && a % 1 === 0)) break;
       if (slot >= 0 && tries % 10 === 9) slot++;   // этот формат не даёт целого ответа (РФМШ) — следующий
@@ -394,19 +407,24 @@
     var t = Z.topicById[tid];
     return !!(fmt && t && (Z.formats[t.gen] || []).some(function (fm) { return fm.id === fmt && fm.lv.indexOf(lvl) >= 0; }));
   }
+  function tplSig(kk) { return 'tpl:' + String(kk).replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, ' ').replace(/\d+([.,]\d+)?/g, '#').replace(/\s+/g, ' ').trim().slice(0, 45); }
   function blueprintSection(sec, si, f, r, seed, mode, qs, seen) {
-    var bp = Z.blueprints[sec.blueprint], prevSeed = 0;
+    var bp = Z.blueprints[sec.blueprint], prevSeed = 0, avoid = {};
+    // у этих типов свой слот в схеме своего года — в «свободных» слотах их не берём (не повторяются и не смешивают годы)
+    Object.keys(Z.blueprints).forEach(function (b) { (Z.blueprints[b].slots || []).forEach(function (sl) { if (sl.f) avoid[sl.f] = 1; }); });
     bp.slots.forEach(function (sl, k) {
       var lvl = sl.l, fmt = sl.f, tid = sl.t, bump = r(), alt = r(), next = bp.slots[k + 1];
       if (next && next.same) bump = alt = 1;   // первая задача пары тоже не меняется
       // same — вторая задача общего условия: тот же seed, без усложнения (иначе условие разойдётся)
-      if (!sl.same && bump < (sec.harder || 0) && lvl < 4) { lvl++; fmt = null; }
+      // усложнение не меняет тип задачи: у слота с форматом уровень растёт, только если формат его поддерживает
+      if (!sl.same && bump < (sec.harder || 0) && lvl < 4 && (!fmt || hasFormat(tid, fmt, lvl + 1))) lvl++;
       if (!sl.same && sl.alt && alt < 0.3) { tid = sl.alt[Math.floor(alt / 0.3 * sl.alt.length)]; fmt = null; }
       var same = sl.same && hasFormat(tid, fmt, lvl);   // нет формата — обычная задача со своим seed
       var q, s2 = same ? prevSeed : seed + k * 7919 + si, tries = 0;
-      do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false, fmt: fmt }); } while (seen[q.kk] && !same && ++tries < 25);
+      // в одном варианте — без одинаковых задач и без двух задач одного шаблона (другие числа, та же формулировка)
+      do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false, fmt: fmt, avoid: avoid }); } while ((seen[q.kk] || seen[tplSig(q.kk)]) && !same && ++tries < 25);
       prevSeed = q.seed;
-      q.vary = false; seen[q.kk] = 1; q.section = si; q.slotN = k + 1;
+      q.vary = false; seen[q.kk] = 1; seen[tplSig(q.kk)] = 1; q.section = si; q.slotN = k + 1;
       qs.push(q);
     });
   }

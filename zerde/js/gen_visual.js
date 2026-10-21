@@ -202,13 +202,21 @@
   function squares(r, lvl) {
     var W, Hh, rows, set = [], x, y;
     if (lvl === 1) { W = r.int(2, 3); Hh = 3; rows = null; }
-    else if (lvl === 2) { W = r.int(3, 4); Hh = r.int(3, 4); rows = null; }
+    else if (lvl === 2 || lvl === 3 && r.chance(0.4)) { W = lvl === 2 ? r.int(3, 5) : r.int(4, 5); Hh = lvl === 2 ? r.int(3, 4) : 4; rows = null; }
     else {   // «лесенка» (диаграмма Юнга): длины строк сверху вниз не убывают
-      Hh = 4; W = lvl === 4 ? 5 : 4; rows = [];
+      Hh = 4; W = lvl === 4 ? 5 : r.int(4, 5); rows = [];   // L3: ширина 4 или 5 — больше разных лесенок
       for (y = 0; y < Hh; y++) rows.push(y === Hh - 1 ? W : r.int(y === 0 ? 1 : rows[y - 1], W));
       if (rows[0] === W) rows[0] = W - 1;
     }
     for (y = 0; y < Hh; y++) for (x = 0; x < W; x++) set.push(!rows || x < rows[y]);
+    if (lvl >= 2 && !rows) {   // прямоугольник без 1–2 клеток на краю — больше разных рисунков
+      var edge = []; for (y = 0; y < Hh; y++) for (x = 0; x < W; x++) if (x === 0 || y === 0 || x === W - 1 || y === Hh - 1) edge.push(y * W + x);
+      for (var tr = 0; tr < 20; tr++) {
+        var cut = r.shuffle(edge).slice(0, r.pick(lvl === 2 ? [0, 1, 1, 2] : [1, 2])), lone = false;
+        for (y = 0; y < Hh; y++) for (x = 0; x < W; x++) if (cut.indexOf(y * W + x) < 0 && [[1, 0], [-1, 0], [0, 1], [0, -1]].every(function (d) { var xx = x + d[0], yy = y + d[1]; return xx < 0 || yy < 0 || xx >= W || yy >= Hh || cut.indexOf(yy * W + xx) >= 0; })) lone = true;
+        if (!lone) { cut.forEach(function (i) { set[i] = false; }); break; }
+      }
+    }
     var cells = set.filter(Boolean).length, wantRect = lvl === 4 && r.chance(0.5);
     var ans = countIn(set, W, Hh, wantRect), sq = countIn(set, W, Hh, false), u = 28, out = '';
     for (y = 0; y < Hh; y++) for (x = 0; x < W; x++) if (set[y * W + x]) out += rect(4 + x * u, 4 + y * u, u, u, 'vz0');

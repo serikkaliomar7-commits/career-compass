@@ -38,12 +38,27 @@
   }
   function ints(list, ans) { return list.filter(function (x) { return typeof x === 'number' && isFinite(x) && x % 1 === 0 && x !== ans; }); }
   function signed(v) { return v < 0 ? '−' + (-v) : String(v); }
+  // Русское согласование с числом: pl(5, 'кубик', 'кубика', 'кубиков') → 'кубиков'
+  function pl(n, one, few, many) { n = Math.abs(n) % 100; var d = n % 10; return n > 10 && n < 20 ? many : d === 1 ? one : d >= 2 && d <= 4 ? few : many; }
+  // Казахский дательный падеж после числа: 16 → «16-ға», 3 → «3-ке»
+  function dat(n) {
+    var a = Math.abs(n), u = a % 10, t = Math.floor(a / 10) % 10, w;
+    if (u) w = ['', 'ге', 'ге', 'ке', 'ке', 'ке', 'ға', 'ге', 'ге', 'ға'][u];
+    else if (t) w = ['', 'ға', 'ға', 'ға', 'қа', 'ге', 'қа', 'ке', 'ге', 'ға'][t];
+    else w = a % 1000 === 0 && a ? 'ға' : 'ге';
+    return fmt(n) + '-' + w;
+  }
+  function npl(n, one, few, many) { return fmt(n) + ' ' + pl(n, one, few, many); }
+  // Линейное выражение k·x + c без «+ (−11)» и «1x»
+  function linStr(k, c, x) { var kx = k === 1 ? x : k === -1 ? '−' + x : signed(k) + x; return c === 0 ? kx : kx + (c < 0 ? ' − ' + (-c) : ' + ' + c); }
+  function linSub(k, c, vs) { var t = k === 1 ? vs : k === -1 ? '−' + vs : signed(k) + ' · ' + vs; return c === 0 ? t : t + (c < 0 ? ' − ' + (-c) : ' + ' + c); }
 
   /* ================= 1. Вероятность буквы (l_count) ================= */
   // Слова пишутся одинаково по-казахски и по-русски. Для вопроса о гласных — только слова,
   // где гласные А, Е, О, Ы, Э (без И, У, Я, Ю: их статус в казахском спорный).
   var LET_W = ['МАТЕМАТИКА', 'ГРАММАТИКА', 'АРИФМЕТИКА', 'ИНФОРМАТИКА', 'ПАРАЛЛЕЛЕПИПЕД', 'КООРДИНАТА', 'КИЛОГРАММ', 'МИЛЛИМЕТР', 'ЭНЦИКЛОПЕДИЯ'];
-  var VOW_W = ['ПАРАЛЛЕЛОГРАММ', 'ПРОГРАММА', 'БАРАБАН', 'АНАНАС', 'АСТАНА', 'АЛМАТЫ', 'ТЕЛЕФОН', 'БАСКЕТБОЛ', 'ВОЛЕЙБОЛ', 'ПАРАГРАФ', 'ОРКЕСТР'];
+  var VOW_W = ['ПАРАЛЛЕЛОГРАММ', 'ПРОГРАММА', 'БАРАБАН', 'АНАНАС', 'АСТАНА', 'АЛМАТЫ', 'ТЕЛЕФОН', 'БАСКЕТБОЛ', 'ВОЛЕЙБОЛ', 'ПАРАГРАФ', 'ОРКЕСТР',
+    'ФОТОГРАФ', 'ТРАКТОР', 'ГЕКТАР', 'ОРНАМЕНТ', 'АСТРОНОМ', 'МЕТЕОР', 'ТЕОРЕМА', 'КАРАНДАШ', 'ТЕАТР', 'ЛАБОРАНТ'];
   var VOWELS = 'АЕОЫЭ';
   add('l_count', 'bil.prob_letter', [2, 3], function (r, lvl) {
     for (;;) {
@@ -62,7 +77,7 @@
       }
       if (k <= 0 || k >= n) continue;
       var ans = frac(k, n), single = mode === 'one' || mode === 'not' ? cnt[c1] : k;
-      var wrong = [frac(k, distinct), frac(1, mode === 'one' ? distinct : n), frac(n - k, n), frac(single, distinct), frac(k, n - k)].filter(function (f) { return f.n < f.d && !frac.eq(f, ans); });
+      var wrong = [frac(k, distinct), frac(1, mode === 'one' ? distinct : n), frac(n - k, n), frac(single, distinct), frac(k, n - k), frac(k - 1, n), frac(k + 1, n), frac(k, n + 1)].filter(function (f) { return f.n > 0 && f.n < f.d && !frac.eq(f, ans); });
       return Q('«' + w + '» сөзінің әріптері бірдей карточкаларға жазылды (әр карточкада бір әріп) және қорапқа салынды. Қораптан қарамай бір карточка алынды. Карточкада ' + askK + ' ықтималдығы қандай?',
         'Буквы слова «' + w + '» написали на одинаковых карточках (на каждой карточке одна буква) и положили в коробку. Не глядя вынули одну карточку. Какова вероятность, что ' + askR + '?',
         ans, wrong, 'Карточка саны — ' + n + ' (қайталанатын әріптер де бөлек саналады). Қолайлы карточкалар: ' + favK + '. P = ' + k + '/' + n + (ans.d !== n ? ' = ' + ans.n + '/' + ans.d : '') + '. Әртүрлі әріптер санына (' + distinct + ') бөлуге болмайды.',
@@ -90,7 +105,7 @@
       var ex = fx(p + 'b − ' + q + ' + ' + s + 'b', d) + ' + ' + e;
       var flip = frac.add(frac.div(frac(-lin.n - q), frac(d)), frac(e));
       return Q('b = ' + vs + ' болғанда өрнектің мәнін табыңыз:' + expr(ex), 'Найдите значение выражения при b = ' + vs + ':' + expr(ex),
-        ans, [part.n, num + e, flip, part.n - e, ans + 1],
+        ans, [part.n, num + e, flip, part.n - e, ans + 1].filter(function (w) { return typeof w === 'number' || w.d === 1; }),
         'Алдымен алымын ықшамдаймыз: ' + p + 'b + ' + s + 'b − ' + q + ' = ' + (p + s) + 'b − ' + q + '. b = ' + vs + ': ' + (p + s) + ' · (' + vs + ') − ' + q + ' = ' + signed(num) + '. ' + signed(num) + ' : ' + d + ' = ' + signed(part.n) + '. Соңындағы + ' + e + ' туралы ұмытпаңыз: ' + signed(part.n) + ' + ' + e + ' = ' + signed(ans) + '.',
         'Упрощаем числитель: ' + (p + s) + 'b − ' + q + '. При b = ' + vs + ': ' + (p + s) + ' · (' + vs + ') − ' + q + ' = ' + signed(num) + '; ' + signed(num) + ' : ' + d + ' = ' + signed(part.n) + '. Не забываем + ' + e + ': ' + signed(ans) + '.');
     }
@@ -102,12 +117,14 @@
       if (res.d === 1 && frac.mul(frac(k), v).d === 1) break;
     }
     vs = U.fracHtml(v);
-    var ex2 = k + '(x + ' + a + ') − ' + m + 'x − ' + c, kx = frac.mul(frac(k), v).n, mx = frac.mul(frac(m), v);
+    var ex2 = k + '(x + ' + a + ') − ' + m + 'x − ' + c, mx = frac.mul(frac(m), v);
     var noDist = frac.sub(frac.add(frac.mul(frac(k), v), frac(a)), frac.add(mx, frac(c)));
+    var vsP = v.n < 0 || v.d > 1 ? '(' + vs + ')' : vs, lin = linStr(k - m, k * a - c, 'x');
+    var wr2 = [res.n + c, noDist, frac.add(frac.mul(frac(k + m), v), frac(k * a - c)), res.n - k * a + a].filter(function (w) { return typeof w === 'number' || w.d === 1; });
     return Q('x = ' + vs + ' болғанда өрнектің мәнін табыңыз:' + expr(ex2), 'Найдите значение выражения при x = ' + vs + ':' + expr(ex2),
-      res.n, [res.n + c, noDist, frac.add(frac.mul(frac(k + m), v), frac(k * a - c)), res.n - k * a + a],
-      'Жақшаны ашамыз: ' + k + 'x + ' + k * a + ' − ' + m + 'x − ' + c + ' = ' + signed(k - m) + 'x + ' + (k * a - c < 0 ? '(' + signed(k * a - c) + ')' : k * a - c) + '. x = ' + vs + ' қойсақ: ' + signed(k - m) + ' · (' + vs + ') + ' + (k * a - c < 0 ? '(' + signed(k * a - c) + ')' : k * a - c) + ' = ' + signed(res.n) + '. Соңғы − ' + c + ' мүшесін ұмытпаңыз.',
-      'Раскрываем скобки: ' + k + 'x + ' + k * a + ' − ' + m + 'x − ' + c + ' = ' + signed(k - m) + 'x + ' + (k * a - c < 0 ? '(' + signed(k * a - c) + ')' : k * a - c) + '. При x = ' + vs + ' получаем ' + signed(res.n) + '. Не забываем последнее − ' + c + '.');
+      res.n, wr2,
+      'Жақшаны ашамыз: ' + k + 'x + ' + k * a + ' − ' + m + 'x − ' + c + ' = ' + lin + '. x = ' + vs + ' қойсақ: ' + linSub(k - m, k * a - c, vsP) + ' = ' + signed(res.n) + '. Жақшаны ашқанда ' + dat(k) + ' жақшадағы екі мүше де көбейтіледі; соңғы − ' + c + ' мүшесін ұмытпаңыз.',
+      'Раскрываем скобки: ' + k + 'x + ' + k * a + ' − ' + m + 'x − ' + c + ' = ' + lin + '. При x = ' + vs + ': ' + linSub(k - m, k * a - c, vsP) + ' = ' + signed(res.n) + '. При раскрытии скобок на ' + k + ' умножаются оба слагаемых; не забываем последнее − ' + c + '.');
   });
 
   /* ================= 3. Какое выражение больше (m_order) ================= */
@@ -123,6 +140,14 @@
     { s: 'DD0 + DD', v: function (d) { return 121 * d; }, g: 1 },
     { s: 'D0D + DDD', v: function (d) { return 212 * d; }, g: 1 },
     { s: 'D + D0D', v: function (d) { return 102 * d; }, g: 1 },
+    { s: 'DD + DD + DD', v: function (d) { return 33 * d; }, g: 1 },
+    { s: 'DD0 − DD', v: function (d) { return 99 * d; }, g: 1 },
+    { s: 'DDD − D0', v: function (d) { return 101 * d; }, g: 1 },
+    { s: 'D0D − DD', v: function (d) { return 90 * d; }, g: 1 },
+    { s: 'DD0 + D', v: function (d) { return 111 * d; }, g: 1 },
+    { s: 'DD × D + D', v: function (d) { return 11 * d * d + d; }, g: 2 },
+    { s: 'D0D × D − D', v: function (d) { return 101 * d * d - d; }, g: 2 },
+    { s: 'DD × DD − D', v: function (d) { return 121 * d * d - d; }, g: 3 },
     { s: 'DD × D × D', v: function (d) { return 11 * d * d * d; }, g: 3 },
     { s: 'DDD × D + D', v: function (d) { return 111 * d * d + d; }, g: 3 },
     { s: 'D0D × D + DD', v: function (d) { return 101 * d * d + 11 * d; }, g: 3 }
@@ -130,7 +155,7 @@
   add('m_order', 'bil.compare_expr', [1, 2, 3], function (r, lvl, opt) {
     var pool = CMP.filter(function (c) { return lvl === 1 ? c.g === 1 || c.s === 'D0D × D' : lvl === 2 ? c.g <= 2 : c.g >= 2; });
     for (;;) {
-      var d = lvl === 1 ? r.int(2, 5) : r.int(lvl === 3 ? 3 : 2, 9), seen = {}, pick = [];
+      var d = lvl === 1 ? r.int(2, 9) : r.int(lvl === 3 ? 3 : 2, 9), seen = {}, pick = [];
       r.shuffle(pool).forEach(function (c) { var v = c.v(d); if (!seen[v] && pick.length < 4) { seen[v] = 1; pick.push({ s: c.s.replace(/D/g, d), v: v }); } });
       if (pick.length < 4) continue;
       var big = r.chance(0.6), best = pick.slice().sort(function (a, b) { return big ? b.v - a.v : a.v - b.v; })[0];
@@ -164,15 +189,15 @@
       for (i = 0; i < N; i++) S += (i % 2 ? -1 : 1) * term(i);
       var pairs = Math.floor(N / 2);
       wrong = [N * s, (pairs + 1) * s, (pairs - 1) * s + (N % 2 ? last : 0), N % 2 ? pairs * s : pairs * s + last, N % 2 ? pairs * s - last : S + s];
-      sk = 'Мүшелер саны: (' + first + ' − ' + last + ') : ' + s + ' + 1 = ' + N + '. Екі-екіден топтаймыз: (' + first + ' − ' + (first - s) + ') + (' + (first - 2 * s) + ' − ' + (first - 3 * s) + ') + … — әр жұп ' + s + '-ке тең, жұп саны ' + pairs + '. ' + (N % 2 ? 'Соңғы ' + last + ' жұпсыз қалады: ' + pairs + ' · ' + s + ' + ' + last : pairs + ' · ' + s) + ' = ' + S + '.';
+      sk = 'Мүшелер саны: (' + first + ' − ' + last + ') : ' + s + ' + 1 = ' + N + '. Екі-екіден топтаймыз: (' + first + ' − ' + (first - s) + ') + (' + (first - 2 * s) + ' − ' + (first - 3 * s) + ') + … — әр жұп ' + dat(s) + ' тең, жұп саны ' + pairs + '. ' + (N % 2 ? 'Соңғы ' + last + ' жұпсыз қалады: ' + pairs + ' · ' + s + ' + ' + last : pairs + ' · ' + s) + ' = ' + S + '.';
       sr = 'Членов: (' + first + ' − ' + last + ') : ' + s + ' + 1 = ' + N + '. Группируем по два: каждая пара равна ' + s + ', пар ' + pairs + '. ' + (N % 2 ? 'Последнее ' + last + ' остаётся без пары: ' + pairs + ' · ' + s + ' + ' + last : pairs + ' · ' + s) + ' = ' + S + '.';
     } else if (kind === 'nat') {
       N = r.int(40, 130);
       term = function (j) { return j + 1; }; sign = function (j) { return j % 2 ? '−' : '+'; };
       S = N % 2 ? (N + 1) / 2 : -N / 2;
       wrong = [-S, N % 2 ? (N - 1) / 2 : N / 2 + 1, N, S + (S > 0 ? 1 : -1)];
-      sk = N % 2 ? '(1 − 2) + (3 − 4) + … + (' + (N - 2) + ' − ' + (N - 1) + ') + ' + N + ': ' + (N - 1) / 2 + ' жұп, әрқайсысы −1. ' + (-(N - 1) / 2) + ' + ' + N + ' = ' + S + '.' : '(1 − 2) + (3 − 4) + … + (' + (N - 1) + ' − ' + N + '): ' + N / 2 + ' жұп, әрқайсысы −1. Жауабы ' + signed(S) + '.';
-      sr = N % 2 ? 'Пары (1 − 2), (3 − 4), …: их ' + (N - 1) / 2 + ', каждая −1; плюс последнее ' + N + ': ' + S + '.' : 'Пары (1 − 2), (3 − 4), …: их ' + N / 2 + ', каждая −1. Ответ ' + signed(S) + '.';
+      sk = N % 2 ? '(1 − 2) + (3 − 4) + … + (' + (N - 2) + ' − ' + (N - 1) + ') + ' + N + ': ' + (N - 1) / 2 + ' жұп, әрқайсысы −1. ' + signed(-(N - 1) / 2) + ' + ' + N + ' = ' + S + '.' : '(1 − 2) + (3 − 4) + … + (' + (N - 1) + ' − ' + N + '): ' + N / 2 + ' жұп, әрқайсысы −1. Жауабы ' + signed(S) + '.';
+      sr = N % 2 ? 'Пары (1 − 2), (3 − 4), …: их ' + (N - 1) / 2 + ', каждая −1; плюс последнее ' + N + ': ' + signed(-(N - 1) / 2) + ' + ' + N + ' = ' + S + '.' : 'Пары (1 − 2), (3 − 4), …: их ' + N / 2 + ', каждая −1. Ответ ' + signed(S) + '.';
     } else {
       var m = r.int(12, 30); N = 3 * m;
       term = function (j) { return j + 1; }; sign = function (j) { return j % 3 === 2 ? '−' : '+'; };
@@ -209,7 +234,7 @@
     else { ans = sm; wrong = [sm + mx + 1, sm - mx, sm - mn, sm + mn - 1]; }
     var sol = a * n + '/' + b + ' < X < ' + c * n + '/' + d;
     return Q(Kq[ask] + expr(ex), Rq[ask] + expr(ex), ans, ints(wrong, ans).filter(function (v) { return v > 0; }),
-      'Теңсіздіктің барлық бөлігін ' + n + '-ге көбейтеміз: ' + sol + '. Бұл аралықтағы натурал сандар: ' + xs.join(', ') + ' (шеттері кірмейді, теңсіздік қатаң).',
+      'Теңсіздіктің барлық бөлігін ' + dat(n) + ' көбейтеміз: ' + sol + '. Бұл аралықтағы натурал сандар: ' + xs.join(', ') + ' (шеттері кірмейді, теңсіздік қатаң).',
       'Умножаем все части на ' + n + ': ' + sol + '. Натуральные числа в промежутке: ' + xs.join(', ') + ' (концы не входят — неравенство строгое).');
   });
 
@@ -234,10 +259,10 @@
       if (!A || !B || A.some(function (x) { return B.indexOf(x) >= 0; })) continue;
       break;
     }
-    var ans = frac(n, d), ex = fx(A.join(' · '), B.join(' · '));
+    var ans = frac(n, d), ex = fx(A.join(' · '), B.join(' · ')), notInt = function (f) { return f.d !== 1; };
     var fa = A.map(function (x) { return x + ' = ' + factor(x).join(' · '); }).concat(B.map(function (x) { return x + ' = ' + factor(x).join(' · '); })).join('; ');
     return Q('Бөлшекті қысқартыңыз:' + expr(ex), 'Сократите дробь:' + expr(ex), ans,
-      [frac(n * C[0], d), frac(n, d * C[1]), frac(d, n), frac(n * C[2], d * C[3] === d * C[0] ? d + 1 : d * C[3])],
+      [frac(n * C[0], d), frac(n, d * C[1]), frac(d, n), frac(n * C[2], d * C[3] === d * C[0] ? d + 1 : d * C[3]), frac(n * C[1], d * C[0]), frac(n, d * C[0]), frac(n + 1, d)].filter(notInt),
       'Әр санды жай көбейткіштерге жіктейміз: ' + fa + '. Алымы мен бөліміндегі ортақ көбейткіштер (' + C.slice().sort(function (x, y) { return x - y; }).join(', ') + ') қысқарады; қалады ' + n + '/' + d + '.',
       'Раскладываем на простые множители: ' + fa + '. Общие множители (' + C.slice().sort(function (x, y) { return x - y; }).join(', ') + ') сокращаются; остаётся ' + n + '/' + d + '.');
   });
@@ -389,11 +414,11 @@
     for (;;) { k = [6, r.int(2, 8), r.int(2, 8), 0]; k[3] = 24 - k[0] - k[1] - k[2]; if (k[3] >= 2 && k[3] <= 12 && k.filter(function (x, i) { return k.indexOf(x) === i; }).length >= 3) break; }
     k = r.shuffle(k);
     var u = r.pick([2, 3, 4, 5, 10]), cnt = k.map(function (x) { return x * u; }), N = 24 * u, j = r.int(0, 3), Lj = 'ABCD'[j], picture = piePic(k);
-    var why = '15° ↔ ' + N + ' : 24 = ' + u + ' оқушы. ', whyR = '15° ↔ ' + N + ' : 24 = ' + u + ' учеников. ';
+    var why = '15° ↔ ' + N + ' : 24 = ' + u + ' оқушы. ', whyR = '15° ↔ ' + N + ' : 24 = ' + npl(u, 'ученик', 'ученика', 'учеников') + '. ';
     var list = 'ABCD'.split('').map(function (l, i) { return l + ': ' + k[i] * 15 + '° → ' + k[i] + ' · ' + u + ' = ' + cnt[i]; }).join('; ');
-    if (lvl === 3) { why = Lj + ' секторы ' + k[j] * 15 + '° және ' + cnt[j] + ' оқушы, сондықтан 15° ↔ ' + u + ' оқушы. '; whyR = 'Сектор ' + Lj + ' — ' + k[j] * 15 + '° и ' + cnt[j] + ' учеников, значит 15° ↔ ' + u + ' учеников. '; }
+    if (lvl === 3) { why = Lj + ' секторы ' + k[j] * 15 + '° және ' + cnt[j] + ' оқушы, сондықтан 15° ↔ ' + u + ' оқушы. '; whyR = 'Сектор ' + Lj + ' — ' + k[j] * 15 + '° и ' + npl(cnt[j], 'ученик', 'ученика', 'учеников') + ', значит 15° ↔ ' + npl(u, 'ученик', 'ученика', 'учеников') + '. '; }
     var introK = lvl === 2 ? 'Дөңгелек диаграммада ' + N + ' оқушының сүйікті спорт түрін таңдауы көрсетілген (A, B, C, D — спорт түрлері). ' : 'Дөңгелек диаграммада оқушылардың сүйікті спорт түрін таңдауы көрсетілген (A, B, C, D — спорт түрлері). ' + Lj + ' түрін ' + cnt[j] + ' оқушы таңдады. ';
-    var introR = lvl === 2 ? 'Круговая диаграмма показывает, какой вид спорта выбрали ' + N + ' учеников (A, B, C, D — виды спорта). ' : 'Круговая диаграмма показывает, какой вид спорта выбрали ученики (A, B, C, D — виды спорта). Вид ' + Lj + ' выбрали ' + cnt[j] + ' учеников. ';
+    var introR = lvl === 2 ? 'Круговая диаграмма показывает, какой вид спорта выбрали ' + npl(N, 'ученик', 'ученика', 'учеников') + ' (A, B, C, D — виды спорта). ' : 'Круговая диаграмма показывает, какой вид спорта выбрали ученики (A, B, C, D — виды спорта). Вид ' + Lj + ' выбрали ' + npl(cnt[j], 'ученик', 'ученика', 'учеников') + '. ';
     if (opt && opt.int) {
       var q = (j + 1 + r.int(0, 2)) % 4, Lq = 'ABCD'[q];
       if (lvl === 2) q = j, Lq = Lj;
@@ -471,8 +496,10 @@
     var a, b, c;
     if (lvl === 2) { a = b = c = r.int(4, 7); }
     else { do { a = r.int(3, 8); b = r.int(3, 7); c = r.int(2, 6); } while (a === b && b === c); }
-    var nb = lvl === 4, cnt = paintCounts(a, b, c, nb), all = paintCounts(a, b, c, false);
-    var ks = lvl === 2 ? [1, 2] : lvl === 3 ? [0, 1, 2] : [0, 1, 2, 3], kk = r.pick(ks), ans = cnt[kk];
+    var nb = lvl === 4, ks = lvl === 2 ? [1, 2] : lvl === 3 ? [0, 1, 2] : [0, 1, 2, 3], kk = r.pick(ks);
+    if (kk === 0 && c < 3) c = r.int(3, 6);   // «ни одной грани» при толщине 2 дало бы 0 — неинтересно
+    if (a === b && b === c && lvl > 2) a++;
+    var cnt = paintCounts(a, b, c, nb), all = paintCounts(a, b, c, false), ans = cnt[kk];
     var dims = a + ' × ' + b + ' × ' + c, cube = lvl === 2;
     var head = cube ? 'Өлшемі ' + dims + ' текшенің барлық жағы боялды' : nb ? 'Өлшемдері ' + dims + ' тікбұрышты параллелепипед үстелде тұр; оның астыңғы жағынан басқа барлық жағы боялды' : 'Өлшемдері ' + dims + ' тікбұрышты параллелепипедтің барлық жағы боялды';
     var headR = cube ? 'Все грани куба ' + dims + ' покрасили' : nb ? 'Прямоугольный параллелепипед ' + dims + ' стоит на столе; покрасили все его грани, кроме нижней' : 'Все грани прямоугольного параллелепипеда ' + dims + ' покрасили';
@@ -534,7 +561,7 @@
     var picture = pic(ox + p * u + t * k + 10, oy + q * u + 10, out);
     var dimK = p + ' × ' + q + (t > 1 ? ' × ' + t : '');
     var sk = 'Тесіксіз пластина ' + dimK + ': ' + full * t + ' кубик. Терезе ' + win[2] + ' × ' + win[3] + ' = ' + winA + (notA ? ', төменгі екі ойық барлығы ' + notA : '') + ' — бір қабатта ' + removed + ' кубик жоқ' + (t > 1 ? ', ал қабат екеу: ' + removed + ' · 2 = ' + removed * 2 : '') + '. ' + full * t + ' − ' + removed * t + ' = ' + ans + '.';
-    var sr = 'Сплошная плита ' + dimK + ': ' + full * t + ' кубиков. Окно ' + win[2] + ' × ' + win[3] + ' = ' + winA + (notA ? ', два нижних выреза вместе ' + notA : '') + ' — в одном слое нет ' + removed + ' кубиков' + (t > 1 ? ', а слоёв два: ' + removed * 2 : '') + '. ' + full * t + ' − ' + removed * t + ' = ' + ans + '.';
+    var sr = 'Сплошная плита ' + dimK + ': ' + npl(full * t, 'кубик', 'кубика', 'кубиков') + '. Окно ' + win[2] + ' × ' + win[3] + ' = ' + winA + (notA ? ', два нижних выреза вместе ' + notA : '') + ' — в одном слое нет ' + npl(removed, 'кубика', 'кубиков', 'кубиков') + (t > 1 ? ', а слоёв два: ' + removed * 2 : '') + '. ' + full * t + ' − ' + removed * t + ' = ' + ans + '.';
     return P('Фигура бірдей кішкентай кубиктерден желімделген (тесіктер фигураны тесіп өтеді). Фигураны жасау үшін неше кубик пайдаланылды?', 'Фигуру склеили из одинаковых маленьких кубиков (отверстия сквозные). Сколько кубиков использовали?', picture,
       ans, ints([full * t, (full - winA) * t, full - removed, ans - t, ans + t, (full - removed + 2 * (win[2] + win[3])) * t], ans), sk, sr);
   });
@@ -554,7 +581,8 @@
     var cv = function (v) { return inMM ? v : v / 10; };
     var wrong = [restMM / (inMM ? 10 : 1), cv(restMM + 50), cv(restMM - 40), cv(restMM + 100), errDm > 0 && errDm < 1e5 ? cv(errDm) : null, errMm > 0 ? cv(errMm) : null].filter(function (v) { return v !== null && v > 0 && v % 1 === 0; });
     var kk = who + ' ' + K + ' км жарыс қашықтығының алдымен ' + fmt(a) + ' м жүгірді, содан кейін ' + fmt(b) + ' дм жүріп өтті' + (d ? ', тағы ' + fmt(d) + ' см секірді' : '') + ', соңында ' + fmt(c) + ' мм еңбектеп барып тоқтады. Мәреге жету үшін оған неше ' + (inMM ? 'миллиметр' : 'сантиметр') + ' қалды?';
-    var ru = 'На соревновании по бегу на дистанцию ' + K + ' км ' + who + ' пробежал ' + fmt(a) + ' м, потом прошёл ' + fmt(b) + ' дм' + (d ? ', ещё пропрыгал ' + fmt(d) + ' см' : '') + ', наконец, прополз ' + fmt(c) + ' мм и остановился. Сколько ' + (inMM ? 'миллиметров' : 'сантиметров') + ' ему осталось до финиша?';
+    var fe = who === 'Дана';   // женское имя — женский род глаголов
+    var ru = 'На соревновании по бегу на дистанцию ' + K + ' км ' + who + (fe ? ' пробежала ' : ' пробежал ') + fmt(a) + ' м, потом ' + (fe ? 'прошла ' : 'прошёл ') + fmt(b) + ' дм' + (d ? ', ещё ' + (fe ? 'пропрыгала ' : 'пропрыгал ') + fmt(d) + ' см' : '') + ', наконец, ' + (fe ? 'проползла ' : 'прополз ') + fmt(c) + ' мм и ' + (fe ? 'остановилась' : 'остановился') + '. Сколько ' + (inMM ? 'миллиметров' : 'сантиметров') + (fe ? ' ей' : ' ему') + ' осталось до финиша?';
     var chainS = fmt(K * 1e6) + ' − ' + fmt(1000 * a) + ' − ' + fmt(100 * b) + (d ? ' − ' + fmt(10 * d) : '') + ' − ' + fmt(c) + ' = ' + fmt(restMM) + ' мм';
     return Q(kk, ru, ans, ints(wrong, ans), 'Бәрін миллиметрге айналдырамыз (1 км = 1 000 000 мм, 1 м = 1000 мм, 1 дм = 100 мм, 1 см = 10 мм): ' + chainS + (inMM ? '.' : ' = ' + fmt(restMM / 10) + ' см.'),
       'Переводим всё в миллиметры (1 км = 1 000 000 мм, 1 м = 1000 мм, 1 дм = 100 мм, 1 см = 10 мм): ' + chainS + (inMM ? '.' : ' = ' + fmt(restMM / 10) + ' см.'), { unit: unit(inMM ? 'мм' : 'см') });
@@ -629,13 +657,13 @@
       whoR + ' соединила белые, серые и чёрные бусины в повторяющемся узоре, как показано ниже. ' + preR + 'Радиус каждой бусины ' + rTxtR + '. ' + whoR + ' сделала цепочку длиной ' + LtxtR + '. Сколько ' + BEAD[col].r + ' бусин она использовала?', picture,
       ans, ints([wrongR, fullOnly, ans + 1, ans - 1, N - ans, inPer * Math.ceil((N - pre.length) / plen)], ans).filter(function (v) { return v > 0; }),
       'Бір моншақтың ұзындығы — диаметрі: ' + dTxt + ' (радиус емес!). Моншақ саны: ' + Ltxt + ' : ' + dTxt + ' = ' + N + '. ' + (pre.length ? 'Алғашқы ' + pre.length + ' моншақта ' + BEAD[col].k + ' моншақ — ' + countIn(pre.length) + '. ' : '') + 'Қайталанатын топта ' + plen + ' моншақ, оның ' + inPer + ' — ' + BEAD[col].k + '. ' + (N - pre.length) + ' = ' + plen + ' · ' + full + ' + ' + tail + ': ' + full + ' толық топ және ' + tail + ' артық моншақ. Барлығы ' + ans + '.',
-      'Длина одной бусины — её диаметр: ' + dTxt + ' (а не радиус!). Бусин: ' + LtxtR + ' : ' + dTxt + ' = ' + N + '. ' + (pre.length ? 'Среди первых ' + pre.length + ' бусин ' + BEAD[col].r + ' — ' + countIn(pre.length) + '. ' : '') + 'В повторяющейся группе ' + plen + ' бусин, из них ' + BEAD[col].r + ' — ' + inPer + '. ' + (N - pre.length) + ' = ' + plen + ' · ' + full + ' + ' + tail + ': ' + full + ' полных групп и ' + tail + ' лишних бусин. Всего ' + ans + '.');
+      'Длина одной бусины — её диаметр: ' + dTxt + ' (а не радиус!). Бусин: ' + LtxtR + ' : ' + dTxt + ' = ' + N + '. ' + (pre.length ? 'Среди первых ' + pre.length + ' бусин ' + BEAD[col].r + ' — ' + countIn(pre.length) + '. ' : '') + 'В повторяющейся группе ' + plen + ' бусин, из них ' + BEAD[col].r + ' — ' + inPer + '. ' + (N - pre.length) + ' = ' + plen + ' · ' + full + ' + ' + tail + ': ' + npl(full, 'полная группа', 'полные группы', 'полных групп') + ' и ' + npl(tail, 'лишняя бусина', 'лишние бусины', 'лишних бусин') + '. Всего ' + ans + '.');
   });
 
   /* ================= 17. Фигурные числа (l_seq) ================= */
   var FIGS = {
     bridge: { lin: true, pts: function (n, h, th) { var o = [], i, j; for (j = 0; j < h; j++) { o.push([0, j]); o.push([n + 1, j]); } for (j = 0; j < th; j++) for (i = 1; i <= n; i++) o.push([i, j]); return o; },
-      f: function (n, h, th) { return 2 * h + th * n; }, sk: function (h, th) { return '2 · ' + h + ' + ' + (th > 1 ? th + 'n' : 'n'); } },
+      f: function (n, h, th) { return 2 * h + th * n; }, sk: function (h, th) { return (th > 1 ? th + 'n' : 'n') + ' + ' + 2 * h; } },
     corner: { lin: true, pts: function (n) { var o = [], i; for (i = 0; i <= n; i++) o.push([i, n]); for (i = 0; i < n; i++) o.push([0, i]); return o; }, f: function (n) { return 2 * n + 1; }, sk: function () { return '2n + 1'; } },
     frame: { lin: true, pts: function (n) { var o = [], i, j; for (j = 0; j <= n; j++) for (i = 0; i <= n; i++) if (i === 0 || j === 0 || i === n || j === n) o.push([i, j]); return o; }, f: function (n) { return 4 * n; }, sk: function () { return '4n'; } },
     plus: { lin: true, pts: function (n) { var o = [[n, n]], i; for (i = 1; i <= n; i++) o.push([n - i, n], [n + i, n], [n, n - i], [n, n + i]); return o; }, f: function (n) { return 4 * n + 1; }, sk: function () { return '4n + 1'; } },
@@ -683,8 +711,8 @@
       var m = r.int(3, k - 6), from = 2 * m + 1;
       ans = k * k - m * m; ex = from + ' + ' + (from + 2) + ' + ' + (from + 4) + ' + … + ' + last;
       wrong = [k * k, (k - m) * (k - m), k * k - (m + 1) * (m + 1), k * k - (m - 1) * (m - 1), (from + last) * (k - m)];
-      sk = '1-ден ' + last + '-ге дейінгі тақ сандар: ' + k + ' дана, қосындысы ' + k * k + '. Басындағы 1-ден ' + (from - 2) + '-ге дейінгілер: ' + m + ' дана, қосындысы ' + m * m + '. ' + k * k + ' − ' + m * m + ' = ' + ans + '.';
-      sr = 'Нечётные от 1 до ' + last + ': ' + k + ' штук, сумма ' + k * k + '. От 1 до ' + (from - 2) + ': ' + m + ' штук, сумма ' + m * m + '. ' + k * k + ' − ' + m * m + ' = ' + ans + '.';
+      sk = '1-ден ' + dat(last) + ' дейінгі тақ сандар: ' + k + ' дана, қосындысы ' + k * k + '. Басындағы 1-ден ' + dat(from - 2) + ' дейінгілер: ' + m + ' дана, қосындысы ' + m * m + '. ' + k * k + ' − ' + m * m + ' = ' + ans + '.';
+      sr = 'Нечётные от 1 до ' + last + ': ' + npl(k, 'число', 'числа', 'чисел') + ', сумма ' + k * k + '. От 1 до ' + (from - 2) + ': ' + npl(m, 'число', 'числа', 'чисел') + ', сумма ' + m * m + '. ' + k * k + ' − ' + m * m + ' = ' + ans + '.';
       return P(introK + 'Өрнектің мәнін анықтаңыз:' + expr(ex), introR + 'Найдите значение выражения:' + expr(ex), picture, ans, ints(wrong, ans), sk, sr);
     }
     ans = last; ex = '1 + 3 + 5 + … + n = ' + k * k;
@@ -795,7 +823,8 @@
     for (;;) {
       R = r.pick(TRI.filter(function (t) { return lvl === 2 ? t.l === 2 : t.l === 3; }));
       ex = [0, 1, 2].map(function () { return [r.int(2, 9), r.int(1, 8), r.int(1, 8)]; });
-      ok = ex.every(function (e) { var v = R.f(e[0], e[1], e[2]); return v > 0 && v < 1000 && new Set(e).size === 3; });
+      ok = ex.every(function (e) { var v = R.f(e[0], e[1], e[2]); return v > 0 && v < 1000 && new Set(e).size === 3; }) &&
+        new Set(ex.map(function (e) { return e[0]; })).size === 3 && R.f.apply(null, ex[0]) !== R.f.apply(null, ex[1]);
       if (!ok) continue;
       // правило должно однозначно восстанавливаться по двум примерам
       var rivals = TRI.filter(function (t) { return t !== R && t.f.apply(null, ex[0]) === R.f.apply(null, ex[0]) && t.f.apply(null, ex[1]) === R.f.apply(null, ex[1]); });

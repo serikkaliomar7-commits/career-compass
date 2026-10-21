@@ -74,14 +74,14 @@
   F.m_eq.push(
     { id: 'b25.ratio_expr', lv: [2, 3], f: function (r, lvl, opt) {   // (a − b)/b = k → (a + b)/b, (2a + b)/b …
       var k;
-      if (opt.int || r.chance(0.5)) k = FR(r.int(2, 9));
-      else { var q = r.pick([2, 3, 4, 5]), p; do { p = r.int(1, 2 * q + 1); } while (gcd(p, q) !== 1 || p % q === 0); k = FR(p, q); }
+      if (opt.int || r.chance(0.4)) k = FR(r.int(2, 15));
+      else { var q = r.pick([2, 3, 4, 5, 6, 7]), p; do { p = r.int(1, 3 * q + 1); } while (gcd(p, q) !== 1 || p % q === 0); k = FR(p, q); }
       var one = FR(1), t = FR.add(k, one), two = FR(2), three = FR(3);
       var kind = r.pick(lvl === 2 ? ['sum', 'dbl'] : opt.int ? ['tri'] : ['tri', 'rat']), ask, ans, wrong, step;
-      if (kind === 'sum') { ask = fx('a + b', 'b'); ans = FR.add(t, one); wrong = [t, FR.add(k, three), FR.mul(two, k)]; step = '(a + b)/b = a/b + 1 = ' + sf(t) + ' + 1 = ' + sf(ans); }
-      else if (kind === 'dbl') { ask = fx('2a + b', 'b'); ans = FR.add(FR.mul(two, t), one); wrong = [FR.add(FR.mul(two, k), one), FR.mul(two, t), FR.add(t, one)]; step = '(2a + b)/b = 2 · a/b + 1 = 2 · ' + sf(t) + ' + 1 = ' + sf(ans); }
-      else if (kind === 'tri') { ask = fx('3a − 2b', 'b'); ans = FR.sub(FR.mul(three, t), two); wrong = [FR.sub(FR.mul(three, k), two), FR.add(FR.mul(three, t), two), FR.mul(three, t)]; step = '(3a − 2b)/b = 3 · a/b − 2 = 3 · ' + sf(t) + ' − 2 = ' + sf(ans); }
-      else { ask = fx('a + b', 'a − b'); ans = FR.div(FR.add(t, one), k); wrong = [FR.add(t, one), FR.div(k, FR.add(t, one)), FR.div(t, k)]; step = '(a + b)/(a − b) = (a/b + 1)/(a/b − 1) = ' + sf(FR.add(t, one)) + ' : ' + sf(k) + ' = ' + sf(ans); }
+      if (kind === 'sum') { ask = fx('a + b', 'b'); ans = FR.add(t, one); wrong = [t, FR.add(k, three), FR.mul(two, k), FR.add(ans, one), FR.sub(k, one)]; step = '(a + b)/b = a/b + 1 = ' + sf(t) + ' + 1 = ' + sf(ans); }
+      else if (kind === 'dbl') { ask = fx('2a + b', 'b'); ans = FR.add(FR.mul(two, t), one); wrong = [FR.add(FR.mul(two, k), one), FR.mul(two, t), FR.add(t, one), FR.add(ans, two)]; step = '(2a + b)/b = 2 · a/b + 1 = 2 · ' + sf(t) + ' + 1 = ' + sf(ans); }
+      else if (kind === 'tri') { ask = fx('3a − 2b', 'b'); ans = FR.sub(FR.mul(three, t), two); wrong = [FR.sub(FR.mul(three, k), two), FR.add(FR.mul(three, t), two), FR.mul(three, t), FR.sub(FR.mul(three, t), one)]; step = '(3a − 2b)/b = 3 · a/b − 2 = 3 · ' + sf(t) + ' − 2 = ' + sf(ans); }
+      else { ask = fx('a + b', 'a − b'); ans = FR.div(FR.add(t, one), k); wrong = [FR.add(t, one), FR.div(k, FR.add(t, one)), FR.div(t, k), FR.div(FR.add(t, two), k)]; step = '(a + b)/(a − b) = (a/b + 1)/(a/b − 1) = ' + sf(FR.add(t, one)) + ' : ' + sf(k) + ' = ' + sf(ans); }
       var e = expr(fx('a − b', 'b') + ' = ' + fh(k) + '&emsp;⇒&emsp;' + ask + ' = ?');
       return Q('Берілген теңдікті пайдаланып, өрнектің мәнін табыңыз:' + e, 'Используя данное равенство, найдите значение выражения:' + e, ans, wrong,
         '(a − b)/b = a/b − 1 = ' + sf(k) + ', сондықтан a/b = ' + sf(t) + '. ' + step + '.',
