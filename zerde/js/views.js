@@ -49,7 +49,15 @@
       'ad.title': 'Әкімші', 'ad.pay': 'Төлемдер', 'ad.users': 'Пайдаланушылар', 'ad.promo': 'Промокодтар', 'ad.set': 'Баптаулар', 'ad.approve': 'Растау', 'ad.reject': 'Бас тарту', 'ad.noPay': 'Тексерілетін төлем жоқ.',
       'ad.search': 'Іздеу (аты немесе пошта)', 'ad.grant': 'Күн қосу', 'ad.until': 'дейін', 'ad.code': 'Код', 'ad.kind': 'Түрі', 'ad.k.free': 'тегін қолжетімділік', 'ad.k.discount': 'жеңілдік', 'ad.k.admin': 'әкімші', 'ad.days': 'Күн (бос — шексіз)', 'ad.percent': 'Жеңілдік %', 'ad.max': 'Неше рет (бос — шексіз)', 'ad.note': 'Ескертпе', 'ad.create': 'Жасау', 'ad.used': 'қолданылды',
       'ad.kaspiPhone': 'Kaspi нөмірі', 'ad.kaspiName': 'Алушының аты', 'ad.prizesKk': 'Сыйлықтар (қазақша)', 'ad.prizesRu': 'Сыйлықтар (орысша)', 'ad.trial': 'Тегін күндер', 'ad.price': 'Баға, ₸', 'ad.save': 'Сақтау', 'ad.saved': 'Сақталды', 'ad.adminWarn': 'Әкімші промокодын тек сенімді адамдарға беріңіз және бір реттік етіп жасаңыз.',
-      'c.title': 'Флеш-карточкалар', 'c.sub': 'Формулалар мен ережелер. «Білемін» — карточка сирек шығады, «Қайталау» — жиі.', 'c.cards': '{n} карточка', 'c.known': '{k}/{n} білемін', 'c.back': 'Карточкаларға', 'c.show': 'Жауапты көру үшін басыңыз', 'c.q': 'Сұрақ', 'c.a': 'Жауап',
+      'c.title': 'Флеш-карточкалар', 'c.sub': 'Формулалар мен ережелер. Бастамас бұрын төмендегі ережені оқыңыз.',
+      'c.h.title': 'Карточкалар қалай жұмыс істейді?', 'c.h.ok': 'Түсіндім, бастаймыз', 'c.h.again': 'Ереже',
+      'c.h.1': '<b>Карточканы басыңыз</b> — артында жауабы ашылады. Алдымен жауапты өзіңіз есіңізге түсіріп көріңіз, сосын ғана ашыңыз.',
+      'c.h.2': '<b>«Білемін»</b> — жауапты ашпай тұрып дұрыс айта алсаңыз ғана басыңыз. Карточка бір деңгейге көтеріледі (0-ден 4-ке дейін) және колоданың соңына қарай кетеді.',
+      'c.h.3': '<b>«Қайталау»</b> — білмесеңіз немесе қателессеңіз басыңыз. Карточка 0 деңгейге түседі де, келесі жолы колоданың басында шығады. Бұл ұпайды азайтпайды.',
+      'c.h.4': 'Карточка <b>2 рет «Білемін»</b> басылғаннан кейін «білемін» қатарына қосылады — колода бетіндегі «K / N» есептегіші мен жолақ осыны көрсетеді.',
+      'c.h.5': '<b>‹ және ›</b> — тек парақтау: ештеңе жазылмайды.',
+      'c.h.6': 'Колоданы соңына дейін өткенде рейтингке ұпай қосылады: әр «Білемін» — 1 ұпай, бір колодадан күніне 20 ұпайдан аспайды.',
+      'c.h.7': '<b>Адал болыңыз:</b> білмей «Білемін» бассаңыз, карточка сирек шығып, формула ұмытылып қалады — емтиханда дәл сол жерде қателесесіз.', 'c.cards': '{n} карточка', 'c.known': '{k}/{n} білемін', 'c.back': 'Карточкаларға', 'c.show': 'Жауапты көру үшін басыңыз', 'c.q': 'Сұрақ', 'c.a': 'Жауап',
       'c.know': 'Білемін', 'c.again': 'Қайталау', 'c.restart': 'Қайтадан', 'c.done': 'Колода аяқталды: {k} карточканы білесіз.', 'c.none': 'Карточкалар жақында қосылады.',
       'g.title': 'Жылдам есеп', 'g.sub': '60 секундта мүмкіндігінше көп мысал шығарыңыз. Enter — жауап беру. Күндегі бірінші ойын рейтингке ұпай береді.', 'g.start': 'Бастау', 'g.level': 'Деңгей', 'g.score': 'Нәтиже: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Тағы ойнау', 'g.time': 'уақыт'
     },
@@ -94,7 +102,15 @@
       'ad.title': 'Админ', 'ad.pay': 'Оплаты', 'ad.users': 'Пользователи', 'ad.promo': 'Промокоды', 'ad.set': 'Настройки', 'ad.approve': 'Подтвердить', 'ad.reject': 'Отклонить', 'ad.noPay': 'Оплат на проверке нет.',
       'ad.search': 'Поиск (имя или почта)', 'ad.grant': 'Добавить дни', 'ad.until': 'до', 'ad.code': 'Код', 'ad.kind': 'Тип', 'ad.k.free': 'бесплатный доступ', 'ad.k.discount': 'скидка', 'ad.k.admin': 'админ', 'ad.days': 'Дней (пусто — бессрочно)', 'ad.percent': 'Скидка %', 'ad.max': 'Сколько раз (пусто — без лимита)', 'ad.note': 'Заметка', 'ad.create': 'Создать', 'ad.used': 'использован',
       'ad.kaspiPhone': 'Номер Kaspi', 'ad.kaspiName': 'Имя получателя', 'ad.prizesKk': 'Призы (казахский)', 'ad.prizesRu': 'Призы (русский)', 'ad.trial': 'Бесплатных дней', 'ad.price': 'Цена, ₸', 'ad.save': 'Сохранить', 'ad.saved': 'Сохранено', 'ad.adminWarn': 'Админ-промокод давайте только доверенным людям и делайте одноразовым.',
-      'c.title': 'Флеш-карточки', 'c.sub': 'Формулы и правила. «Знаю» — карточка будет реже, «Повторить» — чаще.', 'c.cards': '{n} карточек', 'c.known': 'знаю {k}/{n}', 'c.back': 'К карточкам', 'c.show': 'Нажмите, чтобы увидеть ответ', 'c.q': 'Вопрос', 'c.a': 'Ответ',
+      'c.title': 'Флеш-карточки', 'c.sub': 'Формулы и правила. Перед началом прочитайте правила ниже.',
+      'c.h.title': 'Как работают карточки?', 'c.h.ok': 'Понятно, начинаем', 'c.h.again': 'Правила',
+      'c.h.1': '<b>Нажмите на карточку</b> — откроется ответ на обороте. Сначала попробуйте вспомнить ответ сами и только потом открывайте.',
+      'c.h.2': '<b>«Знаю»</b> — нажимайте, только если назвали ответ правильно, не подглядывая. Карточка поднимается на уровень (от 0 до 4) и уходит ближе к концу колоды.',
+      'c.h.3': '<b>«Повторить»</b> — если не знали или ошиблись. Карточка падает на уровень 0 и в следующий раз будет в начале колоды. Баллы за это не снимаются.',
+      'c.h.4': 'Карточка считается выученной после <b>двух нажатий «Знаю»</b> — это показывают счётчик «K / N» и полоска на странице колод.',
+      'c.h.5': '<b>‹ и ›</b> — просто листают карточки, ничего не записывают.',
+      'c.h.6': 'Когда колода пройдена до конца, начисляются баллы в рейтинг: 1 балл за каждое «Знаю», не больше 20 в день за одну колоду.',
+      'c.h.7': '<b>Будьте честны:</b> если нажать «Знаю», не зная, карточка будет попадаться реже и формула забудется — и ошибка случится на экзамене.', 'c.cards': '{n} карточек', 'c.known': 'знаю {k}/{n}', 'c.back': 'К карточкам', 'c.show': 'Нажмите, чтобы увидеть ответ', 'c.q': 'Вопрос', 'c.a': 'Ответ',
       'c.know': 'Знаю', 'c.again': 'Повторить', 'c.restart': 'Заново', 'c.done': 'Колода пройдена: вы знаете {k} карточек.', 'c.none': 'Карточки скоро появятся.',
       'g.title': 'Быстрый счёт', 'g.sub': 'Решите как можно больше примеров за 60 секунд. Enter — ответить. Первая игра за день даёт баллы в рейтинг.', 'g.start': 'Начать', 'g.level': 'Уровень', 'g.score': 'Результат: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Ещё раз', 'g.time': 'время'
     }
@@ -355,9 +371,14 @@
   // Лейтнер: коробка 0–4; «Знаю» — в следующую коробку, «Повторить» — в нулевую. В колоде сначала слабые карточки.
   function decksFor() { var sc = ui().S().profile.school; return (Z.decks || []).filter(function (d) { return d.schools.indexOf(sc) >= 0; }); }
   function boxes(id) { var S = ui().S(); S.cards = S.cards || {}; return (S.cards[id] = S.cards[id] || {}); }
+  // Правила карточек: открыты, пока ученик их не прочитал; потом — свёрнуты, но всегда под рукой.
+  function cardRules(open) {
+    return '<details class="card c-rules"' + (open ? ' open' : '') + '><summary>' + tt('c.h.title') + '</summary><ol>' +
+      [1, 2, 3, 4, 5, 6, 7].map(function (k) { return '<li>' + tt('c.h.' + k) + '</li>'; }).join('') + '</ol></details>';
+  }
   function cards() {
     var ds = decksFor(), lg = I.lang();
-    var h = '<section class="sec"><h1>' + tt('c.title') + '</h1><p class="muted">' + tt('c.sub') + '</p></section>';
+    var h = '<section class="sec"><h1>' + tt('c.title') + '</h1><p class="muted">' + tt('c.sub') + '</p></section>' + cardRules(!ui().S().cardsHelpSeen);
     if (!ds.length) return h + '<p class="muted">' + tt('c.none') + '</p>';
     return h + '<div class="decks">' + ds.map(function (d) {
       var bx = boxes(d.id), known = d.cards.filter(function (c, i) { return (bx[i] || 0) >= 2; }).length;
@@ -374,8 +395,12 @@
     if (!d) return cards();
     if (!m.dk || m.dk.id !== id) m.dk = { id: id, order: deckOrder(d), i: 0, flip: false, know: 0 };
     var st = m.dk, n = st.order.length;
-    var h = '<div class="dk-head"><a class="back" href="#/cards">' + ui().ic('back') + tt('c.back') + '</a><span class="muted">' + Math.min(st.i + 1, n) + ' / ' + n + '</span></div>' +
+    var h = '<div class="dk-head"><a class="back" href="#/cards">' + ui().ic('back') + tt('c.back') + '</a><span class="row"><button class="btn line sm" data-act="dkHelp">? ' + tt('c.h.again') + '</button><span class="muted">' + Math.min(st.i + 1, n) + ' / ' + n + '</span></span></div>' +
       '<div class="center"><h2>' + esc(ru ? d.ru : d.kk) + '</h2><p class="muted">' + esc(ru ? d.sub_ru : d.sub_kk) + '</p></div><div class="bar"><i style="width:' + (st.i / n * 100) + '%"></i></div>';
+    // Первый вход (или «? Правила»): сначала объясняем, что делают кнопки.
+    if (!ui().S().cardsHelpSeen || m.dkHelp) {
+      return h + cardRules(true) + '<div class="row center"><button class="btn pill dark" data-act="dkHelpOk">' + tt('c.h.ok') + '</button></div>';
+    }
     if (st.i >= n) {
       return h + '<div class="flash done"><b>' + tt('c.done', { k: st.know }) + '</b></div><div class="row center"><button class="btn pill" data-act="dkRestart">' + tt('c.restart') + '</button><a class="btn pill dark" href="#/cards">' + tt('c.back') + '</a></div>';
     }
@@ -448,6 +473,8 @@
     dkNext: function () { var st = ui().mem.dk; st.i++; st.flip = false; ui().render(); },
     dkPrev: function () { var st = ui().mem.dk; if (st.i > 0) st.i--; st.flip = false; ui().render(); },
     dkRestart: function () { ui().mem.dk = null; ui().render(); },
+    dkHelp: function () { ui().mem.dkHelp = true; ui().render(); },
+    dkHelpOk: function () { ui().S().cardsHelpSeen = true; ui().mem.dkHelp = false; ui().save(); ui().render(); },
     dkMark: function (el) {
       var st = ui().mem.dk, bx = boxes(st.id), k = st.order[st.i];
       if (el.dataset.ok === '1') { bx[k] = Math.min(4, (bx[k] || 0) + 1); st.know++; } else bx[k] = 0;
