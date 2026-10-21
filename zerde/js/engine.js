@@ -372,7 +372,7 @@
         if (f.full) rl = Math.max(2, rl);
         var lv = [], np = Math.ceil(sec.count / 5);
         for (var j = 0; j < np; j++) lv.push(Math.min(4, rl + (j >= np / 2 ? 1 : 0)));   // вторая половина текстов — на ступень труднее
-        var ids = pickPassages(r, lv, sec.bank).map(function (p) { return p.id; });
+        var ids = sec.pick ? sec.pick(seed, np) : pickPassages(r, lv, sec.bank).map(function (p) { return p.id; });   // pick — «Практика»: тексты по кругу
         ids.forEach(function (id, k) { buildReading(id, seed + 500 + si * 1000 + k * 10, mode.options).slice(0, sec.count - k * 5).forEach(function (q) { q.section = si; qs.push(q); }); });
         return;
       }
@@ -412,7 +412,7 @@
     var t = Z.topicById[tid];
     return !!(fmt && t && (Z.formats[t.gen] || []).some(function (fm) { return fm.id === fmt && fm.lv.indexOf(lvl) >= 0; }));
   }
-  function tplSig(kk) { return 'tpl:' + String(kk).replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, ' ').replace(/\d+([.,]\d+)?/g, '#').replace(/\s+/g, ' ').trim().slice(0, 45); }
+  function tplSig(kk) { return 'tpl:' + String(kk).replace(/<svg[\s\S]*?<\/svg>/g, '').replace(/<[^>]+>/g, ' ').replace(/\d+(?:[\s\u00a0\u202f]\d{3})*(?:[.,]\d+)?/g, '#').replace(/\s+/g, ' ').trim().slice(0, 45); }
   function blueprintSection(sec, si, f, r, seed, mode, qs, seen) {
     var bp = Z.blueprints[sec.blueprint], prevSeed = 0, avoid = {};
     // у этих типов свой слот в схеме своего года — в «свободных» слотах их не берём (не повторяются и не смешивают годы)
@@ -427,7 +427,11 @@
       var same = sl.same && hasFormat(tid, fmt, lvl);   // нет формата — обычная задача со своим seed
       var q, s2 = same ? prevSeed : seed + k * 7919 + si, tries = 0;
       // в одном варианте — без одинаковых задач и без двух задач одного шаблона (другие числа, та же формулировка)
-      do { q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false, fmt: fmt, avoid: avoid }); } while ((seen[q.kk] || seen[tplSig(q.kk)]) && !same && ++tries < 25);
+      do {
+        // все шаблоны темы уже были в этом варианте — берём соседнюю тему слота (alt), если она есть
+        if (tries === 25 && !fmt && sl.alt && tid === sl.t) { tid = sl.alt[0]; }
+        q = buildQuestion(tid, lvl, s2 + tries * 31337, mode, { vary: false, fmt: fmt, avoid: avoid });
+      } while ((seen[q.kk] || seen[tplSig(q.kk)]) && !same && ++tries < (sl.alt && !fmt ? 50 : 25));
       prevSeed = q.seed;
       q.vary = false; seen[q.kk] = 1; seen[tplSig(q.kk)] = 1; q.section = si; q.slotN = k + 1;
       qs.push(q);

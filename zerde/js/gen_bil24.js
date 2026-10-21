@@ -576,7 +576,8 @@
     var order = r.shuffle(range(5)), sizes = order.map(function (j) { return vals[j]; }), right = order.map(function (j) { return L[j]; });
     var cands = [];
     for (i = 0; i < 5; i++) for (var j = i + 1; j < 5; j++) { var w = right.slice(); w[i] = right[j]; w[j] = right[i]; cands.push({ w: w, d: Math.abs(sizes[i] - sizes[j]) }); }
-    cands.sort(function (a, b) { return a.d - b.d; });
+    // перестановка двух секторов должна быть видна глазом: разница не меньше 24° (близкие по размеру — в конец)
+    cands.sort(function (a, b) { var fa = a.d * 360 / total >= 24, fb = b.d * 360 / total >= 24; return fa !== fb ? (fa ? -1 : 1) : a.d - b.d; });
     var pool = cands.slice(0, 6).map(function (c) { return c.w; }), wrongL = uniq(right, r.shuffle(pool).concat(cands.map(function (c) { return c.w; })), function (a) { return a.join(''); }, 3);
     var deg = function (v) { return v * 360 / total; };
     var bigIdx = sizes.indexOf(mx), extra = lvl >= 3 ? '' : '';
@@ -810,7 +811,7 @@
     var k = 230 / (m * c), X0 = 40, Y0 = 130, Hp = Math.min(100, h * k), out = '';
     var A = [X0, Y0], B = [X0, Y0 - Hp], C = [X0 + c * k, Y0], D = [X0 + m * c * k, Y0];
     out += poly([B, C, D], null, S_G) + poly([A, B, D], null, S_L) + line(B[0], B[1], C[0], C[1]) + rect(X0, Y0 - 8, 8, 8, null, S_L);
-    for (var i = 0; i < m; i++) { var tx = X0 + (i + 0.5) * c * k; out += line(tx, Y0 - 5, tx, Y0 + 5); }
+    for (var i = 1; i < m; i++) { var tx = X0 + i * c * k; out += line(tx, Y0 - 5, tx, Y0 + 5); }   // AD разделён на m равных частей (первая — AC)
     out += txt(A[0] - 6, A[1] + 14, 'A') + txt(B[0], B[1] - 6, 'B') + txt(C[0], C[1] + 16, 'C') + txt(D[0] + 6, D[1] + 14, 'D');
     if (iso) out += txt(X0 - 12, Y0 - Hp / 2 + 4, h + ' см', 'end') + line(X0 + 3, Y0 - Hp / 2 - 4, X0 - 3, Y0 - Hp / 2 + 4) + line(X0 + c * k / 2 + 3, Y0 - 4, X0 + c * k / 2 - 3, Y0 + 4);
     else out += txt(X0 - 8, Y0 - Hp / 2 + 4, h + ' см', 'end');
@@ -995,17 +996,18 @@
     for (;;) {
       var ds = r.shuffle([2, 3, 4, 6, 5]), d1 = ds[0], d2 = ds[1], d3 = ds[2], d4 = ds[3];
       var a1 = r.int(1, 7), b1 = r.int(-9, 9), a2 = r.int(1, 12), kk = r.int(1, 3), m = r.int(1, 3), a4 = r.int(1, 5);
-      if (!b1) continue;
+      if (!b1 || gcd(a2, d2) > 1 || gcd(a4, d4) > 1 || gcd(kk, d3) > 1) continue;   // без 5x/5, 3(3 − x)/3
       var A = fr.add(fr.sub(fr(a1, d1), fr(a2, d2)), fr.sub(fr(kk, d3), fr(a4, d4))), C = fr.sub(fr(b1, d1), fr(kk * m, d3));
       if (A.n === 0) continue;
       var V = fr.div(fr(-C.n, C.d), A);
       if (V.d !== 1 || V.n === 0 || Math.abs(V.n) > 9) continue;
       var s = lvl >= 3 ? r.pick(['≥', '≤', '<', '>']) : r.pick(['≥', '≤']), res = A.n < 0 ? FLIP[s] : s, v = V.n;
       var e = fx(lin(a1, b1), d1) + ' − ' + fx((a2 === 1 ? '' : a2) + 'x', d2) + ' ' + HTMLS[s] + ' ' + fx((kk === 1 ? '' : kk) + '(' + m + ' − x)', d3) + ' + ' + fx((a4 === 1 ? '' : a4) + 'x', d4);
-      var one = function (sg, val) { return 'x ' + HTMLS[sg] + ' ' + num(val); };
+      var one = function (sg, val) { return 'x ' + HTMLS[sg] + ' ' + num(val); }, R = fr(-C.n, C.d), kc = kk === 1 ? '' : kk;
+      var mv = '(' + a1 + '/' + d1 + ' − ' + a2 + '/' + d2 + ' + ' + kk + '/' + d3 + ' − ' + a4 + '/' + d4 + ') · x ' + HTMLS[s] + ' ' + kk * m + '/' + d3 + (b1 > 0 ? ' − ' : ' + ') + Math.abs(b1) + '/' + d1;
       return Q('Теңсіздікті шешіңіз:' + expr(e), 'Решите неравенство:' + expr(e), one(res, v), [one(FLIP[res], v), one(res, -v), one(FLIP[res], -v)],
-        'Барлығын сол жаққа жинаймыз: x-тің коэффициенті ' + fs(A) + ', бос мүше ' + fs(C) + '. ' + fs(A) + 'x ' + HTMLS[s] + ' ' + fs(fr(-C.n, C.d)) + '. ' + (A.n < 0 ? 'Теріс санға бөлеміз — таңба ауысады: ' : 'Бөлеміз: ') + one(res, v) + '.',
-        'Переносим всё влево: коэффициент при x ' + fs(A) + ', свободный член ' + fs(C) + '. ' + fs(A) + 'x ' + HTMLS[s] + ' ' + fs(fr(-C.n, C.d)) + '. ' + (A.n < 0 ? 'Делим на отрицательное — знак меняется: ' : 'Делим: ') + one(res, v) + '.');
+        'Жақшаны ашамыз: ' + kc + '(' + m + ' − x)/' + d3 + ' = ' + kk * m + '/' + d3 + ' − ' + kc + 'x/' + d3 + '. x бар мүшелерді сол жаққа, сандарды оң жаққа жинаймыз: ' + mv + ', яғни (' + fs(A) + ') · x ' + HTMLS[s] + ' ' + fs(R) + '. ' + (A.n < 0 ? 'Теріс санға бөлеміз — таңба ауысады: ' : 'Оң санға бөлеміз: ') + one(res, v) + '.',
+        'Раскрываем скобку: ' + kc + '(' + m + ' − x)/' + d3 + ' = ' + kk * m + '/' + d3 + ' − ' + kc + 'x/' + d3 + '. Члены с x переносим влево, числа — вправо: ' + mv + ', т.е. (' + fs(A) + ') · x ' + HTMLS[s] + ' ' + fs(R) + '. ' + (A.n < 0 ? 'Делим на отрицательное число — знак меняется: ' : 'Делим на положительное число: ') + one(res, v) + '.');
     }
   });
 
@@ -1054,7 +1056,7 @@
   function qfGrid(r, m, n, k) {
     var u = Math.min(64 / m, 64 / n), on = r.shuffle(range(m * n)).slice(0, k), o = '';
     for (var i = 0; i < m * n; i++) o += rect(4 + (i % m) * u, 4 + Math.floor(i / m) * u, u, u, null, on.indexOf(i) >= 0 ? S_G : S_W);
-    return { s: osv(m * u + 8, n * u + 8, o), v: fr(k, m * n), id: 'g' + m + n + k };
+    return { s: osv(m * u + 8, n * u + 8, o), v: fr(k, m * n), raw: k + '/' + m * n, id: 'g' + m + n + k };
   }
   function qfSectors(r, angles, shaded) {
     var R = 32, c = 36, o = '', acc = 0, tot = sum(angles);
@@ -1063,7 +1065,7 @@
       o += path('M' + c + ',' + c + ' L' + r1(c + R * Math.sin(a1)) + ',' + r1(c - R * Math.cos(a1)) + ' A' + R + ',' + R + ' 0 ' + (a2 - a1 > Math.PI ? 1 : 0) + ' 1 ' + r1(c + R * Math.sin(a2)) + ',' + r1(c - R * Math.cos(a2)) + ' Z', shaded.indexOf(i) >= 0 ? S_G : S_W);
     });
     var v = fr(sum(shaded.map(function (i) { return angles[i]; })), tot);
-    return { s: osv(72, 72, o), v: v, id: 's' + angles.join('.') + '/' + shaded.join('.') };
+    return { s: osv(72, 72, o), v: v, raw: sum(shaded.map(function (i) { return angles[i]; })) + '/' + tot, id: 's' + angles.join('.') + '/' + shaded.join('.') };
   }
   function qfStrips(which) {   // круг, разрезанный 3 хордами на 4 полосы РАВНОЙ ширины — полосы не равны по площади
     var R = 32, c = 36, o = circ(c, c, R, S_W);
@@ -1080,7 +1082,7 @@
     var S = 64, o = '', c = [36, 36], P = [[4, 4], [36, 4], [68, 4], [68, 36], [68, 68], [36, 68], [4, 68], [4, 36]], on = r.shuffle(range(8)).slice(0, k);
     for (var i = 0; i < 8; i++) o += poly([c, P[i], P[(i + 1) % 8]], null, on.indexOf(i) >= 0 ? S_G : S_W);
     void S;
-    return { s: osv(72, 72, o), v: fr(k, 8), id: 't8' + on.sort().join('') };
+    return { s: osv(72, 72, o), v: fr(k, 8), raw: k + '/8', id: 't8' + on.sort().join('') };
   }
   add('m_frac', 'b24.quarter_shaded', [1, 2], function (r) {
     var good = r.pick([function () { return qfGrid(r, 4, 3, 3); }, function () { return qfGrid(r, 4, 4, 4); }, function () { return qfTri8(r, 2); }, function () { return qfSectors(r, rep(1, 12), r.shuffle(range(12)).slice(0, 3)); }, function () { return qfGrid(r, 4, 2, 2); }])();
@@ -1096,7 +1098,7 @@
     var desc = function (L) { return traps.map(function (t) { return t.v ? fs(t.v) : (L ? 'полосы одинаковой ширины, но разной площади' : 'жолақтардың ені бірдей, бірақ аудандары әртүрлі'); }).join('; '); };
     var nb = numbered(r, good.s, traps.map(function (t) { return t.s; }));
     return P('Қай фигураның ' + fx(1, 4) + ' бөлігі боялған?', 'Какая из фигур закрашена на ' + fx(1, 4) + '?', nb.pic, nb.ans, nb.wrong,
-      'Тек тең бөліктерді санауға болады. Дұрысы: ' + fs(good.v) + ' = 1/4. Қалғандары: ' + desc(0) + '.', 'Считать части можно, только если они равны. Верная: ' + fs(good.v) + ' = 1/4. Остальные: ' + desc(1) + '.');
+      'Тек тең бөліктерді санауға болады. Дұрысы: ' + good.raw + ' = 1/4. Қалғандары: ' + desc(0) + '.', 'Считать части можно, только если они равны. Верная: ' + good.raw + ' = 1/4. Остальные: ' + desc(1) + '.');
   });
 
   /* ================= 35. Расставить 1…8 в примеры (l_op) ================= */
@@ -1207,7 +1209,7 @@
       var t1 = [r.int(1, 9), 'a', r.int(0, 9), two ? 'b' : 'a'], t2 = two ? ['b', r.int(0, 9), 'a'] : ['a', r.int(0, 9), r.int(0, 9)];
       if (r.chance(0.5)) t1 = [r.int(1, 9), r.int(0, 9), 'a', two ? 'b' : 'a'];
       var a = r.int(1, 9), b = two ? r.int(1, 9) : 0, S = tplVal(t1, { a: a, b: b }) + tplVal(t2, { a: a, b: b }), sols = [];
-      for (var x = 1; x <= 9; x++) for (var y = two ? 1 : 0; y <= (two ? 9 : 0); y++) if (tplVal(t1, { a: x, b: y }) + tplVal(t2, { a: x, b: y }) === S) sols.push([x, y]);
+      for (var x = two ? 0 : 1; x <= 9; x++) for (var y = two ? 1 : 0; y <= (two ? 9 : 0); y++) if (tplVal(t1, { a: x, b: y }) + tplVal(t2, { a: x, b: y }) === S) sols.push([x, y]);
       if (sols.length !== 1 || two && a === b) continue;
       var ans = two ? a + b : a, wrong = ints([ans + 1, ans - 1, ans + 2, ans - 2, 9 - ans + 1], ans, true).filter(function (v) { return two || v <= 9; });
       return Q((two ? 'a мен b — әртүрлі цифрлар. ' : '') + 'Төрт таңбалы ' + tplTxt(t1) + ' және үш таңбалы ' + tplTxt(t2) + ' сандарының қосындысы ' + S + '. ' + (two ? 'a + b мәнін' : 'a мәнін') + ' анықтаңыз.',
@@ -1348,6 +1350,7 @@
       var names = r.shuffle(['B', 'C', 'D', 'E']);
       var A = { name: 'A', x: 160, y: 50, w: 56, kids: [] }, Lc = { name: names[0], x: 70, y: 126, w: 50, kids: [] }, Rc = { name: names[1], x: 262, y: 126, w: 50, kids: [] };
       var hA = r.shuffle([0, 1, 2, 3]).slice(0, 2);
+      if (Math.abs(hA[0] - hA[1]) < 2) continue;   // выходы из A на заметно разной высоте
       A.kids.push({ v: Lc, at: hA[0], side: -1 }, { v: Rc, at: hA[1], side: 1 });
       var g1 = { name: names[2], x: 8, y: 204, w: 46, kids: [] }, g2 = { name: names[3], x: 330, y: 204, w: 46, kids: [] }, vs = [A, Lc, Rc];
       var useL = lvl >= 4 || r.chance(0.5), useR = lvl >= 4 || !useL;

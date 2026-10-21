@@ -65,12 +65,21 @@
     S('l_op', 1, 'b25.op_eval'), S('l_visual', 3, 'b25.card_flip')
   ] };
 
+  /* Тексты для чтения в «Практике» идут по кругу по номеру варианта: соседние варианты не повторяют
+   * друг друга, а пара текстов каждый раз новая (банк — тексты уровней 2–4). */
+  function pickTexts(seed, np) {
+    var list = Z.bank.reading.filter(function (p) { return p.lvl >= 2; }).sort(function (a, b) { return a.lvl - b.lvl || (a.id < b.id ? -1 : 1); });
+    var n = Math.max(1, Math.round((seed - 70000) / 131)), out = [];
+    for (var k = 0; k < np; k++) out.push(list[((n - 1) * np + k) % list.length].id);
+    return out;
+  }
+
   // Форматы «Практики»: по одному на каждый год-образец. Скрыты из обычного списка тестов.
   function practiceFormat(year) {
     return { id: 'BIL_P' + year, school: 'BIL', practice: true, full: true, year: year, minutes: 110,
       kk: 'БИЛ ' + year + ' үлгісі', ru: 'По образцу БИЛ ' + year,
       sections: [{ kk: 'Математика және логика', ru: 'Математика и логика', kinds: ['math', 'logic'], blueprint: 'BIL_' + year, count: Z.blueprints['BIL_' + year].slots.length, harder: 0.25 },
-                 { kk: 'Оқу сауаттылығы', ru: 'Грамотность чтения', kinds: ['reading'], count: 10 }],
+                 { kk: 'Оқу сауаттылығы', ru: 'Грамотность чтения', kinds: ['reading'], count: 10, pick: pickTexts }],
       answer: 'mc', options: 4, scoring: { correct: 4, wrong: -1, skip: 0 } };
   }
 
