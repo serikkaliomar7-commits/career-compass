@@ -125,8 +125,9 @@
   function fr(n, d) { return fracHtml(frac(n, d), false); }
 
   // Время: минуты → «2 сағ 05 мин» и «14:05».
-  function hm(mins) { return Math.floor(mins / 60) + ' сағ ' + pad2(mins % 60) + ' мин'; }
-  function hmRu(mins) { return Math.floor(mins / 60) + ' ч ' + pad2(mins % 60) + ' мин'; }
+  // «0 сағ 20 мин» → «20 мин», «14 сағ 00 мин» → «14 сағ»
+  function hm(mins) { var h = Math.floor(mins / 60), m = mins % 60; return !h ? m + ' мин' : !m ? h + ' сағ' : h + ' сағ ' + pad2(m) + ' мин'; }
+  function hmRu(mins) { var h = Math.floor(mins / 60), m = mins % 60; return !h ? m + ' мин' : !m ? h + ' ч' : h + ' ч ' + pad2(m) + ' мин'; }
   function clock(mins) { mins = ((mins % 1440) + 1440) % 1440; return pad2(Math.floor(mins / 60)) + ':' + pad2(mins % 60); }
   function pad2(n) { return (n < 10 ? '0' : '') + n; }
 

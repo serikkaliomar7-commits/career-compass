@@ -470,6 +470,11 @@
       ans = x; wrong = [theta, 90 - theta, 90 - x, x + theta, 2 * x];
       sk = 'Бүктегенде бұрыш өзгермейді: ∠ACD′ = ∠ACD = x. C төбесіндегі бұрыш тік: ∠ACD + ∠ACB = 90°, ал ∠ACB = x + ' + theta + '°. Сонда 2x + ' + theta + '° = 90°, x = (90° − ' + theta + '°) : 2 = ' + x + '°.';
       sr = 'При сгибании угол не меняется: ∠ACD′ = ∠ACD = x. Угол C прямой: ∠ACD + ∠ACB = 90°, а ∠ACB = x + ' + theta + '°. Значит, 2x + ' + theta + '° = 90°, x = (90° − ' + theta + '°) : 2 = ' + x + '°.';
+    } else if (r.chance(0.5)) {   // x = ∠BCE = 90° − 2β
+      out += '<circle cx="' + r1(sE[0]) + '" cy="' + r1(sE[1]) + '" r="2.5" class="dot"/>' + txt(sE[0] + 2, sE[1] + 16, 'E') + mark(sA, sB, sC, 30, beta + '°', 46) + mark(sC, sB, sE, 22, 'x', 34);
+      ans = 90 - 2 * beta; wrong = [2 * beta, beta, 90 - beta, 180 - 2 * beta, 45 - beta];
+      sk = 'ABC үшбұрышында B бұрышы тік, сондықтан ∠ACB = 90° − ' + beta + '° = ' + (90 - beta) + '°. AB ∥ CD болғандықтан ∠ACD = ∠CAB = ' + beta + '°, ал бүктегенде ∠ACE = ∠ACD = ' + beta + '°. Сонда x = ∠ACB − ∠ACE = ' + (90 - beta) + '° − ' + beta + '° = ' + ans + '°.';
+      sr = 'В треугольнике ABC угол B прямой, поэтому ∠ACB = 90° − ' + beta + '° = ' + (90 - beta) + '°. AB ∥ CD, значит ∠ACD = ∠CAB = ' + beta + '°, а при сгибании ∠ACE = ∠ACD = ' + beta + '°. Тогда x = ∠ACB − ∠ACE = ' + (90 - beta) + '° − ' + beta + '° = ' + ans + '°.';
     } else {
       out += '<circle cx="' + r1(sE[0]) + '" cy="' + r1(sE[1]) + '" r="2.5" class="dot"/>' + txt(sE[0] + 2, sE[1] + 16, 'E') + mark(sA, sB, sC, 30, beta + '°', 46) + mark(sE, sB, sC, 14, 'x', 26);
       ans = 2 * beta; wrong = [beta, 90 - beta, 180 - 2 * beta, 90 - 2 * beta, 3 * beta];
@@ -603,14 +608,16 @@
       ans = h2 / 12 * 11 * T.per;
       spanK = day ? 'Бір тәулікте' : '12 сағатта'; spanR = day ? 'за сутки' : 'за 12 часов';
     } else {
-      // внутри 12 часов без полудня число событий равно числу часов — промежуток проходит через 12:00
-      for (var tr = 0; tr < 300; tr++) {
-        if (lvl === 3) { h1 = r.int(6, 11); h2 = r.int(13, 18); }
-        else { h1 = r.int(1, 14); h2 = h1 + r.int(5, Math.min(16, 24 - h1)); }
-        if (h2 <= h1 + 2 || T.test(11 * h1) || T.test(11 * h2)) continue;
-        ans = 0; for (n = 11 * h1 + 1; n < 11 * h2; n++) if (T.test(n)) ans++;
-        if (ans !== (h2 - h1) * T.per) break;
+      // внутри 12 часов без полудня число событий равно числу часов — промежуток проходит через 12:00.
+      // Перебираем все подходящие промежутки (концы — не события, ответ ≠ «число часов × частота») и берём случайный.
+      var cand = [], a1, a2, cnt;
+      for (a1 = 0; a1 < 24; a1++) for (a2 = a1 + 3; a2 <= 24; a2++) {
+        if (lvl === 3 ? !(a1 >= 5 && a1 <= 11 && a2 >= 13 && a2 <= 19 && a2 - a1 <= 10) : a2 - a1 < 5 || a2 - a1 > 16) continue;
+        if (T.test(11 * a1) || T.test(11 * a2)) continue;
+        cnt = 0; for (n = 11 * a1 + 1; n < 11 * a2; n++) if (T.test(n)) cnt++;
+        if (cnt !== (a2 - a1) * T.per) cand.push([a1, a2, cnt]);
       }
+      var pick = r.pick(cand); h1 = pick[0]; h2 = pick[1]; ans = pick[2];
       spanK = 'Сағат ' + U.pad2(h1) + ':00 мен ' + U.pad2(h2) + ':00 аралығында'; spanR = 'с ' + U.pad2(h1) + ':00 до ' + U.pad2(h2) + ':00';
     }
     var hours = h2 - h1, naive = hours * T.per;
@@ -948,11 +955,14 @@
       cells = normCells(cells.concat([r.pick(adj)]));
       var mxX = Math.max.apply(null, cells.map(function (c) { return c[0]; })), mxY = Math.max.apply(null, cells.map(function (c) { return c[1]; }));
       if (mxX > 4 || mxY > 4) continue;
-      valid = []; invalid = [];
-      cells.forEach(function (c, i) { var rest = cells.filter(function (_, j) { return j !== i; }); (connected(rest) && foldOk(rest) ? valid : invalid).push(i); });
-      if (invalid.length >= 3 && valid.length >= 1 && (lvl === 2 || valid.length <= 2)) break;
+      valid = []; invalid = []; var overlap = [];
+      cells.forEach(function (c, i) { var rest = cells.filter(function (_, j) { return j !== i; }), cn = connected(rest); (cn && foldOk(rest) ? valid : invalid).push(i); if (cn && !foldOk(rest)) overlap.push(i); });
+      // L3–L4: среди неверных есть «коварные» — фигура цела, но две грани совпадают (не только «распадается»)
+      var needOv = lvl === 2 ? 0 : lvl === 3 ? 1 : 2;
+      if (invalid.length >= 3 && valid.length >= 1 && (lvl === 2 || valid.length <= 2) && overlap.length >= needOv) break;
     }
-    var right = r.pick(valid), wrongs = r.shuffle(invalid).slice(0, 3), labs = r.shuffle([right].concat(wrongs)), L = 'ABCD', lab = {};
+    var ovPick = r.shuffle(overlap).slice(0, lvl === 2 ? 0 : lvl === 3 ? 1 : 2);
+    var right = r.pick(valid), wrongs = ovPick.concat(r.shuffle(invalid.filter(function (i) { return ovPick.indexOf(i) < 0; }))).slice(0, 3), labs = r.shuffle([right].concat(wrongs)), L = 'ABCD', lab = {};
     labs.forEach(function (ci, k) { lab[ci] = L[k]; });
     var u = 38, out = '', W = 0, Hh = 0;
     cells.forEach(function (c, i) { out += rect(6 + c[0] * u, 6 + c[1] * u, u, u, 'face') + (lab[i] ? txt(6 + c[0] * u + u / 2, 6 + c[1] * u + u / 2 + 6, lab[i], 'middle', 'big') : ''); W = Math.max(W, c[0] + 1); Hh = Math.max(Hh, c[1] + 1); });
@@ -974,11 +984,15 @@
     for (t = 0; t < 500; t++) {
       h = []; for (c = 0; c < C; c++) h.push([]);
       for (d = D - 1; d >= 0; d--) for (c = 0; c < C; c++) {
-        var lim = Math.min(d < D - 1 ? h[c][d + 1] : hmax, c > 0 ? h[c - 1][d] : hmax);
-        h[c][d] = c === 0 && d === D - 1 ? hmax : r.int(Math.max(0, lim - 2), lim);
+        // ближний ряд не выше дальнего в том же столбце — тогда видна верхняя грань каждой башни
+        var lim = d < D - 1 ? h[c][d + 1] : hmax;
+        h[c][d] = r.int(0, lim);
       }
-      var rowLen = []; for (d = 0; d < D; d++) { var L0 = 0; for (c = 0; c < C; c++) if (h[c][d]) L0++; rowLen.push(L0); }
-      if (rowLen.some(function (x) { return x > 0 && x < C; })) break;
+      var rowLen = [], cells0 = 0, cols0 = 0, rowsS = {};
+      for (d = 0; d < D; d++) { var L0 = 0, key0 = ''; for (c = 0; c < C; c++) { if (h[c][d]) L0++; key0 += h[c][d] ? 1 : 0; } rowLen.push(L0); cells0 += L0; rowsS[key0] = 1; }
+      for (c = 0; c < C; c++) if (h[c].some(function (v) { return v > 0; })) cols0++;
+      // вид сверху не должен быть тривиальным: передний ряд не пуст, занято ≥ 2 столбцов и ≥ 4 клеток (L2: ≥ 3), ряды разные
+      if (rowLen[0] > 0 && cols0 >= 2 && cells0 >= (lvl === 2 ? 3 : 4) && cells0 < C * D && Object.keys(rowsS).length === D) break;
     }
     // косоугольная проекция (как в gen_visual.js): ближе — левее и ниже
     var s = 24, k = 12, ox = 6, oy = hmax * s + D * k + 6, out = '';
@@ -1003,8 +1017,8 @@
     var key = function (g) { return g.length + 'x' + g[0].length + ':' + g.map(function (row) { return row.join(''); }).join('/'); };
     var wrong = uniq(top, r.shuffle([front, mirror]).concat([side, flipUD, tog]), key, 3);
     return P('Суретте бірдей кубиктерден құрастырылған құрылыс көрсетілген. Оған жоғарыдан (үстінен) қарағанда қалай көрінеді? Жауаптарда құрылыстың бізге жақын (алдыңғы) жағы — төменде.', 'На рисунке постройка из одинаковых кубиков. Как она выглядит сверху? В ответах ближняя к нам (передняя) сторона постройки — внизу.', picture,
-      gp(top), wrong.map(gp), 'Үстінен қарағанда кубиктер тұрған әр орын бір шаршы болып көрінеді, биіктігі маңызды емес. Алдыңғы қатардан артқы қатарға қарай: ' + top.slice().reverse().map(function (row) { return row.join(''); }).join(' | ') + ' (1 — кубик бар). Алдынан көрініс пен айнадағы бейнені шатастырмаңыз.',
-      'Сверху каждое место, где стоят кубики, видно как один квадрат; высота не важна. От переднего ряда к заднему: ' + top.slice().reverse().map(function (row) { return row.join(''); }).join(' | ') + ' (1 — кубик есть). Не путайте с видом спереди и зеркальным отражением.');
+      gp(top), wrong.map(gp), 'Үстінен қарағанда кубиктер тұрған әр орын бір шаршы болып көрінеді, биіктігі маңызды емес. Алдыңғы қатардан артқы қатарға қарай: ' + top.slice().reverse().map(function (row) { return row.map(function (v) { return v ? '■' : '□'; }).join(''); }).join(' | ') + ' (■ — кубик бар, □ — бос). Алдынан көрініс пен айнадағы бейнені шатастырмаңыз.',
+      'Сверху каждое место, где стоят кубики, видно как один квадрат; высота не важна. От переднего ряда к заднему: ' + top.slice().reverse().map(function (row) { return row.map(function (v) { return v ? '■' : '□'; }).join(''); }).join(' | ') + ' (■ — есть кубик, □ — пусто). Не путайте с видом спереди и зеркальным отражением.');
   });
 
   // Поиск формата по id (для пробных тестов): { topic, format } или null.

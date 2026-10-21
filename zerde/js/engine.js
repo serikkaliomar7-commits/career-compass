@@ -16,6 +16,10 @@
   function show(v, unit, lang) {
     v = norm(v);
     var u = unit ? (unit[lang] || unit.kk) : '';
+    if (Array.isArray(u)) {   // русская единица с согласованием: ['год', 'года', 'лет']
+      var n100 = Math.abs(v) % 100, n10 = n100 % 10;
+      u = typeof v !== 'number' || v % 1 ? u[1] : n100 > 10 && n100 < 20 ? u[2] : n10 === 1 ? u[0] : n10 >= 2 && n10 <= 4 ? u[1] : u[2];
+    }
     if (u && !/^[%°]/.test(u)) u = '\u00a0' + u;   // «25%», «30°», но «12 см»
     if (typeof v === 'number') return U.fmt(v) + u;
     if (isFrac(v)) return U.fracHtml(v, false) + u;
@@ -35,10 +39,11 @@
     } else if (isFrac(ans)) {
       out.push(U.frac(ans.n + 1, ans.d), U.frac(ans.n, ans.d + 1), U.frac(ans.d, ans.n), U.frac(ans.n * 2, ans.d), U.frac(Math.max(1, ans.n - 1), ans.d));
     } else if (typeof ans === 'string') {
-      var m = /^(\d\d):(\d\d)$/.exec(ans), m2 = /^(\d+) сағ (\d\d) мин$/.exec(ans);
+      var m = /^(\d\d):(\d\d)$/.exec(ans), m2 = /^(?:(\d+) сағ)? ?(?:(\d+) мин)?$/.exec(ans);
+      if (m2 && !m2[1] && !m2[2]) m2 = null;
       var shifts = r.shuffle([5, -5, 15, -15, 30, -30, 60, -60]);
       if (m) shifts.forEach(function (d) { out.push(U.clock(+m[1] * 60 + +m[2] + d)); });
-      else if (m2) shifts.forEach(function (d) { var v = +m2[1] * 60 + +m2[2] + d; if (v > 0) out.push(U.hm(v)); });
+      else if (m2) shifts.forEach(function (d) { var v = (+m2[1] || 0) * 60 + (+m2[2] || 0) + d; if (v > 0) out.push(U.hm(v)); });
     }
     return out;
   }

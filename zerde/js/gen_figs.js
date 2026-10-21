@@ -181,7 +181,7 @@
     var ans = lvl === 1 ? U.frac(vol, cap) : U.frac(cap - vol, cap);
     return P(lvl === 1 ? 'Ыдыс суретте көрсетілгендей толтырылған. Ыдыс ең жоғарғы белгіге дейін толады. Ыдыстың қандай бөлігі толған?' : 'Ыдыс ең жоғарғы белгіге дейін толады. Ыдыстың қандай бөлігі әлі бос?',
       lvl === 1 ? 'Сосуд заполнен, как на рисунке; заполнить его можно до верхней отметки. Какая часть сосуда заполнена?' : 'Сосуд заполняется до верхней отметки. Какая часть сосуда ещё пустая?', pic,
-      ans, [U.frac(vol, cap + step), lvl === 1 ? U.frac(cap - vol, cap) : U.frac(vol, cap), U.frac(lvlN, n + 1)],
+      ans, [U.frac(vol, cap + step), lvl === 1 ? U.frac(cap - vol, cap) : U.frac(vol, cap), U.frac(lvlN, n + 1), U.frac(lvl === 1 ? vol + step : cap - vol + step, cap), U.frac(lvl === 1 ? vol - step : cap - vol - step, cap)].filter(function (f) { return f.n > 0 && f.n < f.d && !U.frac.eq(f, ans); }),
       'Ыдыста ' + vol + ' мл, сыйымдылығы ' + cap + ' мл. ' + (lvl === 1 ? vol : cap - vol) + '/' + cap + ' — қысқартамыз.', 'В сосуде ' + vol + ' мл из ' + cap + ' мл. Дробь ' + (lvl === 1 ? vol : cap - vol) + '/' + cap + ' сокращаем.');
   } });
 
