@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'gen_ktl.js', 'gen_visual.js', 'gen_bil.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'practice.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'gen_ktl.js', 'gen_visual.js', 'gen_bil.js', 'gen_bil24.js', 'gen_bil25.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'practice.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;

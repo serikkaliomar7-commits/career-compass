@@ -311,4 +311,9 @@
   var TYPES = [raven, oddOne, cubesView, cubesCount, mirror, squares, paths, walk, overlay];
   Z.gen.l_visual = function (r, lvl) { return r.pick(TYPES)(r, Math.min(lvl || 1, 3)); };
   Z.gen4.l_visual = function (r) { return r.pick(TYPES)(r, 4); };   // три признака в матрице, 6 фигур, 4×4 и выше, два бегуна с разной скоростью, отражение в воде
+  // Подтипы как форматы с id — пробные тесты по образцу экзамена просят конкретный тип (Z.gen.l_visual не меняется).
+  var VF = Z.formats.l_visual = Z.formats.l_visual || [];
+  [['vis.squares', squares], ['vis.odd', oddOne], ['vis.raven', raven], ['vis.cubes', cubesCount], ['vis.front', cubesView], ['vis.mirror', mirror], ['vis.paths', paths], ['vis.move', walk], ['vis.overlay', overlay]].forEach(function (p) {
+    VF.push({ id: p[0], lv: [1, 2, 3, 4], f: function (r, lvl) { return p[1](r, lvl); } });
+  });
 })(typeof window !== 'undefined' ? window : globalThis);

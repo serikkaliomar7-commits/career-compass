@@ -66,11 +66,11 @@
   function generate(t, lvl, r, needInt, vary, slot, fmt) {
     var opt = { int: needInt };
     if (t.bank) return pickBank(Z.bank[t.bank], lvl, r, needInt);
-    if (lvl === 4 && Z.gen4[t.gen]) return Z.gen4[t.gen](r, lvl, opt);
-    if (fmt) {   // пробный по образцу экзамена просит конкретный формат (id из gen_bil.js и др.)
+    if (fmt) {   // пробный по образцу экзамена просит конкретный формат (id из gen_bil.js и др.) — раньше уровня ★
       var want = (Z.formats[t.gen] || []).filter(function (fm) { return fm.id === fmt && fm.lv.indexOf(lvl) >= 0; })[0];
       if (want) return want.f(r, lvl, opt);
     }
+    if (lvl === 4 && Z.gen4[t.gen]) return Z.gen4[t.gen](r, lvl, opt);
     var pool = [function () { return Z.gen[t.gen](r, Math.min(lvl, 3), opt); }];
     (Z.formats[t.gen] || []).forEach(function (fm) { if (fm.lv.indexOf(lvl) >= 0) pool.push(function () { return fm.f(r, lvl, opt); }); });
     // slot — номер задачи в домашке: форматы идут по кругу, чтобы в 20 задачах не было повторов типа
