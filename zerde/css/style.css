@@ -751,3 +751,17 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .amap span small { font-weight: 600; opacity: .85; font-size: .7rem; }
 .amap .ok { background: #17A34A; } .amap .no { background: #E6483D; } .amap .sk { background: #EBB305; }
 @media (max-width: 520px) { .amap { grid-template-columns: repeat(6, 1fr); } }
+/* Бумажный лист всегда светлый: внутри него — светлые токены, даже в тёмной теме
+   (иначе рисунки, таблицы-варианты и полосы на «бумаге» становятся чёрными). */
+.paperx .qcard, .paperx .rsplit, .paperx .sheet, .pdoc {
+  --ink: #0B0D12; --ink-2: #2B2F38; --muted: #6B7180; --faint: #9AA0AB;
+  --accent: #FF5533; --accent-2: #E8401F; --accent-bg: #FFF0EC;
+  --paper: #FFFEFB; --card: #FFFEFB; --soft: #F4F2EC; --line: #E7E3DA; --line-2: #D4CFC4;
+  --ok: #16A34A; --ok-bg: #EAF7EF; --bad: #E5484D; --bad-bg: #FDECEC; --gold: #E3A008; --gold-bg: #FFF7E1; --chart: #FF5533;
+  color: var(--ink); color-scheme: light;
+}
+.paperx .opt.sel { background: none; }
+/* Система уравнений/неравенств: фигурная скобка слева, как в школьной записи */
+.sysb { display: inline-flex; align-items: center; gap: 6px; text-align: left; }
+.sysb .br { font: 300 3.2em/1 "Times New Roman", Times, serif; transform: scaleX(.7); margin-top: -.08em; }
+.sysb .rows { display: inline-block; line-height: 2.1; }

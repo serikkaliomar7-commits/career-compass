@@ -119,7 +119,7 @@
       var q = r.pick([2, 3, 5]), R = L + r.int(3, 9), d = r.int(-2, 4), c = R + q * d;
       var s1 = r.chance(0.5), s2 = r.chance(0.5);   // true → нестрогое
       var t1 = fx('x' + (a ? sgnT(a) : ''), p) + ' ' + (s1 ? '≥' : '>') + ' ' + num(b), t2 = fx(num(c) + ' − x', q) + ' ' + (s2 ? '≥' : '>') + ' ' + num(d);
-      var sys = expr('<span style="display:inline-block;border-left:2px solid currentColor;padding-left:10px;text-align:left">' + t1 + '<br>' + t2 + '</span>');
+      var sys = expr('<span class="sysb"><span class="br">{</span><span class="rows">' + t1 + '<br>' + t2 + '</span></span>');
       function show(l, n1, n2, h) { return num(l) + (n1 ? ' ≤ ' : ' < ') + 'x' + (n2 ? ' ≤ ' : ' < ') + num(h); }
       var ans = show(L, s1, s2, R);
       var sk = '1) x' + (a ? sgnT(a) : '') + ' ' + (s1 ? '≥' : '>') + ' ' + num(p * b) + ' ⇒ x ' + (s1 ? '≥' : '>') + ' ' + num(L) + '. 2) ' + num(c) + ' − x ' + (s2 ? '≥' : '>') + ' ' + num(q * d) + ' ⇒ x ' + (s2 ? '≤' : '<') + ' ' + num(R) + '. ';

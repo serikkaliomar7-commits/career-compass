@@ -16,16 +16,27 @@
 
   /* ---------- Теңдеулер ---------- */
   F.m_eq.push(
-    { id: 'ktl.cont_frac', lv: [2, 3], f: function (r, lvl) {   // цепная дробь: a − 1/(a − 1/(a − 1/x)) = p/q
-      var a = r.int(2, 4), x = r.int(2, 7), depth = lvl === 2 ? 2 : 3;
-      var n = a * x - 1, d = x;                       // a − 1/x = (ax − 1)/x
-      for (var i = 1; i < depth; i++) { var nn = a * n - d; d = n; n = nn; }   // a − 1/(n/d) = (a·n − d)/n
+    { id: 'ktl.cont_frac', lv: [2, 3], f: function (r, lvl) {   // цепная дробь: a − 1/(b − 1/(c − 1/x)) = p/q
+      var depth = lvl === 2 ? 2 : 3, ks = [], i, x = r.int(2, 9);
+      for (i = 0; i < depth; i++) ks.push(r.int(2, 5));      // коэффициенты снаружи внутрь
+      var n = x, d = 1;
+      for (i = depth - 1; i >= 0; i--) { var nn = ks[i] * n - d; d = n; n = nn; }   // k − 1/(n/d) = (k·n − d)/n
       var g = gcd(n, d); n /= g; d /= g;
       var inner = 'x';
-      for (i = 0; i < depth; i++) inner = a + ' − ' + fx(1, inner);
-      return Q('Теңдеуді шешіңіз:' + expr(inner + ' = ' + fx(n, d)), 'Решите уравнение:' + expr(inner + ' = ' + fx(n, d)), x, [x + 1, d, n - d],
-        'Сыртқы қабаттан бастап «шешеміз»: ' + a + ' − 1/A = ' + n + '/' + d + ' ⇒ 1/A = ' + a + ' − ' + n + '/' + d + ', A-ны тауып, келесі қабатқа өтеміз. Жауабы x = ' + x + '.',
-        'Разворачиваем снаружи внутрь: из a − 1/A = значение находим A, затем следующий слой. Ответ x = ' + x + '.');
+      for (i = depth - 1; i >= 0; i--) inner = ks[i] + ' − ' + fx(1, inner);
+      // решение «снаружи внутрь»: k − 1/A = p/q ⇒ 1/A = (k·q − p)/q ⇒ A = q/(k·q − p)
+      var p = n, q = d, stK = [], stR = [], names = ['A', 'B', 'C'];
+      for (i = 0; i < depth; i++) {
+        var tn = ks[i] * q - p, an = q, ad = tn, g2 = gcd(an, ad); an /= g2; ad /= g2;
+        var nm = i === depth - 1 ? 'x' : names[i], val = ad === 1 ? String(an) : fx(an, ad);
+        var g3 = gcd(tn, q);
+        stK.push(ks[i] + ' − ' + fx(1, nm) + ' = ' + fx(p, q) + ' ⇒ ' + fx(1, nm) + ' = ' + (q / g3 === 1 ? tn / g3 : fx(tn / g3, q / g3)) + ' ⇒ ' + nm + ' = ' + val);
+        p = an; q = ad;
+      }
+      var steps = stK.join('; ');
+      return Q('Теңдеуді шешіңіз:' + expr(inner + ' = ' + fx(n, d)), 'Решите уравнение:' + expr(inner + ' = ' + fx(n, d)), x, [x + 1, x - 1 || x + 2, x + 2],
+        'Сыртқы қабаттан ішке қарай «ашамыз» (ішкі өрнекті бір әріппен белгілейміз): ' + steps + '.',
+        'Разворачиваем снаружи внутрь (внутреннее выражение обозначаем буквой): ' + steps + '.');
     } },
     { lv: [1, 2, 3], f: function (r, lvl) {   // неравенство с переменой знака
       var a = r.int(2, 6), c = a + r.int(1, 5), b = r.int(-15, 15), x0 = r.int(-6, 9), d = (a - c) * x0 + b;
@@ -43,7 +54,7 @@
     { lv: [2, 3], f: function (r, lvl) {   // система с дробными коэффициентами → x + y или x·y
       var p = r.pick([2, 3, 4, 5]), q = r.pick([2, 3, 4, 6]), x = p * r.int(1, 6), y = q * r.int(1, 6), s1 = x / p + y / q, s2 = x - y;
       var ask = lvl === 2 ? 'sum' : r.pick(['sum', 'prod']), ans = ask === 'sum' ? x + y : x * y;
-      var sys = fx('x', p) + ' + ' + fx('y', q) + ' = ' + s1 + '<br>x − y = ' + s2;
+      var sys = '<span class="sysb"><span class="br">{</span><span class="rows">' + fx('x', p) + ' + ' + fx('y', q) + ' = ' + s1 + '<br>x − y = ' + s2 + '</span></span>';
       return Q('Теңдеулер жүйесі берілген. ' + (ask === 'sum' ? 'x + y' : 'x · y') + ' неге тең?' + expr(sys), 'Дана система уравнений. Чему равно ' + (ask === 'sum' ? 'x + y' : 'x · y') + '?' + expr(sys), ans,
         ask === 'sum' ? [x - y, x * y, x + y + p] : [x + y, x * y + q, (x + q) * y],
         'Бірінші теңдеуді ' + (p * q / gcd(p, q)) + '-ге көбейтіп, бөлшектерден құтыламыз; екіншісінен x = y + ' + s2 + '. Сонда x = ' + x + ', y = ' + y + '.',
