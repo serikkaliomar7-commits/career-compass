@@ -774,3 +774,6 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .c-rules-l { margin-top: 14px; }
 .c-rules-l + .c-rules-l { padding-top: 14px; border-top: 1px dashed var(--line-2); }
 .c-rules-l ol { margin-top: 6px; }
+.ptips h3 { margin: 12px 0 6px; font: 700 .98rem var(--serif); }
+.ptips ul, .ptips ol { padding-left: 20px; display: grid; gap: 6px; line-height: 1.5; margin: 0; }
+.ptips p { margin: 0 0 6px; }

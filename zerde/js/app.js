@@ -808,6 +808,7 @@
     var h = '<section class="sec"><h1>' + t('rep.title') + '</h1><p class="muted">' + t('rep.sub') + '</p></section>' +
       '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>' + t('cls.student') + '</th><th class="num">' + t('cls.active') + '</th><th class="num">' + t('cls.hw') + '</th><th class="num">' + t('cls.mocks') + '</th><th class="num">' + t('today.ready') + '</th><th class="num">' + t('today.forecast') + '</th><th>' + t('prog.weak') + '</th><th class="num">' + t('nav.mistakes') + '</th><th>' + t('cls.upd') + '</th></tr></thead><tbody><tr>' + r.html + '</tr></tbody></table></div>';
     h += '<section class="card"><h2>' + t('rep.advice') + '</h2><ul class="theory">' + repAdvice(x).map(function (a) { return '<li>' + a + '</li>'; }).join('') + '</ul></section>';
+    if (Z.parentTips) h += Z.parentTips();
     h += '<section class="card noprint"><h2>' + t('rep.codeTitle') + '</h2><p class="muted">' + t('rep.codeNote') + '</p><textarea class="code" readonly id="repCode">' + Z.cloud.reportCode(S) + '</textarea>' +
       '<div class="row"><button class="btn primary" data-act="copy" data-src="repCode">' + t('c.copy') + '</button><button class="btn line" data-act="print">' + t('print.go') + '</button></div></section>';
     return h;
