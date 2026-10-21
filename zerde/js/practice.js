@@ -18,12 +18,12 @@
     S('l_seq', 1), S('l_seq', 1), S('l_visual', 2, 'vis.odd'), S('m_ratio', 2),
     S('m_frac', 1, null, ['m_dec']), S('m_word', 2), S('m_time', 1), S('m_order', 2, 'bil.subst'),
     S('l_puzzles', 1), S('m_ratio', 1), S('l_visual', 2, 'bil.top_view'), S('m_geom', 1, 'bil.ruler'),
-    S('m_time', 1, 'bil.units_chain'), S('l_seq', 2, 'bil.figurate'), S('m_divis', 1), S('l_count', 2, 'bil.prob_letter'),
+    S('m_time', 2, 'bil.units_chain'), S('l_seq', 2, 'bil.figurate'), S('m_divis', 1), S('l_count', 2, 'bil.prob_letter'),
     S('m_ratio', 1), S('m_frac', 2, 'bil.cancel_product'), S('m_order', 2, 'bil.subst'), S('l_seq', 2, null, ['l_fig']),
     S('m_volume', 1), S('l_op', 2, 'bil.think_number'), S('l_seq', 2, 'ktl.ap_sum'), S('m_divis', 2, 'ktl.fact_zeros'),
     S('l_visual', 3, 'bil.net_remove'), S('m_percent', 2, 'bil.pie_table'), S('m_geom', 2, 'bil.grid_areas'), S('m_frac', 1, null, ['m_dec', 'm_order']),
     S('l_cal', 3, 'bil.clock_hands'), S('m_angles', 3, 'bil.fold'), S('l_count', 3, 'bil.beads'), S('m_geom', 2, 'bil.l_shape'),
-    S('l_visual', 3, 'bil.slab_holes'), S('m_order', 2, 'bil.alt_sum'), S('l_seq', 2, 'bil.odd_squares'), S('m_volume', 3, 'bil.box_paint'),
+    S('m_volume', 3, 'bil.slab_holes'), S('m_order', 2, 'bil.alt_sum'), S('l_seq', 2, 'bil.odd_squares'), S('m_volume', 3, 'bil.box_paint'),
     S('m_ratio', 2, null, ['m_percent']), S('l_visual', 3, 'vis.odd'), S('m_word', 2, null, ['m_setup']), S('l_fig', 3, 'bil.table_rule'),
     S('m_time', 3, 'bil.units_chain'), S('l_op', 2, 'bil.triangle_op'), S('l_fig', 2, 'ktl.pyramid'), S('l_visual', 3, 'vis.squares'),
     S('l_digits', 3, 'ktl.last_digit'), S('l_visual', 4, 'vis.overlay')
@@ -33,7 +33,7 @@
   // с окружностями при π = 3; появились пары задач с общим условием (9–10, 14–15, 25–26, 31–32).
   Z.blueprints.BIL_2024 = { year: 2024, slots: [
     S('l_visual', 2, 'vis.squares'), S('m_eq', 2, 'b24.frac_eq'), S('l_visual', 2, 'vis.odd'), S('l_op', 2, 'b24.digit_ops'),
-    S('m_frac', 2, 'b24.shaded_part'), S('l_visual', 2, 'b24.rotate_sectors'), S('m_frac', 1, 'b24.frac_chain'), S('m_time', 1, 'bil.units_chain'),
+    S('m_frac', 2, 'b24.shaded_part'), S('l_visual', 2, 'b24.rotate_sectors'), S('m_frac', 1, 'b24.frac_chain'), S('m_time', 2, 'bil.units_chain'),
     S('m_ratio', 3, 'b24.bolts1'), P('m_ratio', 3, 'b24.bolts2'), S('m_eq', 2, 'b24.ineq_frac'), S('l_op', 2, 'b24.student_error'),
     S('m_divis', 1, 'b24.multiples_between'), S('m_eq', 3, 'b24.towers1'), P('m_volume', 3, 'b24.towers2'), S('l_visual', 3, 'b24.painted_shape'),
     S('l_op', 2, 'b24.symbol_ops'), S('l_count', 3, 'b24.pattern_string'), S('m_frac', 3, 'b24.sticks'), S('m_motion', 2, 'b24.catch_up'),

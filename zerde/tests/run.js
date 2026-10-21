@@ -239,6 +239,10 @@ if (Z.cloud.readReport('garbage') !== null) fail('bad report code must be reject
     e.questions.forEach(function (q, i) { checks++; if (bad(q.kk) || bad(q.ru) || (q.options && q.options.length !== 4)) fail('practice ' + n + ' q' + (i + 1) + ' bad'); });
   }
   if (Z.formatsFor('BIL').some(function (f) { return f.practice; })) fail('practice formats must be hidden from the tests list');
+  // Каждая позиция схемы с id формата должна получать именно этот формат на своём уровне.
+  Object.keys(Z.blueprints).forEach(function (k) {
+    Z.blueprints[k].slots.forEach(function (sl, i) { checks++; if (sl.f && !E.hasFormat(sl.t, sl.f, sl.l)) fail(k + ' slot ' + (i + 1) + ': no format ' + sl.f + ' at level ' + sl.l); });
+  });
 })();
 
 console.log((fails ? 'FAILED ' + fails : 'OK') + ' — ' + checks + ' checks');
