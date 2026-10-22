@@ -32,21 +32,37 @@
       'l.d.rank': 'Үй жұмысы, сынақ, карточка, ойын үшін ұпай беріледі. Ай сайын көшбасшыларға сыйлық.',
       'l.d.parent': 'Ата-ана баласының нәтижесін өз аккаунтынан көреді: белсенділік, үй жұмыстары, сынақтар, әлсіз тақырыптар.',
       'a.login': 'Кіру', 'a.signup': 'Тіркелу', 'a.who': 'Сіз кімсіз?', 'a.student': 'Оқушы', 'a.studentSub': 'Есеп шығарамын, курстан өтемін', 'a.parent': 'Ата-ана', 'a.parentSub': 'Баламның нәтижесін көремін',
-      'a.name': 'Аты-жөні', 'a.email': 'Электрондық пошта', 'a.pass': 'Құпиясөз (кемінде 6 таңба)', 'a.school': 'Мектеп', 'a.grade': 'Сынып', 'a.promo': 'Промокод (міндетті емес)',
+      'a.name': 'Аты-жөні', 'a.email': 'Электрондық пошта', 'a.pass': 'Құпиясөз', 'a.passNew': 'Құпиясөз ойлап табыңыз', 'a.show': 'Көрсету', 'a.hide': 'Жасыру',
+      'a.passHint': 'Кемінде 8 таңба: әріп пен сан болсын', 'a.pw0': 'Тым қысқа', 'a.pw1': 'Әлсіз — сан мен әріп қосыңыз', 'a.pw2': 'Жарайды', 'a.pw3': 'Мықты құпиясөз',
+      'a.promoQ': 'Промокод бар ма?', 'a.forgot': 'Құпиясөзді ұмыттыңыз ба?', 'a.resetSent': 'Құпиясөзді жаңарту сілтемесі поштаңызға жіберілді.', 'a.resetEmail': 'Алдымен поштаңызды жазыңыз.',
+      'a.terms': 'Тіркелу арқылы сіз деректеріңізді тек оқу үшін сақтауымызға келісесіз. 14 жасқа толмаған оқушыны ата-анасы тіркейді немесе ата-анасының рұқсатымен тіркеледі.', 'a.school': 'Мектеп', 'a.grade': 'Сынып', 'a.promo': 'Промокод (міндетті емес)',
       'a.go': 'Тіркелу', 'a.enter': 'Кіру', 'a.have': 'Аккаунт бар ма?', 'a.no': 'Аккаунт жоқ па?', 'a.demo': 'Демо-режим: аккаунттар тек осы браузерде сақталады. Нақты іске қосу үшін сервер қосылады (README).',
-      'e.exists': 'Бұл пошта тіркелген. Кіріп көріңіз.', 'e.weak': 'Пошта мен кемінде 6 таңбалы құпиясөзді енгізіңіз.', 'e.bad_login': 'Пошта немесе құпиясөз қате.', 'e.network': 'Серверге қосылу мүмкін болмады.', 'e.error': 'Қате. Қайталап көріңіз.',
+      'e.exists': 'Бұл пошта тіркелген. Кіріп көріңіз.', 'e.weak': 'Пошта мен құпиясөзді енгізіңіз.', 'e.pass_short': 'Құпиясөз кемінде 8 таңба болуы керек.', 'e.pass_mix': 'Құпиясөзде әріп те, сан да болсын.',
+      'e.pass_common': 'Бұл құпиясөз тым оңай (12345678 сияқты). Басқасын ойлап табыңыз.', 'e.bad_email': 'Пошта дұрыс емес. Мысалы: aigerim@mail.kz',
+      'e.locked': 'Құпиясөз бірнеше рет қате терілді. Қауіпсіздік үшін кіру 10 минутқа жабылды.', 'e.confirm_email': 'Поштаңызға хат жіберілді: сілтемені басып, сосын кіріңіз.',
+      'e.demo_reset': 'Демо-режимде құпиясөзді қалпына келтіру жоқ. Админге жазыңыз.', 'e.bad_login': 'Пошта немесе құпиясөз қате.', 'e.network': 'Серверге қосылу мүмкін болмады.', 'e.error': 'Қате. Қайталап көріңіз.',
       'e.not_found': 'Мұндай промокод жоқ.', 'e.expired': 'Промокодтың мерзімі өткен.', 'e.used_up': 'Промокод таусылған.', 'e.already': 'Бұл промокод бұрын қолданылған.', 'e.role': 'Бұл әрекет тек ата-анаға.',
       'p.title': 'Тарифтер', 'p.sub': 'Барлық тақырыптар, сынақтар, карточкалар және рейтинг. Жазылым өздігінен ұзармайды.', 'p.active': 'Қолжетімділік тағы {n} күн', 'p.none': 'Қолжетімділік жоқ — тарифті таңдаңыз немесе промокод енгізіңіз.', 'p.forever': 'Қолжетімділік шексіз',
       'p.diag': 'Әзірге бастапқы диагностиканы тегін тапсыра аласыз.', 'p.diagGo': 'Диагностика', 'p.promo': 'Промокод', 'p.apply': 'Қолдану', 'p.pay': 'Төлеу',
       'p.kaspi': 'Kaspi арқылы төлеу', 'p.kaspiTo': '{amount} ₸ сомасын Kaspi-ге аударыңыз: {phone} ({name}). Аударма түсініктемесіне поштаңызды жазыңыз: {email}.', 'p.kaspiNo': 'Әкімші әзірге Kaspi нөмірін енгізбеген. Бізге хабарласыңыз.',
       'p.wait': 'Өтінім қабылданды (№{id}). Әкімші төлемді тексеріп, бір күн ішінде қолжетімділікті ашады.', 'p.mine': 'Менің өтінімдерім', 'p.st.pending': 'тексерілуде', 'p.st.approved': 'расталды', 'p.st.rejected': 'қабылданбады',
       'p.ok.free': 'Промокод қолданылды: тегін қолжетімділік ашылды.', 'p.ok.admin': 'Промокод қолданылды: сіз — әкімшісіз.', 'p.ok.discount': 'Жеңілдік {p}% — төлемде ескеріледі.',
-      'acc.title': 'Аккаунт', 'acc.code': 'Ата-анаға арналған код', 'acc.codeNote': 'Ата-анаңыз өз аккаунтында осы кодты енгізсе, сіздің нәтижелеріңізді көре алады.', 'acc.out': 'Шығу', 'acc.status': 'Жазылым',
+      'acc.title': 'Аккаунт', 'acc.code': 'Ата-анаға арналған код', 'acc.codeNote': 'Ата-анаңыз өз аккаунтында осы кодты енгізсе, сіздің нәтижелеріңізді көре алады.', 'acc.outAll': 'Барлық құрылғыдан шығу', 'acc.outAllQ': 'Барлық телефон мен компьютердегі аккаунттан шығасыз ба? Қайта кіру керек болады.', 'acc.safe': 'Қауіпсіздік: құпиясөзді ешкімге айтпаңыз. Бөтен біреу кіргенін байқасаңыз — «Барлық құрылғыдан шығу» батырмасын басып, құпиясөзді «Құпиясөзді ұмыттыңыз ба?» арқылы ауыстырыңыз.', 'acc.out': 'Шығу', 'acc.status': 'Жазылым',
       'k.title': 'Балаларым', 'k.cards': 'Карточкалар: {k} / {n} «білемін» белгіленген', 'k.cardsNote': '— бала өзі белгілейді, тексеріп көріңіз (төмендегі кеңесті қараңыз).', 'k.add': 'Баланың кодын енгізіңіз', 'k.addNote': 'Код баланың «Аккаунт» бетінде тұр.', 'k.link': 'Қосу', 'k.none': 'Әзірге бала қосылмаған.', 'k.noData': 'Бала әлі ештеңе шығармады немесе прогресс әлі сақталмады.',
       'k.active': 'Белсенді күн (7 күн)', 'k.hw': 'Үй жұмысы (7 күн)', 'k.mocks': 'Сынақтар (7 күн)', 'k.ready': 'Дайындық', 'k.fc': 'Болжам', 'k.target': 'өту межесі {v}', 'k.weak': 'Назар аударыңыз', 'k.lastMocks': 'Соңғы сынақтар', 'k.topics': 'Тақырыптар бойынша бағалар', 'k.upd': 'Жаңартылды: {d}',
       'r.title': 'Ай рейтингі', 'r.sub': 'Ұпай: үй жұмысы, сынақтар, қайталау, карточкалар, ойын. Ай соңында көшбасшыларға сыйлық.', 'r.mine': 'Менің ұпайым осы айда', 'r.prizes': 'Сыйлықтар', 'r.noPrizes': 'Сыйлықтар жақында жарияланады.', 'r.all': 'Барлығы', 'r.empty': 'Бұл айда әзірге ұпай жоқ.', 'r.prev': 'Өткен ай', 'r.cur': 'Осы ай',
       'r.how': 'Ұпай қалай жиналады', 'r.h.hw': 'Үй жұмысы — баға × 10 (100-ге дейін)', 'r.h.mock': 'Толық сынақ — 150-ге дейін', 'r.h.test': 'Шағын тест — 50-ге дейін', 'r.h.review': 'Қайталау — 30', 'r.h.cards': 'Карточкалар — 20-ға дейін', 'r.h.game': 'Ойын — 30-ға дейін', 'r.h.day': 'Күндік жоспар толық — +30', 'r.h.cap': 'Күніне ең көбі 500 ұпай.',
-      'ad.title': 'Әкімші', 'ad.pay': 'Төлемдер', 'ad.users': 'Пайдаланушылар', 'ad.promo': 'Промокодтар', 'ad.set': 'Баптаулар', 'ad.approve': 'Растау', 'ad.reject': 'Бас тарту', 'ad.noPay': 'Тексерілетін төлем жоқ.',
+      'ad.title': 'Әкімші', 'ad.pay': 'Төлемдер', 'ad.users': 'Оқушылар',
+      'ad.k.all': 'барлығы', 'ad.k.students': 'оқушы', 'ad.k.today': 'бүгін кірді', 'ad.k.week': '7 күнде кірді', 'ad.k.new': 'жаңа (7 күн)',
+      'ad.f.student': 'Оқушылар', 'ad.f.parent': 'Ата-аналар', 'ad.f.admin': 'Админдер', 'ad.f.active': '7 күнде белсенді', 'ad.f.all': 'Барлығы', 'ad.none': 'Ешкім табылмады.',
+      'ad.c.name': 'Аты-жөні', 'ad.c.school': 'Мектеп · сынып', 'ad.c.seen': 'Соңғы рет', 'ad.c.topics': 'Тақырып меңгерді', 'ad.c.hw': 'Үй ж. (7 күн)', 'ad.c.mock': 'Соңғы сынақ', 'ad.c.ready': 'Дайындық', 'ad.c.access': 'Қолжетімділік',
+      'ad.reg': 'тіркелді', 'ad.hint': 'Жолды басыңыз — оқушының толық беті ашылады: тақырыптар, сынақтар, әрекеттер журналы.', 'ad.forever': 'тегін, мерзімсіз', 'ad.paidTo': 'төленген: {d} дейін', 'ad.trialTo': 'сынақ: {d} дейін', 'ad.noAccess': 'қолжетімділік жоқ',
+      'ad.grade': 'сынып', 'ad.code2': 'Бала коды', 'ad.synced': 'Прогресс сақталды', 'ad.streak': 'күн қатарынан', 'ad.mist': 'қате дәптерінде',
+      'ad.topics': 'Тақырыптар', 'ad.t.done': 'Меңгерді', 'ad.t.go': 'Өтіп жатыр', 'ad.t.no': 'Басталмаған', 'ad.c.topic': 'Тақырып', 'ad.c.status': 'Күйі', 'ad.c.grade': 'Үздік баға', 'ad.c.solved': 'Шығарды', 'ad.c.hwN': 'Үй ж.',
+      'ad.mocks': 'Сынақтар', 'ad.log': 'Әрекеттер журналы', 'ad.noSync': 'Оқушының прогресі серверге әлі сақталмаған (ол сайтқа кіріп, бір нәрсе шығаруы керек).',
+      'act.signup': 'Тіркелді ({r})', 'act.login': 'Кірді (пошта + құпиясөз)', 'act.visit': 'Сайтқа кірді', 'act.hw': 'Үй жұмысы: {t} — {g}/10 ({ok}/{n})', 'act.quick': 'Қайталау: {t} — {g}/10', 'act.lesson': 'Сабақ ашты: {t}',
+      'act.mock': 'Толық сынақ: {f} — {s}/{m}', 'act.test': 'Тест: {f} — {s}/{m}', 'act.diag': 'Диагностика — {s}/{m}', 'act.cards': 'Карточкалар: {d} — {k}/{n} «білемін»', 'act.game': 'Ойын — {s} ұпай',
+      'act.promo': 'Промокод қолданды ({k})', 'act.pay': 'Төлем өтінімі — {a} ₸', 'act.admin': 'Әкімші әрекеті: {a}', 'ad.promo': 'Промокодтар', 'ad.set': 'Баптаулар', 'ad.approve': 'Растау', 'ad.reject': 'Бас тарту', 'ad.noPay': 'Тексерілетін төлем жоқ.',
       'ad.search': 'Іздеу (аты немесе пошта)', 'ad.grant': 'Күн қосу', 'ad.until': 'дейін', 'ad.code': 'Код', 'ad.kind': 'Түрі', 'ad.k.free': 'тегін қолжетімділік', 'ad.k.discount': 'жеңілдік', 'ad.k.admin': 'әкімші', 'ad.days': 'Күн (бос — шексіз)', 'ad.percent': 'Жеңілдік %', 'ad.max': 'Неше рет (бос — шексіз)', 'ad.note': 'Ескертпе', 'ad.create': 'Жасау', 'ad.used': 'қолданылды',
       'ad.kaspiPhone': 'Kaspi нөмірі', 'ad.kaspiName': 'Алушының аты', 'ad.prizesKk': 'Сыйлықтар (қазақша)', 'ad.prizesRu': 'Сыйлықтар (орысша)', 'ad.trial': 'Тегін күндер', 'ad.price': 'Баға, ₸', 'ad.save': 'Сақтау', 'ad.saved': 'Сақталды', 'ad.adminWarn': 'Әкімші промокодын тек сенімді адамдарға беріңіз және бір реттік етіп жасаңыз.',
       'c.title': 'Флеш-карточкалар', 'c.sub': 'Формулалар мен ережелер. Бастамас бұрын төмендегі ережені оқыңыз.',
@@ -85,21 +101,37 @@
       'l.d.rank': 'Баллы за домашки, пробники, карточки и игры. Каждый месяц лидеры получают призы.',
       'l.d.parent': 'Родитель видит результаты ребёнка в своём аккаунте: активность, домашки, пробники, слабые темы.',
       'a.login': 'Вход', 'a.signup': 'Регистрация', 'a.who': 'Кто вы?', 'a.student': 'Ученик', 'a.studentSub': 'Решаю задачи и прохожу курс', 'a.parent': 'Родитель', 'a.parentSub': 'Смотрю результаты ребёнка',
-      'a.name': 'Имя и фамилия', 'a.email': 'Электронная почта', 'a.pass': 'Пароль (не меньше 6 символов)', 'a.school': 'Школа', 'a.grade': 'Класс', 'a.promo': 'Промокод (необязательно)',
+      'a.name': 'Имя и фамилия', 'a.email': 'Электронная почта', 'a.pass': 'Пароль', 'a.passNew': 'Придумайте пароль', 'a.show': 'Показать', 'a.hide': 'Скрыть',
+      'a.passHint': 'Не меньше 8 символов: буквы и цифры', 'a.pw0': 'Слишком короткий', 'a.pw1': 'Слабый — добавьте цифры и буквы', 'a.pw2': 'Нормальный', 'a.pw3': 'Надёжный пароль',
+      'a.promoQ': 'Есть промокод?', 'a.forgot': 'Забыли пароль?', 'a.resetSent': 'Ссылка для смены пароля отправлена на вашу почту.', 'a.resetEmail': 'Сначала введите почту.',
+      'a.terms': 'Регистрируясь, вы соглашаетесь, что мы храним ваши данные только для обучения. Ученика младше 14 лет регистрирует родитель или ученик регистрируется с разрешения родителя.', 'a.school': 'Школа', 'a.grade': 'Класс', 'a.promo': 'Промокод (необязательно)',
       'a.go': 'Зарегистрироваться', 'a.enter': 'Войти', 'a.have': 'Уже есть аккаунт?', 'a.no': 'Нет аккаунта?', 'a.demo': 'Демо-режим: аккаунты хранятся только в этом браузере. Для настоящего запуска подключается сервер (README).',
-      'e.exists': 'Эта почта уже зарегистрирована. Попробуйте войти.', 'e.weak': 'Введите почту и пароль не короче 6 символов.', 'e.bad_login': 'Неверная почта или пароль.', 'e.network': 'Не удалось подключиться к серверу.', 'e.error': 'Ошибка. Попробуйте ещё раз.',
+      'e.exists': 'Эта почта уже зарегистрирована. Попробуйте войти.', 'e.weak': 'Введите почту и пароль.', 'e.pass_short': 'Пароль должен быть не короче 8 символов.', 'e.pass_mix': 'В пароле должны быть и буквы, и цифры.',
+      'e.pass_common': 'Слишком простой пароль (как 12345678). Придумайте другой.', 'e.bad_email': 'Почта указана неверно. Пример: aigerim@mail.kz',
+      'e.locked': 'Пароль несколько раз введён неверно. Для безопасности вход закрыт на 10 минут.', 'e.confirm_email': 'На почту отправлено письмо: перейдите по ссылке и войдите.',
+      'e.demo_reset': 'В демо-режиме восстановления пароля нет. Напишите администратору.', 'e.bad_login': 'Неверная почта или пароль.', 'e.network': 'Не удалось подключиться к серверу.', 'e.error': 'Ошибка. Попробуйте ещё раз.',
       'e.not_found': 'Такого промокода нет.', 'e.expired': 'Срок промокода истёк.', 'e.used_up': 'Промокод закончился.', 'e.already': 'Этот промокод уже использован.', 'e.role': 'Это действие только для родителя.',
       'p.title': 'Тарифы', 'p.sub': 'Все темы, пробники, карточки и рейтинг. Подписка не продлевается автоматически.', 'p.active': 'Доступ ещё {n} дн.', 'p.none': 'Доступа нет — выберите тариф или введите промокод.', 'p.forever': 'Доступ бессрочный',
       'p.diag': 'Пока можно бесплатно пройти входную диагностику.', 'p.diagGo': 'Диагностика', 'p.promo': 'Промокод', 'p.apply': 'Применить', 'p.pay': 'Оплатить',
       'p.kaspi': 'Оплата через Kaspi', 'p.kaspiTo': 'Переведите {amount} ₸ на Kaspi: {phone} ({name}). В комментарии к переводу укажите почту: {email}.', 'p.kaspiNo': 'Админ пока не указал номер Kaspi. Свяжитесь с нами.',
       'p.wait': 'Заявка принята (№{id}). Админ проверит оплату и откроет доступ в течение дня.', 'p.mine': 'Мои заявки', 'p.st.pending': 'на проверке', 'p.st.approved': 'подтверждена', 'p.st.rejected': 'отклонена',
       'p.ok.free': 'Промокод применён: бесплатный доступ открыт.', 'p.ok.admin': 'Промокод применён: вы — админ.', 'p.ok.discount': 'Скидка {p}% — учтём при оплате.',
-      'acc.title': 'Аккаунт', 'acc.code': 'Код для родителей', 'acc.codeNote': 'Если родитель введёт этот код в своём аккаунте, он увидит ваши результаты.', 'acc.out': 'Выйти', 'acc.status': 'Подписка',
+      'acc.title': 'Аккаунт', 'acc.code': 'Код для родителей', 'acc.codeNote': 'Если родитель введёт этот код в своём аккаунте, он увидит ваши результаты.', 'acc.outAll': 'Выйти на всех устройствах', 'acc.outAllQ': 'Выйти из аккаунта на всех телефонах и компьютерах? Понадобится войти заново.', 'acc.safe': 'Безопасность: никому не сообщайте пароль. Если заметили чужой вход — нажмите «Выйти на всех устройствах» и смените пароль через «Забыли пароль?».', 'acc.out': 'Выйти', 'acc.status': 'Подписка',
       'k.title': 'Мои дети', 'k.cards': 'Карточки: отмечено «знаю» {k} из {n}', 'k.cardsNote': '— отмечает сам ребёнок, проверьте (см. совет ниже).', 'k.add': 'Введите код ребёнка', 'k.addNote': 'Код есть у ребёнка на странице «Аккаунт».', 'k.link': 'Добавить', 'k.none': 'Пока нет привязанных детей.', 'k.noData': 'Ребёнок ещё ничего не решал или прогресс ещё не сохранился.',
       'k.active': 'Активных дней (7 дн.)', 'k.hw': 'Домашек (7 дн.)', 'k.mocks': 'Пробников (7 дн.)', 'k.ready': 'Готовность', 'k.fc': 'Прогноз', 'k.target': 'ориентир {v}', 'k.weak': 'Обратите внимание', 'k.lastMocks': 'Последние пробники', 'k.topics': 'Оценки по темам', 'k.upd': 'Обновлено: {d}',
       'r.title': 'Рейтинг месяца', 'r.sub': 'Баллы: домашки, пробники, повторение, карточки, игра. В конце месяца лидеры получают призы.', 'r.mine': 'Мои баллы в этом месяце', 'r.prizes': 'Призы', 'r.noPrizes': 'Призы скоро объявим.', 'r.all': 'Все', 'r.empty': 'В этом месяце баллов пока нет.', 'r.prev': 'Прошлый месяц', 'r.cur': 'Этот месяц',
       'r.how': 'Как заработать баллы', 'r.h.hw': 'Домашка — оценка × 10 (до 100)', 'r.h.mock': 'Полный пробник — до 150', 'r.h.test': 'Мини-тест — до 50', 'r.h.review': 'Повторение — 30', 'r.h.cards': 'Карточки — до 20', 'r.h.game': 'Игра — до 30', 'r.h.day': 'Весь план дня — +30', 'r.h.cap': 'Не больше 500 баллов в день.',
-      'ad.title': 'Админ', 'ad.pay': 'Оплаты', 'ad.users': 'Пользователи', 'ad.promo': 'Промокоды', 'ad.set': 'Настройки', 'ad.approve': 'Подтвердить', 'ad.reject': 'Отклонить', 'ad.noPay': 'Оплат на проверке нет.',
+      'ad.title': 'Админ', 'ad.pay': 'Оплаты', 'ad.users': 'Ученики',
+      'ad.k.all': 'всего', 'ad.k.students': 'учеников', 'ad.k.today': 'заходили сегодня', 'ad.k.week': 'заходили за 7 дней', 'ad.k.new': 'новых (7 дней)',
+      'ad.f.student': 'Ученики', 'ad.f.parent': 'Родители', 'ad.f.admin': 'Админы', 'ad.f.active': 'Активны 7 дней', 'ad.f.all': 'Все', 'ad.none': 'Никого не найдено.',
+      'ad.c.name': 'Имя', 'ad.c.school': 'Школа · класс', 'ad.c.seen': 'Последний раз', 'ad.c.topics': 'Тем освоено', 'ad.c.hw': 'Домашек (7 дн.)', 'ad.c.mock': 'Последний пробный', 'ad.c.ready': 'Готовность', 'ad.c.access': 'Доступ',
+      'ad.reg': 'регистрация', 'ad.hint': 'Нажмите на строку — откроется страница ученика: темы, пробные, журнал действий.', 'ad.forever': 'бесплатно, бессрочно', 'ad.paidTo': 'оплачено до {d}', 'ad.trialTo': 'пробный до {d}', 'ad.noAccess': 'нет доступа',
+      'ad.grade': 'класс', 'ad.code2': 'Код ребёнка', 'ad.synced': 'Прогресс сохранён', 'ad.streak': 'дней подряд', 'ad.mist': 'в тетради ошибок',
+      'ad.topics': 'Темы', 'ad.t.done': 'Освоил', 'ad.t.go': 'В процессе', 'ad.t.no': 'Не начинал', 'ad.c.topic': 'Тема', 'ad.c.status': 'Статус', 'ad.c.grade': 'Лучшая оценка', 'ad.c.solved': 'Решено', 'ad.c.hwN': 'Домашек',
+      'ad.mocks': 'Пробные', 'ad.log': 'Журнал действий', 'ad.noSync': 'Прогресс ученика ещё не сохранён на сервере (он должен зайти на сайт и что-то решить).',
+      'act.signup': 'Зарегистрировался ({r})', 'act.login': 'Вошёл (почта + пароль)', 'act.visit': 'Зашёл на сайт', 'act.hw': 'Домашка: {t} — {g}/10 ({ok}/{n})', 'act.quick': 'Повторение: {t} — {g}/10', 'act.lesson': 'Открыл урок: {t}',
+      'act.mock': 'Полный пробный: {f} — {s}/{m}', 'act.test': 'Тест: {f} — {s}/{m}', 'act.diag': 'Диагностика — {s}/{m}', 'act.cards': 'Карточки: {d} — «знаю» {k}/{n}', 'act.game': 'Игра — {s} очков',
+      'act.promo': 'Применил промокод ({k})', 'act.pay': 'Заявка на оплату — {a} ₸', 'act.admin': 'Действие админа: {a}', 'ad.promo': 'Промокоды', 'ad.set': 'Настройки', 'ad.approve': 'Подтвердить', 'ad.reject': 'Отклонить', 'ad.noPay': 'Оплат на проверке нет.',
       'ad.search': 'Поиск (имя или почта)', 'ad.grant': 'Добавить дни', 'ad.until': 'до', 'ad.code': 'Код', 'ad.kind': 'Тип', 'ad.k.free': 'бесплатный доступ', 'ad.k.discount': 'скидка', 'ad.k.admin': 'админ', 'ad.days': 'Дней (пусто — бессрочно)', 'ad.percent': 'Скидка %', 'ad.max': 'Сколько раз (пусто — без лимита)', 'ad.note': 'Заметка', 'ad.create': 'Создать', 'ad.used': 'использован',
       'ad.kaspiPhone': 'Номер Kaspi', 'ad.kaspiName': 'Имя получателя', 'ad.prizesKk': 'Призы (казахский)', 'ad.prizesRu': 'Призы (русский)', 'ad.trial': 'Бесплатных дней', 'ad.price': 'Цена, ₸', 'ad.save': 'Сохранить', 'ad.saved': 'Сохранено', 'ad.adminWarn': 'Админ-промокод давайте только доверенным людям и делайте одноразовым.',
       'c.title': 'Флеш-карточки', 'c.sub': 'Формулы и правила. Перед началом прочитайте правила ниже.',
@@ -214,10 +246,15 @@
           '<label class="field"><span>' + tt('a.grade') + '</span><select name="grade">' + [4, 5, 6, 7].map(function (g) { return '<option' + (g === 6 ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label></div>';
       }
     }
-    h += '<label class="field"><span>' + tt('a.email') + '</span><input name="email" type="email" required autocomplete="email"></label>' +
-      '<label class="field"><span>' + tt('a.pass') + '</span><input name="password" type="password" required minlength="6" autocomplete="' + (signup ? 'new-password' : 'current-password') + '"></label>';
-    if (signup) h += '<label class="field"><span>' + tt('a.promo') + '</span><input name="promo" autocomplete="off" style="text-transform:uppercase"></label>';
+    h += '<label class="field"><span>' + tt('a.email') + '</span><input name="email" type="email" required autocomplete="email" inputmode="email" maxlength="120" value="' + esc(m.aEmail || '') + '"></label>' +
+      '<label class="field"><span>' + tt(signup ? 'a.passNew' : 'a.pass') + '</span><span class="pw"><input name="password" type="password" required minlength="' + (signup ? 8 : 1) + '" maxlength="72" autocomplete="' + (signup ? 'new-password' : 'current-password') + '"' + (signup ? ' data-pw="1"' : '') + '>' +
+      '<button type="button" class="pw-eye" data-act="pwEye" aria-label="' + tt('a.show') + '">' + tt('a.show') + '</button></span></label>';
+    // Надёжность пароля — подсказка обновляется при вводе (слушатель input ниже).
+    if (signup) h += '<div class="pw-meter" id="pwMeter"><i></i><i></i><i></i><i></i><span>' + tt('a.passHint') + '</span></div>' +
+      '<details class="promo-d"><summary>' + tt('a.promoQ') + '</summary><label class="field"><span>' + tt('a.promo') + '</span><input name="promo" autocomplete="off" maxlength="32" style="text-transform:uppercase"></label></details>';
+    else h += '<p class="small"><a href="#" data-act="forgotPw">' + tt('a.forgot') + '</a></p>';
     h += '<button class="btn pill dark wide" type="submit">' + (signup ? tt('a.go') : tt('a.enter')) + '</button>' +
+      (signup ? '<p class="small muted center">' + tt('a.terms') + '</p>' : '') +
       '<p class="small muted center">' + (signup ? tt('a.have') + ' <a href="#/auth/login">' + tt('a.login') + '</a>' : tt('a.no') + ' <a href="#/auth/signup">' + tt('a.signup') + '</a>') + '</p>' +
       (B.mode === 'demo' ? '<p class="small muted">' + tt('a.demo') + '</p>' : '') + '</form>';
     return h;
@@ -260,7 +297,8 @@
       h += '<section class="card"><span class="label">' + tt('acc.code') + '</span><div class="bigcode">' + esc(u.childCode || '—') + '</div><p class="muted small">' + tt('acc.codeNote') + '</p></section>';
       h += '<section class="card"><span class="label">' + tt('acc.status') + '</span>' + statusLine(u) + '<a class="btn pill" href="#/pricing">' + tt('p.title') + '</a></section>' + promoForm();
     }
-    h += '<div class="row"><button class="btn pill" data-act="signOut">' + tt('acc.out') + '</button></div>';
+    h += '<div class="row"><button class="btn pill" data-act="signOut">' + tt('acc.out') + '</button>' + (B.mode === 'supabase' ? '<button class="btn pill line" data-act="signOutAll">' + tt('acc.outAll') + '</button>' : '') + '</div>' +
+      '<p class="small muted">' + tt('acc.safe') + '</p>';
     return h;
   }
 
@@ -363,10 +401,114 @@
   }
 
   /* =================== АДМИНКА =================== */
-  function admin(tab) {
-    tab = tab || 'pay';
+  /* ---------- Админ: оқушылар — кто зарегистрирован, когда был, что сделал, какие темы прошёл ---------- */
+  function ago(iso) {
+    if (!iso) return '—';
+    var ms = Date.now() - +new Date(iso), ru = I.lang() === 'ru';
+    if (ms < 60000) return ru ? 'сейчас' : 'қазір';
+    if (ms < 3600000) return Math.floor(ms / 60000) + (ru ? ' мин назад' : ' мин бұрын');
+    if (ms < 86400000) return Math.floor(ms / 3600000) + (ru ? ' ч назад' : ' сағ бұрын');
+    var d = Math.floor(ms / 86400000); return d + (ru ? ' дн. назад' : ' күн бұрын');
+  }
+  function dt(iso) { return iso ? String(iso).slice(0, 16).replace('T', ' ') : '—'; }
+  function accessText(u) {
+    if (u.role !== 'student') return tt('role.' + u.role);
+    if (u.subUntil && new Date(u.subUntil).getFullYear() > 9000) return tt('ad.forever');
+    if (u.subUntil && +new Date(u.subUntil) > Date.now()) return tt('ad.paidTo', { d: String(u.subUntil).slice(0, 10) });
+    if (u.trialUntil && +new Date(u.trialUntil) > Date.now()) return tt('ad.trialTo', { d: String(u.trialUntil).slice(0, 10) });
+    return '<span class="no">' + tt('ad.noAccess') + '</span>';
+  }
+  function adStudents() {
+    var m = ui().mem, f = m.adF || 'student', q = String(m.adQ || '').toLowerCase();
+    return later('ad:overview', B.admin.overview, function (list) {
+      list = list || [];
+      var now = Date.now(), day = 86400000;
+      var seen = function (u) { return u.lastSeen ? now - +new Date(u.lastSeen) : 1e15; };
+      var st = { all: list.length, student: 0, parent: 0, admin: 0, today: 0, week: 0, fresh: 0 };
+      list.forEach(function (u) { st[u.role]++; if (seen(u) < day) st.today++; if (seen(u) < 7 * day) st.week++; if (u.createdAt && now - +new Date(u.createdAt) < 7 * day) st.fresh++; });
+      var h = '<dl class="kpis ad-kpis">' + [[st.all, 'ad.k.all'], [st.student, 'ad.k.students'], [st.today, 'ad.k.today'], [st.week, 'ad.k.week'], [st.fresh, 'ad.k.new']].map(function (k) {
+        return '<div><dd>' + k[0] + '</dd><dt>' + tt(k[1]) + '</dt></div>'; }).join('') + '</dl>';
+      h += '<form class="card form row" data-form="adSearch"><label class="field grow"><span>' + tt('ad.search') + '</span><input name="q" value="' + esc(m.adQ || '') + '"></label><button class="btn pill" type="submit">→</button></form>';
+      h += '<div class="chips">' + ['student', 'parent', 'admin', 'active', 'all'].map(function (k) { return '<button class="chip' + (f === k ? ' on' : '') + '" data-act="adF" data-f="' + k + '">' + tt('ad.f.' + k) + '</button>'; }).join('') + '</div>';
+      var rows = list.filter(function (u) {
+        if (q && (String(u.name) + ' ' + String(u.email)).toLowerCase().indexOf(q) < 0) return false;
+        if (f === 'active') return seen(u) < 7 * day;
+        return f === 'all' || u.role === f;
+      }).sort(function (a, b) { return seen(a) - seen(b); });
+      if (!rows.length) return h + '<p class="muted">' + tt('ad.none') + '</p>';
+      return h + '<div class="tbl-wrap"><table class="tbl ad-tbl"><thead><tr><th>' + tt('ad.c.name') + '</th><th>' + tt('ad.c.school') + '</th><th>' + tt('ad.c.seen') + '</th><th class="num">' + tt('ad.c.topics') + '</th><th class="num">' + tt('ad.c.hw') + '</th><th class="num">' + tt('ad.c.mock') + '</th><th class="num">' + tt('ad.c.ready') + '</th><th>' + tt('ad.c.access') + '</th></tr></thead><tbody>' +
+        rows.map(function (u) {
+          var x = u.summary || {}, sc = Z.schools[u.school];
+          return '<tr class="click" data-act="adOpen" data-id="' + esc(u.id) + '"><td><b>' + esc(u.name || '—') + '</b><br><small class="muted">' + esc(u.email || '') + '</small></td>' +
+            '<td class="small">' + (sc ? sc.name : '—') + (u.grade ? ' · ' + u.grade : '') + '<br><small class="muted">' + tt('ad.reg') + ' ' + String(u.createdAt || '').slice(0, 10) + '</small></td>' +
+            '<td class="small">' + ago(u.lastSeen || u.updatedAt) + '</td>' +
+            '<td class="num">' + (u.role === 'student' ? (x.mastered || 0) + ' / ' + (x.topicsTotal || Z.topicsFor(u.school || 'BIL').length) : '—') + '</td>' +
+            '<td class="num">' + (x.hw7 != null ? x.hw7 : '—') + '</td>' +
+            '<td class="num">' + (x.lastMock ? x.lastMock.score + '/' + x.lastMock.max : '—') + '</td>' +
+            '<td class="num">' + (x.ready != null ? x.ready + '%' : '—') + '</td><td class="small">' + accessText(u) + '</td></tr>';
+        }).join('') + '</tbody></table></div><p class="small muted">' + tt('ad.hint') + '</p>';
+    });
+  }
+  function actText(a) {
+    var i = a.info || {}, tp = i.topic && Z.topicById[i.topic] ? ui().tn(Z.topicById[i.topic]) : (i.topic || ''), f = i.format && Z.examFormats[i.format] ? ui().fname(Z.examFormats[i.format]) : (i.format || '');
+    switch (a.kind) {
+      case 'signup': return tt('act.signup', { r: tt('role.' + (i.role || 'student')) });
+      case 'login': return tt('act.login');
+      case 'visit': return tt('act.visit');
+      case 'hw': return tt('act.hw', { t: tp, g: i.grade, ok: i.ok, n: i.n });
+      case 'quick': case 'review': return tt('act.quick', { t: tp, g: i.grade });
+      case 'lesson': return tt('act.lesson', { t: tp });
+      case 'mock': case 'test': case 'diag': return tt('act.' + a.kind, { f: (i.practice ? I.t('mk.test', { n: U.pad2(i.practice) }) + ' · ' : '') + f, s: i.score, m: i.max });
+      case 'cards': var dk = (Z.decks || []).filter(function (d) { return d.id === i.deck; })[0]; return tt('act.cards', { d: dk ? (I.lang() === 'ru' ? dk.ru : dk.kk) : i.deck, k: i.know, n: i.n });
+      case 'game': return tt('act.game', { s: i.score });
+      case 'promo': return tt('act.promo', { k: i.kind });
+      case 'pay': return tt('act.pay', { a: money(i.amount || 0) });
+      case 'admin': return tt('act.admin', { a: i.act || '' });
+    }
+    return a.kind;
+  }
+  function adUser(id) {
+    return later('ad:user:' + id, function () { return B.admin.userDetail(id); }, function (d) {
+      if (!d || !d.user) return '<p class="muted">' + tt('ad.none') + '</p>';
+      var u = d.user, st = d.state || {}, x = d.summary || {}, sc = Z.schools[u.school];
+      var h = '<a class="back" href="#/admin/users">' + ui().ic('back') + tt('ad.users') + '</a>' +
+        '<section class="card"><span class="label">' + tt('role.' + u.role) + (sc ? ' · ' + sc.name : '') + (u.grade ? ' · ' + u.grade + '-' + tt('ad.grade') : '') + '</span><h1>' + esc(u.name || '—') + '</h1>' +
+        '<p class="muted">' + esc(u.email || '') + '</p><dl class="kv">' +
+        [['ad.reg', dt(u.createdAt)], ['ad.c.seen', ago(u.lastSeen) + ' · ' + dt(u.lastSeen)], ['ad.c.access', accessText(u)], ['ad.code2', esc(u.childCode || '—')], ['ad.synced', dt(d.updatedAt)]].map(function (k) {
+          return '<div><dt>' + tt(k[0]) + '</dt><dd>' + k[1] + '</dd></div>'; }).join('') + '</dl>' +
+        '<form class="row" data-form="adGrant" data-id="' + esc(u.id) + '"><input name="days" type="number" min="1" max="3650" value="30" style="width:80px"><button class="btn pill sm" type="submit">' + tt('ad.grant') + '</button></form></section>';
+      if (u.role === 'student') {
+        var fc = x.fc ? (x.fc.pct ? x.fc.score + '%' : x.fc.score + ' / ' + x.fc.max) : '—';
+        h += '<dl class="kpis">' + [[(x.ready != null ? x.ready : 0) + '%', 'k.ready'], [fc, 'k.fc'], [x.streak || 0, 'ad.streak'], [(x.mastered || 0) + ' / ' + (x.topicsTotal || 0), 'ad.c.topics'], [x.mistakes || 0, 'ad.mist']].map(function (k) {
+          return '<div><dd>' + k[0] + '</dd><dt>' + tt(k[1]) + '</dt></div>'; }).join('') + '</dl>';
+        // Темы: прошёл / в процессе / не начинал
+        var tps = Z.topicsFor(u.school || 'BIL'), T = st.topics || {}, cnt = { done: 0, go: 0, no: 0 };
+        var rows = tps.map(function (t) {
+          var p = T[t.id], s2 = !p || !(p.sessions || p.solved) ? 'no' : (p.grade || 0) >= 8 ? 'done' : 'go'; cnt[s2]++;
+          return '<tr><td>' + ui().tn(t) + '</td><td><span class="st-' + s2 + '">' + tt('ad.t.' + s2) + '</span></td><td class="num">' + (p ? (p.grade || 0) + '/10' : '—') + '</td><td class="num">' + (p ? p.solved || 0 : 0) + '</td><td class="num">' + (p ? p.hw || 0 : 0) + '</td></tr>';
+        }).join('');
+        h += '<section class="sec"><h2>' + tt('ad.topics') + '</h2><p class="small"><span class="st-done">' + tt('ad.t.done') + ': ' + cnt.done + '</span> <span class="st-go">' + tt('ad.t.go') + ': ' + cnt.go + '</span> <span class="st-no">' + tt('ad.t.no') + ': ' + cnt.no + '</span></p>' +
+          '<div class="tbl-wrap"><table class="tbl"><thead><tr><th>' + tt('ad.c.topic') + '</th><th>' + tt('ad.c.status') + '</th><th class="num">' + tt('ad.c.grade') + '</th><th class="num">' + tt('ad.c.solved') + '</th><th class="num">' + tt('ad.c.hwN') + '</th></tr></thead><tbody>' + rows + '</tbody></table></div></section>';
+        var ex = (st.exams || []).slice(-10).reverse();
+        if (ex.length) h += '<section class="sec"><h2>' + tt('ad.mocks') + '</h2><div class="tbl-wrap"><table class="tbl"><tbody>' + ex.map(function (e) {
+          var f2 = Z.examFormats[e.format]; return '<tr><td>' + e.date + '</td><td>' + (e.practice ? I.t('mk.test', { n: U.pad2(e.practice) }) + ' · ' : '') + (f2 ? ui().fname(f2) : e.format) + '</td><td class="num"><b>' + e.score + '</b> / ' + e.max + '</td><td class="num">' + ui().pct(e.pct) + '</td></tr>';
+        }).join('') + '</tbody></table></div></section>';
+        if (!d.state) h += '<div class="note">' + tt('ad.noSync') + '</div>';
+      }
+      var acts = d.activity || [];
+      h += '<section class="sec"><h2>' + tt('ad.log') + '</h2>' + (acts.length ? '<ol class="actlog">' + acts.map(function (a) {
+        return '<li><time>' + dt(a.at) + '</time><span class="ak ak-' + a.kind + '">' + esc(actText(a)) + '</span></li>'; }).join('') + '</ol>' : '<p class="muted">—</p>') + '</section>';
+      if ((d.payments || []).length) h += '<section class="sec"><h2>' + tt('ad.pay') + '</h2><div class="tbl-wrap"><table class="tbl"><tbody>' + d.payments.map(function (p) {
+        return '<tr><td>№' + p.id + '</td><td>' + p.months + ' ' + tt('l.months') + '</td><td class="num">' + money(p.amount) + ' ₸</td><td>' + p.status + '</td><td class="small muted">' + dt(p.createdAt) + '</td></tr>'; }).join('') + '</tbody></table></div></section>';
+      return h;
+    });
+  }
+
+  function admin(tab, id) {
+    tab = tab || 'users';
     var m = ui().mem;
-    var h = '<section class="sec"><h1>' + tt('ad.title') + '</h1></section><div class="seg">' + ['pay', 'users', 'promo', 'set'].map(function (k) {
+    if (tab === 'user' && id) return adUser(id);
+    var h = '<section class="sec"><h1>' + tt('ad.title') + '</h1></section><div class="seg">' + ['users', 'pay', 'promo', 'set'].map(function (k) {
       return '<a class="' + (k === tab ? 'on' : '') + '" href="#/admin/' + k + '">' + tt('ad.' + k) + '</a>';
     }).join('') + '</div>';
     if (m.adMsg) h += '<div class="note ok">' + esc(m.adMsg) + '</div>';
@@ -378,14 +520,7 @@
           '<td class="num"><button class="btn pill sm dark" data-act="adPay" data-id="' + p.id + '" data-ok="1">' + tt('ad.approve') + '</button> <button class="btn pill sm" data-act="adPay" data-id="' + p.id + '" data-ok="0">' + tt('ad.reject') + '</button></td></tr>';
       }).join('') + '</tbody></table></div>';
     });
-    if (tab === 'users') return h + '<form class="card form row" data-form="adSearch"><label class="field grow"><span>' + tt('ad.search') + '</span><input name="q" value="' + esc(m.adQ || '') + '"></label><button class="btn pill" type="submit">→</button></form>' +
-      later('ad:users:' + (m.adQ || ''), function () { return B.admin.users(m.adQ || ''); }, function (list) {
-        return '<div class="tbl-wrap"><table class="tbl"><tbody>' + (list || []).map(function (u) {
-          var until = u.subUntil ? String(u.subUntil).slice(0, 10) : u.trialUntil ? 'trial ' + String(u.trialUntil).slice(0, 10) : '—';
-          return '<tr><td><b>' + esc(u.name) + '</b><br><small class="muted">' + esc(u.email || '') + '</small></td><td>' + tt('role.' + u.role) + '</td><td>' + (Z.schools[u.school] ? Z.schools[u.school].name : '') + '</td><td class="small">' + until + '</td>' +
-            '<td class="num"><form class="row" data-form="adGrant" data-id="' + esc(u.id) + '"><input name="days" type="number" min="1" value="30" style="width:70px"><button class="btn pill sm" type="submit">' + tt('ad.grant') + '</button></form></td></tr>';
-        }).join('') + '</tbody></table></div>';
-      });
+    if (tab === 'users') return h + adStudents();
     if (tab === 'promo') return h + '<form class="card form" data-form="adPromo"><div class="row2"><label class="field"><span>' + tt('ad.code') + '</span><input name="code" required pattern="[A-Za-z0-9\\-]{4,32}" style="text-transform:uppercase"></label>' +
       '<label class="field"><span>' + tt('ad.kind') + '</span><select name="kind"><option value="free">' + tt('ad.k.free') + '</option><option value="discount">' + tt('ad.k.discount') + '</option><option value="admin">' + tt('ad.k.admin') + '</option></select></label></div>' +
       '<div class="row2"><label class="field"><span>' + tt('ad.days') + '</span><input name="days" type="number" min="1"></label><label class="field"><span>' + tt('ad.percent') + '</span><input name="percent" type="number" min="1" max="100"></label></div>' +
@@ -620,6 +755,7 @@
       g.over = true; clearInterval(g.timer);
       var S = ui().S(); gBest(S, g.id); S.game.bests[g.id] = Math.max(S.game.bests[g.id] || 0, g.score); ui().save();
       ui().award('game', ui().today(), Math.min(30, g.score));
+      ui().track('game', { game: g.id, score: g.score, ok: g.ok, bad: g.bad, lvl: g.lvl });
       ui().render(); return;
     }
     if (el) el.textContent = left;
@@ -638,7 +774,15 @@
     ltab: function (el) { ui().mem.ltab = el.dataset.k; var y = window.scrollY; ui().render(); window.scrollTo(0, y); },
     scrollTour: function () { var t = document.getElementById('tour'); if (t) t.scrollIntoView({ behavior: 'smooth' }); },
     arole: function (el) { ui().mem.arole = el.dataset.r; ui().render(); },
-    signOut: function () { B.signOut().then(function () { refresh(); ui().setUser(null); ui().go('#/'); }); },
+    pwEye: function (el) { var i = el.parentNode.querySelector('input'); var show = i.type === 'password'; i.type = show ? 'text' : 'password'; el.textContent = tt(show ? 'a.hide' : 'a.show'); },
+    forgotPw: function () {
+      var m = ui().mem, inp = document.querySelector('form.auth input[name=email]'), email = inp ? inp.value.trim() : '';
+      if (!email) { m.aerr = tt('a.resetEmail'); ui().render(); return; }
+      m.aEmail = email;
+      B.resetPassword(email).then(function () { m.aerr = null; ui().toast(tt('a.resetSent')); }).catch(function (e) { m.aerr = errText(e); ui().render(); });
+    },
+    signOutAll: function () { ui().ask(tt('acc.outAllQ'), tt('acc.outAll'), function () { ui().flush().then(function () { return B.signOutAll(); }).then(function () { refresh(); ui().setUser(null); ui().go('#/'); }); }); },
+    signOut: function () { ui().flush().then(function () { return B.signOut(); }).then(function () { refresh(); ui().setUser(null); ui().go('#/'); }); },
     pay: function (el) {
       var m = ui().mem, u = m.user;
       B.requestPayment(el.dataset.plan, m.discount || null).then(function (r) {
@@ -650,6 +794,9 @@
         });
       }).catch(function (e) { ui().ask(errText(e), 'OK', null, false); });
     },
+    adF: function (el) { ui().mem.adF = el.dataset.f; ui().render(); },
+    adOpen: function (el) { ui().go('#/admin/user/' + el.dataset.id); },
+    adRefresh: function () { refresh(); ui().render(); },
     lbMonth: function (el) { ui().mem.lbMonth = el.dataset.m; ui().render(); },
     lbSchool: function (el) { ui().mem.lbSchool = el.dataset.s; ui().render(); },
     adPay: function (el) { after(B.admin.decidePayment(+el.dataset.id, el.dataset.ok === '1'), '✓', 'ad:pay'); },
@@ -664,7 +811,7 @@
       var st = ui().mem.dk, bx = boxes(st.id), k = st.order[st.i];
       if (el.dataset.ok === '1') { bx[k] = Math.min(4, (bx[k] || 0) + 1); st.know++; } else bx[k] = 0;
       st.i++; st.flip = false; ui().save();
-      if (st.i >= st.order.length) ui().award('cards', st.id + ':' + ui().today(), Math.min(20, st.know));
+      if (st.i >= st.order.length) { ui().award('cards', st.id + ':' + ui().today(), Math.min(20, st.know)); ui().track('cards', { deck: st.id, know: st.know, n: st.order.length }); }
       ui().render();
     },
     gLvl: function (el) { ui().mem.gLvl = +el.dataset.l; ui().render(); },
@@ -701,7 +848,8 @@
   };
   Z.viewForms = {
     signup: function (d) {
-      var m = ui().mem, f = { role: d.get('role') || m.arole || 'student', name: String(d.get('name') || '').trim(), email: d.get('email'), password: d.get('password'), school: d.get('school'), grade: d.get('grade') ? +d.get('grade') : null };
+      var m = ui().mem; m.aEmail = String(d.get('email') || '').trim();
+      var f = { role: d.get('role') || m.arole || 'student', name: String(d.get('name') || '').trim(), email: d.get('email'), password: d.get('password'), school: d.get('school'), grade: d.get('grade') ? +d.get('grade') : null };
       B.signUp(f).then(function (u) {
         var promo = String(d.get('promo') || '').trim();
         return (promo ? B.redeemPromo(promo).then(function () { return B.session(); }) : Promise.resolve(u));
@@ -719,7 +867,7 @@
       }).catch(function (e) { m.aerr = errText(e); ui().render(); });
     },
     login: function (d) {
-      var m = ui().mem;
+      var m = ui().mem; m.aEmail = String(d.get('email') || '').trim();
       B.signIn({ email: d.get('email'), password: d.get('password') }).then(function (u) { m.aerr = null; refresh(); return ui().setUser(u).then(function () { ui().go(u.role === 'parent' ? '#/kids' : '#/today'); }); })
         .catch(function (e) { m.aerr = errText(e); ui().render(); });
     },
@@ -740,7 +888,7 @@
         .catch(function (e) { m.kidMsg = errText(e); ui().render(); });
     },
     adSearch: function (d) { ui().mem.adQ = String(d.get('q') || ''); ui().render(); },
-    adGrant: function (d, f) { after(B.admin.grant(f.dataset.id, +d.get('days') || 30), '✓', 'ad:users:' + (ui().mem.adQ || '')); },
+    adGrant: function (d, f) { after(B.admin.grant(f.dataset.id, +d.get('days') || 30), '✓', null); },
     adPromo: function (d) {
       after(B.admin.createPromo({ code: d.get('code'), kind: d.get('kind'), days: +d.get('days') || null, percent: +d.get('percent') || null, maxUses: +d.get('max') || null, note: d.get('note') }), '✓', 'ad:promo');
     },
@@ -758,6 +906,15 @@
       gNext(g, +String(d.get('a')).replace(',', '.').replace('−', '-') === g.task.a);
     }
   };
+  // Индикатор надёжности пароля на форме регистрации.
+  function pwScore(p) { var s = 0; if (p.length >= 8) s++; if (/[A-Za-zА-Яа-яӘәІіҢңҒғҮүҰұҚқӨөҺһЁё]/.test(p) && /\d/.test(p)) s++; if (p.length >= 12 || /[^A-Za-z0-9А-Яа-яЁё]/.test(p)) s++; return p.length < 8 ? 0 : B.passIssue(p) ? 1 : s; }
+  if (root.document) root.document.addEventListener('input', function (ev) {
+    var t = ev.target; if (!t || !t.dataset || !t.dataset.pw) return;
+    var box = root.document.getElementById('pwMeter'); if (!box) return;
+    var sc = t.value ? pwScore(t.value) : -1;
+    box.className = 'pw-meter s' + sc;
+    box.querySelector('span').textContent = sc < 0 ? tt('a.passHint') : tt('a.pw' + Math.max(0, sc));
+  });
   Z.parentTips = parentTips;
   Z.views = { refresh: refresh, landing: landing, auth: auth, pricing: pricing, account: account, kids: kids, leaders: leaders, admin: admin, cards: cards, deck: deck, game: game };
 })(typeof window !== 'undefined' ? window : globalThis);

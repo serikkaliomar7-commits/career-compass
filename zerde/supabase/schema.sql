@@ -20,6 +20,9 @@ create table if not exists public.profiles (
   trial_until timestamptz,                -- пробный период до
   created_at timestamptz not null default now()
 );
+-- Для админки: почта (копия из auth.users) и когда пользователь был на сайте последний раз.
+alter table public.profiles add column if not exists email text;
+alter table public.profiles add column if not exists last_seen timestamptz;
 
 create table if not exists public.settings (
   key text primary key,
@@ -31,6 +34,17 @@ insert into public.settings (key, value) values
   ('kaspi', '{"phone": "", "name": ""}'),
   ('prizes', '{"kk": "", "ru": ""}')
 on conflict (key) do nothing;
+
+-- ---------- журнал активности (кто, что, когда) ----------
+-- Пишется только серверными функциями ниже; читает сам пользователь и админ.
+create table if not exists public.activity (
+  id bigserial primary key,
+  user_id uuid not null references public.profiles on delete cascade,
+  kind text not null,
+  info jsonb not null default '{}',
+  at timestamptz not null default now()
+);
+create index if not exists activity_user_at on public.activity (user_id, at desc);
 
 create or replace function public.is_admin() returns boolean
 language sql stable security definer set search_path = public as $$
@@ -45,12 +59,13 @@ declare r text := coalesce(new.raw_user_meta_data->>'role', 'student');
         days int := coalesce((select (value)::text::int from public.settings where key = 'trial_days'), 3);
 begin
   if r not in ('student', 'parent') then r := 'student'; end if;
-  insert into public.profiles (id, role, name, school, grade, child_code, trial_until)
-  values (new.id, r, coalesce(new.raw_user_meta_data->>'name', ''),
+  insert into public.profiles (id, role, email, last_seen, name, school, grade, child_code, trial_until)
+  values (new.id, r, lower(new.email), now(), left(coalesce(new.raw_user_meta_data->>'name', ''), 40),
           nullif(new.raw_user_meta_data->>'school', ''), nullif(new.raw_user_meta_data->>'grade', '')::int,
           upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 6)),
           case when r = 'student' then now() + make_interval(days => days) end)
   on conflict (id) do nothing;
+  insert into public.activity (user_id, kind, info) values (new.id, 'signup', jsonb_build_object('role', r));
   return new;
 end $$;
 drop trigger if exists on_auth_user_created on auth.users;
@@ -62,6 +77,8 @@ language plpgsql security definer set search_path = public as $$
 begin
   if not public.is_admin() then
     new.role := old.role; new.sub_until := old.sub_until; new.trial_until := old.trial_until; new.child_code := old.child_code;
+    new.email := old.email; new.created_at := old.created_at;
+    new.name := left(new.name, 40);
   end if;
   return new;
 end $$;
@@ -143,6 +160,10 @@ alter table public.promo_redemptions enable row level security;
 alter table public.payments enable row level security;
 alter table public.points enable row level security;
 alter table public.settings enable row level security;
+alter table public.activity enable row level security;
+
+drop policy if exists p_activity_read on public.activity;
+create policy p_activity_read on public.activity for select using (user_id = auth.uid() or public.is_admin());
 
 drop policy if exists p_profiles_read on public.profiles;
 create policy p_profiles_read on public.profiles for select using (id = auth.uid() or public.is_admin() or public.is_parent_of(id));
@@ -197,6 +218,7 @@ begin
     update public.profiles set sub_until = case when pc.days is null then 'infinity'::timestamptz else base + make_interval(days => pc.days) end where id = uid;
   end if;
   insert into public.promo_redemptions (code, user_id) values (pc.code, uid);
+  insert into public.activity (user_id, kind, info) values (uid, 'promo', jsonb_build_object('kind', pc.kind));
   update public.promo_codes set used = used + 1 where code = pc.code;
   return jsonb_build_object('ok', true, 'kind', pc.kind, 'days', pc.days, 'percent', pc.percent);
 end $$;
@@ -229,6 +251,7 @@ begin
   select * into pay from public.payments where id = p_id for update;
   if not found or pay.status <> 'pending' then return jsonb_build_object('ok', false, 'error', 'state'); end if;
   update public.payments set status = case when p_ok then 'approved' else 'rejected' end, note = p_note, decided_at = now(), decided_by = auth.uid() where id = p_id;
+  insert into public.activity (user_id, kind, info) values (auth.uid(), 'admin', jsonb_build_object('act', case when p_ok then 'approve' else 'reject' end, 'payment', p_id, 'user', pay.user_id));
   if p_ok then
     select greatest(coalesce(sub_until, now()), now()) into base from public.profiles where id = pay.user_id;
     update public.profiles set sub_until = base + make_interval(months => pay.months) where id = pay.user_id;
@@ -244,6 +267,7 @@ begin
   if not public.is_admin() then return jsonb_build_object('ok', false, 'error', 'forbidden'); end if;
   select greatest(coalesce(sub_until, now()), now()) into base from public.profiles where id = p_user;
   update public.profiles set sub_until = base + make_interval(days => p_days) where id = p_user;
+  insert into public.activity (user_id, kind, info) values (auth.uid(), 'admin', jsonb_build_object('act', 'grant', 'user', p_user, 'days', p_days));
   return jsonb_build_object('ok', true);
 end $$;
 
@@ -289,5 +313,51 @@ language sql stable security definer set search_path = public as $$
   limit 100;
 $$;
 
+-- Журнал: только разрешённые виды, не больше 400 записей в день, маленький размер, без чужого user_id.
+create or replace function public.log_activity(p_kind text, p_info jsonb default '{}') returns boolean
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); n int;
+begin
+  if uid is null then return false; end if;
+  if p_kind not in ('login', 'visit', 'hw', 'quick', 'review', 'mock', 'test', 'diag', 'cards', 'game', 'lesson', 'pay') then return false; end if;
+  if length(coalesce(p_info, '{}')::text) > 1000 then p_info := '{}'; end if;
+  select count(*) into n from public.activity where user_id = uid and at >= date_trunc('day', now());
+  if n >= 400 then return false; end if;
+  insert into public.activity (user_id, kind, info) values (uid, p_kind, coalesce(p_info, '{}'));
+  update public.profiles set last_seen = now() where id = uid;
+  return true;
+end $$;
+
+-- «Был на сайте»: обновляем last_seen; первое посещение за день попадает в журнал.
+create or replace function public.touch_seen() returns boolean
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); prev timestamptz;
+begin
+  if uid is null then return false; end if;
+  select last_seen into prev from public.profiles where id = uid;
+  if prev is null or prev < date_trunc('day', now()) then
+    insert into public.activity (user_id, kind, info) values (uid, 'visit', '{}');
+  end if;
+  update public.profiles set last_seen = now() where id = uid;
+  return true;
+end $$;
+
+-- Админ-промокод — самый опасный: по умолчанию одноразовый и на 7 дней.
+create or replace function public.guard_admin_promo() returns trigger
+language plpgsql as $$
+begin
+  if new.kind = 'admin' then
+    new.max_uses := coalesce(new.max_uses, 1);
+    new.expires_at := coalesce(new.expires_at, now() + interval '7 days');
+  end if;
+  return new;
+end $$;
+drop trigger if exists guard_admin_promo on public.promo_codes;
+create trigger guard_admin_promo before insert on public.promo_codes for each row execute function public.guard_admin_promo();
+
+-- Заполнить почту у тех, кто зарегистрировался до появления колонки.
+update public.profiles p set email = lower(u.email) from auth.users u where u.id = p.id and p.email is null;
+
+grant execute on function public.log_activity, public.touch_seen to authenticated;
 grant execute on function public.redeem_promo, public.request_payment, public.decide_payment, public.grant_access,
   public.link_child, public.add_points, public.leaderboard to authenticated;

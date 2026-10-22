@@ -46,10 +46,25 @@
     // Аккаунт ученика: прогресс уходит на сервер (с задержкой, чтобы не слать на каждый клик).
     if (mem.user && mem.user.role !== 'parent' && S.profile) {
       clearTimeout(mem.syncT);
-      mem.syncT = setTimeout(function () { B.saveProgress(Z.cloud.compact(S), Z.cloud.summary(S)).catch(function () { /* офлайн — сохранится позже */ }); }, 4000);
+      mem.syncT = setTimeout(syncNow, 4000);
     }
   }
+  function syncNow() {
+    clearTimeout(mem.syncT); mem.syncT = null;
+    if (!mem.user || mem.user.role === 'parent' || !S.profile) return Promise.resolve();
+    return B.saveProgress(Z.cloud.compact(S), Z.cloud.summary(S)).catch(function () { /* офлайн — сохранится позже */ });
+  }
+  // Ушли со страницы или выходят из аккаунта — отправляем несохранённое сразу, не дожидаясь таймера.
+  function flushSync() { return mem.syncT ? syncNow() : Promise.resolve(); }
+  window.addEventListener('pagehide', function () { flushSync(); });
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flushSync(); });
   // Баллы за сделанное: сервер ограничивает сумму и не засчитывает одно действие дважды.
+  // Журнал для админа: что ученик сделал (тема, оценка, пробный…). Без сети — просто не пишем.
+  function track(kind, info) { if (mem.user && B.log) B.log(kind, info || {}).catch(function () {}); }
+  function examTrack(ex, res) {
+    var ff = Z.examFormats[ex.format];
+    track(ff.diag ? 'diag' : ff.full ? 'mock' : 'test', { format: ex.format, practice: ex.practice || undefined, paper: ex.paper || undefined, score: res.score, max: res.max, ok: res.correct, bad: res.wrong, skip: res.skipped });
+  }
   function award(kind, ref, amount) {
     if (!mem.user || mem.user.role === 'parent' || amount <= 0) return;
     B.addPoints(kind, ref, amount).then(function (r) {
@@ -186,7 +201,7 @@
     switch (route) {
       case 'pricing': case 'account': case 'leaders': case 'cards': case 'deck': case 'game': case 'admin':
         if (route === 'admin' && u.role !== 'admin') { route = 'today'; html = vToday(); break; }
-        html = V[route](parts[1]); break;
+        html = V[route](parts[1], parts[2]); break;
       case 'topics': html = vTopics(); break;
       case 'topic': html = vTopic(parts[1]); break;
       case 'practice': html = vPractice(); break;
@@ -337,7 +352,7 @@
       }).join('') + '</div>' : '<p class="muted">' + t('topic.noVideo') + '</p>') +
       '<a class="back" href="' + esc(searchUrl(tp)) + '" target="_blank" rel="noopener">' + ic('search') + t('topic.search') + '</a></div></div>';
     var ls = Z.lessons && Z.lessons[id];
-    if (ls) h += lessonSteps(id, ls);
+    if (ls) { h += lessonSteps(id, ls); var lk = id + ':' + today(); mem.lessonSeen = mem.lessonSeen || {}; if (!mem.lessonSeen[lk]) { mem.lessonSeen[lk] = 1; track('lesson', { topic: id }); } }
     // 2. Теория
     else h += '<div class="step"><div><h3>' + t('topic.s2') + '</h3><ul class="theory">' + tp.theory.map(function (x) { return '<li>' + U.mathFrac(x) + '</li>'; }).join('') + '</ul></div></div>';
     // 3. Решённый пример (генерируется, уровень B) — если нет готового урока
@@ -602,7 +617,7 @@
     if (!ex) return;
     readExamInput();
     var res = E.scoreExam(ex);
-    P.recordExam(S, ex, res, today()); examPoints(ex, res);
+    P.recordExam(S, ex, res, today()); examPoints(ex, res); examTrack(ex, res);
     mem.lastExam = S.lastExam = { ex: ex, res: res, timeout: !!timeout };
     S.activeExam = null; mem.sheet = false;
     save();
@@ -871,6 +886,7 @@
         if (s.topic) {
           var wasRev = (S.plans[today()] || { tasks: [] }).tasks.some(function (x) { return x.type === 'review' && x.topic === s.topic && !x.done; });
           P.recordPractice(S, s.topic, mem.res, today());
+          track(s.mode === 'hw' ? 'hw' : wasRev ? 'review' : 'quick', { topic: s.topic, grade: mem.res.grade, ok: mem.res.correct, n: mem.res.total });
           if (s.mode === 'hw') award('hw', s.topic + ':' + s.seed, mem.res.grade * 10);
           else if (s.mode === 'quick') award(wasRev ? 'review' : 'quick', s.topic + ':' + s.seed, wasRev ? (mem.res.grade >= 7 ? 30 : 10) : (mem.res.grade >= 7 ? 20 : 5));
           dayBonus();
@@ -1030,7 +1046,7 @@
       ex.questions.forEach(function (q, i) { var v = d.get('a' + i); if (v !== null && String(v).trim() !== '') ex.answers[i] = String(v).trim(); });
       ex.paper = true;
       var res = E.scoreExam(ex);
-      P.recordExam(S, ex, res, today()); examPoints(ex, res);
+      P.recordExam(S, ex, res, today()); examPoints(ex, res); examTrack(ex, res);
       mem.lastExam = S.lastExam = { ex: ex, res: res, timeout: false };
       save(); go('#/result');
       return;
@@ -1062,6 +1078,7 @@
     Z.store.setUser(u ? u.id : null);
     S = Z.store.load();
     mem.lastExam = S.lastExam || null; mem.session = null;
+    if (u && B.touch) B.touch().catch(function () {});   // «был на сайте» для админки
     if (!u || u.role === 'parent') { render(); return Promise.resolve(); }
     return B.loadProgress().then(function (remote) {
       if (remote && (remote.savedAt || 0) > (S.savedAt || 0) && remote.profile) {
@@ -1074,7 +1091,7 @@
   // Общие функции для экранов из views.js.
   Z.ui = {
     S: function () { return S; }, mem: mem, save: save, go: go, render: render, t: t, esc: esc, ic: ic, tn: tn, fname: fname, ask: ask, toast: toast,
-    pct: pct, today: today, lvPill: lvPill, award: award, setUser: setUser, qCount: qCount, LETTERS: LETTERS
+    pct: pct, today: today, lvPill: lvPill, award: award, track: track, flush: flushSync, setUser: setUser, qCount: qCount, LETTERS: LETTERS
   };
   I.setLang((S.profile && S.profile.uiLang) || 'kk');
   // Старт после загрузки всех скриптов (views.js подключается после app.js).
