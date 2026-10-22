@@ -777,3 +777,11 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .ptips h3 { margin: 12px 0 6px; font: 700 .98rem var(--serif); }
 .ptips ul, .ptips ol { padding-left: 20px; display: grid; gap: 6px; line-height: 1.5; margin: 0; }
 .ptips p { margin: 0 0 6px; }
+/* Заголовок правил карточек — акцентный, чтобы его заметили и открыли */
+.c-rules { border: 1.5px solid var(--accent); background: var(--accent-bg); }
+.c-rules summary { color: var(--accent); display: flex; align-items: center; gap: 10px; list-style: none; }
+.c-rules summary::-webkit-details-marker { display: none; }
+.c-rules summary::before { content: "?"; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font: 800 .95rem var(--sans); }
+.c-rules summary::after { content: "▾"; margin-left: auto; font-size: .9rem; transition: transform .2s; }
+.c-rules:not([open]) summary::after { transform: rotate(-90deg); }
+.c-rules[open] summary { margin-bottom: 4px; }
