@@ -785,3 +785,19 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .c-rules summary::after { content: "▾"; margin-left: auto; font-size: .9rem; transition: transform .2s; }
 .c-rules:not([open]) summary::after { transform: rotate(-90deg); }
 .c-rules[open] summary { margin-bottom: 4px; }
+/* Ойындар */
+.g-ico { font: 800 1.15rem var(--serif); color: var(--accent); display: grid; place-items: center; }
+.game .g-q { text-align: center; line-height: 1.4; }
+.g-vs { display: inline-flex; align-items: center; gap: 22px; font-size: 1.3em; }
+.g-vs i { font-style: normal; color: var(--muted); }
+.g-opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; width: 100%; max-width: 520px; }
+.g-opts.two { grid-template-columns: 1fr 1fr; }
+.g-opts.long { grid-template-columns: 1fr 1fr; }
+.g-opts:not(.two):not(.long) .g-opt:nth-child(4) { grid-column: auto; }
+.g-opt { min-height: 54px; font: 700 1.1rem var(--sans); white-space: normal; text-transform: none; letter-spacing: 0; }
+.g-opts.long .g-opt { font: 600 .95rem var(--sans); }
+.game.fb-ok { box-shadow: 0 0 0 2px var(--ok); }
+.game.fb-no { box-shadow: 0 0 0 2px var(--bad); }
+@media (max-width: 520px) { .g-opts, .g-opts.long { grid-template-columns: 1fr 1fr; } }
+.g-opts.long .g-opt { height: auto; min-height: 54px; border-radius: 14px; padding: 10px 12px; line-height: 1.35; }
+.game .g-q small { font: 600 .8rem var(--sans); }

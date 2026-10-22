@@ -1,5 +1,5 @@
 /* Зерде — экраны аккаунта и сообщества: лендинг, вход/регистрация, тарифы и оплата, аккаунт,
- * кабинет родителя, рейтинг месяца, админка, флеш-карточки, игра «Жылдам есеп».
+ * кабинет родителя, рейтинг месяца, админка, флеш-карточки, ойындар (игры).
  * Подключается после app.js и пользуется его общими функциями (Z.ui). */
 (function (root) {
   'use strict';
@@ -9,7 +9,7 @@
   /* ---------- тексты экранов ---------- */
   var L = {
     kk: {
-      'nav.pricing': 'Тарифтер', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточкалар', 'nav.game': 'Жылдам есеп', 'nav.admin': 'Әкімші',
+      'nav.pricing': 'Тарифтер', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточкалар', 'nav.game': 'Ойындар', 'nav.admin': 'Әкімші',
       'nav.kids': 'Балаларым', 'nav.secParent': 'Ата-ана', 'nav.secAcc': 'Аккаунт', 'role.parent': 'Ата-ана', 'role.student': 'Оқушы', 'role.admin': 'Әкімші', 'pts.unit': 'ұпай',
       'l.login': 'Кіру', 'l.start': 'Дайындықты бастау', 'l.platform': 'Платформа', 'l.hero': 'Мақсатты мектепке бірінші талпыныстан түс',
       'l.heroSub': '5–7 сынып оқушыларына БИЛ, РФМШ және НЗМ емтихандарына дайындық: күнделікті жоспар, сабақтар, үй жұмыстары және нақты форматтағы сынақтар — бір платформада.',
@@ -28,7 +28,7 @@
       'l.d.hw': 'Әр тақырыпқа 20 есеп: A → B → C → ★. Қате жауаптан кейін — ұқсас есеп. Есептер шаблонды емес: суреттер, кестелер, кері есептер, «қатені тап».',
       'l.d.mock': 'БИЛ (+4/−1), РФМШ (тек сан), НЗМ (бөлімдердің өз уақыты) форматтары. Қағазға басып шығарып, жауаптарды кейін енгізуге болады.',
       'l.d.cards': 'Формулалар мен ережелерге арналған флеш-карточкалар: «Білемін / Қайталау» — білмегендері жиірек шығады.',
-      'l.d.game': '«Жылдам есеп»: 60 секундта ойша есептеу. Ұпай рейтингке қосылады.',
+      'l.d.game': 'Ойындар: жылдам есеп, бөлшек жекпе-жегі, тізбек, «шын ба, жалған ба?», формула викторинасы — әрқайсысы 60 секунд. Ұпай рейтингке қосылады.',
       'l.d.rank': 'Үй жұмысы, сынақ, карточка, ойын үшін ұпай беріледі. Ай сайын көшбасшыларға сыйлық.',
       'l.d.parent': 'Ата-ана баласының нәтижесін өз аккаунтынан көреді: белсенділік, үй жұмыстары, сынақтар, әлсіз тақырыптар.',
       'a.login': 'Кіру', 'a.signup': 'Тіркелу', 'a.who': 'Сіз кімсіз?', 'a.student': 'Оқушы', 'a.studentSub': 'Есеп шығарамын, курстан өтемін', 'a.parent': 'Ата-ана', 'a.parentSub': 'Баламның нәтижесін көремін',
@@ -59,10 +59,10 @@
       'c.h.6': 'Колоданы соңына дейін өткенде рейтингке ұпай қосылады: әр «Білемін» — 1 ұпай, бір колодадан күніне 20 ұпайдан аспайды.',
       'c.h.7': '<b>Адал болыңыз:</b> білмей «Білемін» бассаңыз, карточка сирек шығып, формула ұмытылып қалады — емтиханда дәл сол жерде қателесесіз.', 'c.cards': '{n} карточка', 'c.known': '{k}/{n} білемін', 'c.back': 'Карточкаларға', 'c.show': 'Жауапты көру үшін басыңыз', 'c.q': 'Сұрақ', 'c.a': 'Жауап',
       'c.know': 'Білемін', 'c.again': 'Қайталау', 'c.restart': 'Қайтадан', 'c.done': 'Колода аяқталды: {k} карточканы білесіз.', 'c.none': 'Карточкалар жақында қосылады.',
-      'g.title': 'Жылдам есеп', 'g.sub': '60 секундта мүмкіндігінше көп мысал шығарыңыз. Enter — жауап беру. Күндегі бірінші ойын рейтингке ұпай береді.', 'g.start': 'Бастау', 'g.level': 'Деңгей', 'g.score': 'Нәтиже: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Тағы ойнау', 'g.time': 'уақыт'
+      'g.title': 'Ойындар', 'g.sub': 'Әр ойын — 60 секунд. Ойын таңдаңыз да, рекордыңызды жаңартыңыз. Күндегі бірінші ойын рейтингке ұпай береді.', 'g.start': 'Бастау', 'g.level': 'Деңгей', 'g.score': 'Нәтиже: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Тағы ойнау', 'g.time': 'уақыт'
     },
     ru: {
-      'nav.pricing': 'Тарифы', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточки', 'nav.game': 'Быстрый счёт', 'nav.admin': 'Админ',
+      'nav.pricing': 'Тарифы', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточки', 'nav.game': 'Игры', 'nav.admin': 'Админ',
       'nav.kids': 'Мои дети', 'nav.secParent': 'Родитель', 'nav.secAcc': 'Аккаунт', 'role.parent': 'Родитель', 'role.student': 'Ученик', 'role.admin': 'Админ', 'pts.unit': 'баллов',
       'l.login': 'Войти', 'l.start': 'Начать подготовку', 'l.platform': 'Платформа', 'l.hero': 'Поступи в школу мечты с первой попытки',
       'l.heroSub': 'Подготовка учеников 5–7 классов к экзаменам БИЛ, РФМШ и НИШ: план на каждый день, уроки, домашки и пробные тесты в настоящем формате — в одной платформе.',
@@ -81,7 +81,7 @@
       'l.d.hw': '20 задач на тему: A → B → C → ★. После ошибки — похожая задача. Задачи не шаблонные: рисунки, таблицы, обратные задачи, «найди ошибку».',
       'l.d.mock': 'Форматы БИЛ (+4/−1), РФМШ (только число), НИШ (своё время у каждого раздела). Можно распечатать и потом внести ответы.',
       'l.d.cards': 'Флеш-карточки на формулы и правила: «Знаю / Повторить» — незнакомые показываются чаще.',
-      'l.d.game': '«Быстрый счёт»: устный счёт на скорость за 60 секунд. Баллы идут в рейтинг.',
+      'l.d.game': 'Игры: быстрый счёт, дуэль дробей, последовательность, «правда или ложь», викторина формул — каждая по 60 секунд. Баллы идут в рейтинг.',
       'l.d.rank': 'Баллы за домашки, пробники, карточки и игры. Каждый месяц лидеры получают призы.',
       'l.d.parent': 'Родитель видит результаты ребёнка в своём аккаунте: активность, домашки, пробники, слабые темы.',
       'a.login': 'Вход', 'a.signup': 'Регистрация', 'a.who': 'Кто вы?', 'a.student': 'Ученик', 'a.studentSub': 'Решаю задачи и прохожу курс', 'a.parent': 'Родитель', 'a.parentSub': 'Смотрю результаты ребёнка',
@@ -112,7 +112,7 @@
       'c.h.6': 'Когда колода пройдена до конца, начисляются баллы в рейтинг: 1 балл за каждое «Знаю», не больше 20 в день за одну колоду.',
       'c.h.7': '<b>Будьте честны:</b> если нажать «Знаю», не зная, карточка будет попадаться реже и формула забудется — и ошибка случится на экзамене.', 'c.cards': '{n} карточек', 'c.known': 'знаю {k}/{n}', 'c.back': 'К карточкам', 'c.show': 'Нажмите, чтобы увидеть ответ', 'c.q': 'Вопрос', 'c.a': 'Ответ',
       'c.know': 'Знаю', 'c.again': 'Повторить', 'c.restart': 'Заново', 'c.done': 'Колода пройдена: вы знаете {k} карточек.', 'c.none': 'Карточки скоро появятся.',
-      'g.title': 'Быстрый счёт', 'g.sub': 'Решите как можно больше примеров за 60 секунд. Enter — ответить. Первая игра за день даёт баллы в рейтинг.', 'g.start': 'Начать', 'g.level': 'Уровень', 'g.score': 'Результат: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Ещё раз', 'g.time': 'время'
+      'g.title': 'Игры', 'g.sub': 'Каждая игра — 60 секунд. Выберите игру и побейте свой рекорд. Первая игра за день даёт баллы в рейтинг.', 'g.start': 'Начать', 'g.level': 'Уровень', 'g.score': 'Результат: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Ещё раз', 'g.time': 'время'
     }
   };
   // Добавляем тексты в общий словарь, чтобы t() в app.js тоже их видел.
@@ -459,36 +459,119 @@
     return h;
   }
 
-  /* =================== ИГРА «ЖЫЛДАМ ЕСЕП» =================== */
-  function gameTask(r, lvl) {
-    var a, b, op = r.pick(lvl === 1 ? ['+', '−'] : lvl === 2 ? ['+', '−', '·'] : ['+', '−', '·', ':']);
-    if (op === '+') { a = r.int(lvl * 8, lvl * 60); b = r.int(lvl * 5, lvl * 45); return [a + ' + ' + b, a + b]; }
-    if (op === '−') { a = r.int(lvl * 20, lvl * 90); b = r.int(lvl * 5, a); return [a + ' − ' + b, a - b]; }
-    if (op === '·') { a = r.int(3, lvl === 2 ? 12 : 19); b = r.int(3, lvl === 2 ? 9 : 15); return [a + ' · ' + b, a * b]; }
-    b = r.int(3, 15); a = b * r.int(3, 15); return [a + ' : ' + b, a / b];
-  }
-  function game() {
-    var m = ui().mem, g = m.game, S = ui().S(); S.game = S.game || { best: 0 };
-    var h = '<section class="sec"><h1>' + tt('g.title') + '</h1><p class="muted">' + tt('g.sub') + '</p></section>';
-    if (!g || g.over) {
-      h += (g && g.over ? '<div class="card center"><b class="big">' + tt('g.score', { n: g.score }) + '</b><p class="muted">' + tt('g.best', { n: S.game.best }) + '</p></div>' : '<p class="muted">' + tt('g.best', { n: S.game.best }) + '</p>') +
-        '<div class="row center"><span class="muted">' + tt('g.level') + ':</span>' + [1, 2, 3].map(function (l) { return '<button class="btn pill' + ((m.gLvl || 2) === l ? ' dark' : '') + '" data-act="gLvl" data-l="' + l + '">' + ['A', 'B', 'C'][l - 1] + '</button>'; }).join('') + '</div>' +
-        '<div class="row center"><button class="btn pill dark" data-act="gStart">' + (g ? tt('g.again') : tt('g.start')) + '</button></div>';
+  /* =================== ОЙЫНДАР / ИГРЫ =================== */
+  // Каждая игра — 60 секунд. Ввод числа (calc) или выбор варианта (остальные): верно +1, неверно −1 (не ниже 0),
+  // чтобы не жали наугад. Рекорд — свой у каждой игры; первая игра дня даёт баллы в рейтинг.
+  function frStr(n, d) { return '<span class="frac"><span>' + n + '</span><span>' + d + '</span></span>'; }
+  function gcdG(a, b) { while (b) { var t = b; b = a % b; a = t; } return a; }
+  var GAMES = {
+    calc: { kk: 'Жылдам есеп', ru: 'Быстрый счёт', ic: '±', typed: true,
+      skk: '60 секундта мүмкіндігінше көп мысал. Жауапты теріп, Enter басыңыз.', sru: 'Как можно больше примеров за 60 секунд. Введите ответ и нажмите Enter.',
+      gen: function (r, lvl) {
+        var a, b, op = r.pick(lvl === 1 ? ['+', '−'] : lvl === 2 ? ['+', '−', '·'] : ['+', '−', '·', ':']);
+        if (op === '+') { a = r.int(lvl * 8, lvl * 60); b = r.int(lvl * 5, lvl * 45); return { q: a + ' + ' + b + ' = ?', a: a + b }; }
+        if (op === '−') { a = r.int(lvl * 20, lvl * 90); b = r.int(lvl * 5, a); return { q: a + ' − ' + b + ' = ?', a: a - b }; }
+        if (op === '·') { a = r.int(3, lvl === 2 ? 12 : 19); b = r.int(3, lvl === 2 ? 9 : 15); return { q: a + ' · ' + b + ' = ?', a: a * b }; }
+        b = r.int(3, 15); a = b * r.int(3, 15); return { q: a + ' : ' + b + ' = ?', a: a / b };
+      } },
+    frac: { kk: 'Бөлшек жекпе-жегі', ru: 'Дуэль дробей', ic: '½',
+      skk: 'Қай бөлшек үлкен? Тең болса — «=». Қате жауап −1.', sru: 'Какая дробь больше? Если равны — «=». Ошибка −1.',
+      gen: function (r, lvl) {
+        var a, b, c, d, g;
+        if (r.chance(0.15)) { a = r.int(1, 6); b = a + r.int(1, 6); var k = r.int(2, 4); c = a * k; d = b * k; }
+        else if (lvl === 1) { if (r.chance(0.5)) { b = d = r.int(5, 12); a = r.int(1, b - 1); do { c = r.int(1, d - 1); } while (c === a); } else { a = c = r.int(1, 5); b = r.int(a + 1, 12); do { d = r.int(a + 1, 12); } while (d === b); } }
+        else { var mx = lvl === 2 ? 12 : 20; do { b = r.int(3, mx); d = r.int(3, mx); a = r.int(1, b - 1); c = r.int(1, d - 1); } while (a * d === b * c || (lvl === 3 && Math.abs(a / b - c / d) > 0.08)); }
+        g = gcdG(a, b); var x = a * d, y = c * b, k2 = x > y ? 0 : x < y ? 1 : 2;
+        return { q: '<span class="g-vs">' + frStr(a, b) + '<i>?</i>' + frStr(c, d) + '</span>', opts: [frStr(a, b), frStr(c, d), '='], k: k2 };
+      } },
+    seq: { kk: 'Тізбек', ru: 'Последовательность', ic: '…',
+      skk: 'Тізбектің келесі санын табыңыз. Қате жауап −1.', sru: 'Найдите следующее число последовательности. Ошибка −1.',
+      gen: function (r, lvl) {
+        var t = r.pick(lvl === 1 ? ['ar', 'ar', 'geo'] : lvl === 2 ? ['ar', 'geo', 'sq', 'dif'] : ['geo', 'sq', 'dif', 'alt', 'fib']), s = [], i, n = 5;
+        if (t === 'ar') { var a0 = r.int(1, 40), d = r.pick([-7, -5, -3, 3, 4, 6, 7, 9, 11, 12]); if (d < 0) a0 += 60; for (i = 0; i <= n; i++) s.push(a0 + i * d); }
+        if (t === 'geo') { var g0 = r.int(1, 5), q = r.pick([2, 3]); for (i = 0; i <= n; i++) s.push(g0 * Math.pow(q, i)); }
+        if (t === 'sq') { var o = r.int(1, 5), add = r.pick([0, 1, -1]); for (i = 0; i <= n; i++) s.push((o + i) * (o + i) + add); }
+        if (t === 'dif') { var v = r.int(1, 10), st = r.int(1, 4); for (i = 0; i <= n; i++) { s.push(v); v += st + i; } }   // разности растут на 1
+        if (t === 'alt') { var u = r.int(10, 30), p = r.int(2, 6), m2 = r.int(1, 4); for (i = 0; i <= n; i++) { s.push(u); u = i % 2 ? u - m2 : u + p; } }
+        if (t === 'fib') { var f1 = r.int(1, 4), f2 = r.int(2, 6); s = [f1, f2]; while (s.length <= n) s.push(s[s.length - 1] + s[s.length - 2]); }
+        var ans = s[n], shown = s.slice(0, n), last = shown[n - 1], dd = ans - last;
+        var cand = [ans + 1, ans - 1, last + (shown[n - 1] - shown[n - 2]), ans + dd, ans * 2, ans - 2, ans + 2].filter(function (x, j, A) { return x !== ans && A.indexOf(x) === j; });
+        var opts = r.shuffle([ans].concat(cand.slice(0, 3)));
+        return { q: shown.join(', ') + ', ?', opts: opts.map(String), k: opts.indexOf(ans) };
+      } },
+    tf: { kk: 'Шын ба, жалған ба?', ru: 'Правда или ложь?', ic: '✓',
+      skk: 'Тұжырым дұрыс па? Тез шешіңіз. Қате жауап −1.', sru: 'Верно ли утверждение? Решайте быстро. Ошибка −1.',
+      gen: function (r, lvl) {
+        var ru = I.lang() === 'ru', t = r.pick(['prime', 'div', 'frac', 'dec', 'pct', 'sq', 'ord']), ok = r.chance(0.5), s, x, y, v;
+        if (t === 'prime') { do { x = r.int(11, lvl === 1 ? 50 : 99); } while ((function (n) { for (var i = 2; i * i <= n; i++) if (n % i === 0) return false; return true; })(x) !== ok); s = x + (ru ? ' — простое число' : ' — жай сан'); }
+        else if (t === 'div') { y = r.pick([3, 4, 6, 8, 9, 11, 12]); x = y * r.int(5, 40) + (ok ? 0 : r.int(1, y - 1)); s = x + (ru ? ' делится на ' + y : ' саны ' + y + { 3: '-ке', 4: '-ке', 6: '-ға', 8: '-ге', 9: '-ға', 11: '-ге', 12: '-ге' }[y] + ' бөлінеді'); }
+        else if (t === 'frac') { var b = r.int(3, 12), d = r.int(3, 12), a = r.int(1, b - 1), c = r.int(1, d - 1); if (a * d === b * c) c = c === 1 ? 2 : c - 1; var big = a * d > b * c; ok = big; s = frStr(a, b) + ' > ' + frStr(c, d); }
+        else if (t === 'dec') { var P = [['0,25', 1, 4], ['0,5', 1, 2], ['0,2', 1, 5], ['0,75', 3, 4], ['0,4', 2, 5], ['0,125', 1, 8], ['0,6', 3, 5], ['0,05', 1, 20]], e = r.pick(P), f = ok ? e : r.pick(P.filter(function (z) { return z !== e; })); s = e[0] + ' = ' + frStr(f[1], f[2]); }
+        else if (t === 'pct') { var p = r.pick([10, 20, 25, 50, 75, 5, 30]), n2 = r.pick([40, 60, 80, 120, 200, 360, 400]), val = p * n2 / 100; if (val % 1) { p = 10; val = n2 / 10; } v = ok ? val : val + r.pick([-10, -5, 5, 10, 2]); s = (ru ? p + '% от ' + n2 + ' = ' : n2 + { 40: '-тың', 60: '-тың', 80: '-нің', 120: '-ның', 200: '-дің', 360: '-тың', 400: '-дің' }[n2] + ' ' + p + '%-ы = ') + v; }
+        else if (t === 'sq') { x = r.int(11, lvl === 1 ? 15 : 25); v = ok ? x * x : x * x + r.pick([-10, 10, -1, 1, 20]); s = x + '² = ' + v; }
+        else { var A1 = r.int(2, 9), B1 = r.int(2, 9), C1 = r.int(2, 9), right = A1 + B1 * C1; v = ok ? right : (A1 + B1) * C1; if (v === right) { v++; ok = false; } s = A1 + ' + ' + B1 + ' · ' + C1 + ' = ' + v; }
+        return { q: s, opts: ru ? ['Верно', 'Неверно'] : ['Шын', 'Жалған'], k: ok ? 0 : 1 };
+      } },
+    formula: { kk: 'Формула викторинасы', ru: 'Викторина формул', ic: 'π',
+      skk: 'Карточкалардағы формулалар: дұрыс жауапты таңдаңыз. Карточкаларды шынымен білетініңізді тексереді. Қате жауап −1.', sru: 'Формулы из карточек: выберите правильный ответ. Проверяет, действительно ли вы знаете карточки. Ошибка −1.',
+      gen: function (r) {
+        // Берём карточки с коротким ответом (формула, число), а неверные варианты — того же вида, чтобы не угадывалось по форме.
+        var ru = I.lang() === 'ru', F = U.mathFrac, back = function (x) { return String(ru ? x.b_ru : x.b_kk); };
+        var plain = function (x) { return back(x).replace(/<[^>]+>/g, ''); }, isNum = function (x) { return /^[\d\s,.−+·:=()\/%°²³-]+$/.test(plain(x)); };
+        var pool = [];
+        (decksFor().length ? decksFor() : (Z.decks || [])).forEach(function (d) { d.cards.forEach(function (c) { if (plain(c).length <= 42) pool.push({ d: d, c: c }); }); });
+        var pick = r.pick(pool), c = pick.c, num = isNum(c);
+        var same = function (list) { return list.filter(function (x) { return back(x.c) !== back(c) && isNum(x.c) === num; }); };
+        var cand = r.shuffle(same(pool.filter(function (x) { return x.d === pick.d; })));
+        if (cand.length < 3) cand = cand.concat(r.shuffle(same(pool.filter(function (x) { return x.d !== pick.d; }))));
+        var opts = [c], seen = {}; seen[back(c)] = 1;
+        cand.forEach(function (x) { if (opts.length < 4 && !seen[back(x.c)]) { seen[back(x.c)] = 1; opts.push(x.c); } });
+        opts = r.shuffle(opts);
+        return { q: '<small class="muted">' + esc(ru ? pick.d.ru : pick.d.kk) + '</small><br>' + F(ru ? c.f_ru : c.f_kk), opts: opts.map(function (x) { return F(back(x)); }), k: opts.indexOf(c), long: true };
+      } }
+  };
+  var GAME_ORDER = ['calc', 'frac', 'seq', 'tf', 'formula'];
+  function gName(G) { return I.lang() === 'ru' ? G.ru : G.kk; }
+  function gBest(S, id) { S.game = S.game || {}; if (typeof S.game.best === 'number') { S.game.bests = { calc: S.game.best }; delete S.game.best; } S.game.bests = S.game.bests || {}; return S.game.bests[id] || 0; }
+  function game(id) {
+    var m = ui().mem, g = m.game, S = ui().S(), ru = I.lang() === 'ru';
+    if (!id || !GAMES[id]) {   // витрина игр
+      return '<section class="sec"><h1>' + tt('g.title') + '</h1><p class="muted">' + tt('g.sub') + '</p></section><div class="decks games">' + GAME_ORDER.map(function (k) {
+        var G = GAMES[k];
+        return '<a class="deck" href="#/game/' + k + '"><span class="dk-ico g-ico">' + G.ic + '</span><b>' + gName(G) + '</b><small>' + (ru ? G.sru : G.skk) + '</small>' +
+          '<span class="dk-foot"><span>60 ' + (ru ? 'сек' : 'сек') + '</span><span class="tag">' + tt('g.best', { n: gBest(S, k) }) + '</span></span></a>';
+      }).join('') + '</div>';
+    }
+    var G = GAMES[id];
+    var h = '<a class="back" href="#/game">' + ui().ic('back') + tt('g.title') + '</a><section class="sec"><h1>' + gName(G) + '</h1><p class="muted">' + (ru ? G.sru : G.skk) + '</p></section>';
+    if (!g || g.id !== id || g.over) {
+      var fin = g && g.id === id && g.over;
+      h += (fin ? '<div class="card center"><b class="big">' + tt('g.score', { n: g.score }) + '</b><p class="muted">' + tt('g.best', { n: gBest(S, id) }) + (g.ok + g.bad ? ' · ✓ ' + g.ok + ' · ✗ ' + g.bad : '') + '</p></div>' : '<p class="muted">' + tt('g.best', { n: gBest(S, id) }) + '</p>') +
+        (id === 'formula' ? '' : '<div class="row center"><span class="muted">' + tt('g.level') + ':</span>' + [1, 2, 3].map(function (l) { return '<button class="btn pill' + ((m.gLvl || 2) === l ? ' dark' : '') + '" data-act="gLvl" data-l="' + l + '">' + ['A', 'B', 'C'][l - 1] + '</button>'; }).join('') + '</div>') +
+        '<div class="row center"><button class="btn pill dark" data-act="gStart" data-g="' + id + '">' + (fin ? tt('g.again') : tt('g.start')) + '</button></div>';
       return h;
     }
-    return h + '<div class="card center game"><span class="timer" id="gTime">' + Math.max(0, Math.ceil((g.end - Date.now()) / 1000)) + '</span><b class="big">' + g.task[0] + ' = ?</b>' +
-      '<form data-form="gAnswer" class="row center"><input name="a" id="gIn" inputmode="numeric" autocomplete="off" data-autofocus class="g-in"><button class="btn pill dark" type="submit">↵</button></form><p class="muted">' + tt('g.score', { n: g.score }) + '</p></div>';
+    var t = g.task;
+    h += '<div class="card center game' + (g.fb ? ' fb-' + g.fb : '') + '"><span class="timer" id="gTime">' + Math.max(0, Math.ceil((g.end - Date.now()) / 1000)) + '</span><b class="big g-q">' + t.q + '</b>';
+    if (G.typed) h += '<form data-form="gAnswer" class="row center"><input name="a" id="gIn" inputmode="numeric" autocomplete="off" data-autofocus class="g-in"><button class="btn pill dark" type="submit">↵</button></form>';
+    else h += '<div class="g-opts' + (t.long ? ' long' : '') + (t.opts.length === 2 ? ' two' : '') + '">' + t.opts.map(function (o, i) { return '<button class="btn pill g-opt" data-act="gPick" data-i="' + i + '">' + o + '</button>'; }).join('') + '</div>';
+    return h + '<p class="muted">' + tt('g.score', { n: g.score }) + '</p></div>';
   }
   function gameTick() {
     var g = ui().mem.game; if (!g || g.over) return;
     var left = Math.ceil((g.end - Date.now()) / 1000), el = document.getElementById('gTime');
     if (left <= 0) {
       g.over = true; clearInterval(g.timer);
-      var S = ui().S(); S.game = S.game || { best: 0 }; S.game.best = Math.max(S.game.best, g.score); ui().save();
+      var S = ui().S(); gBest(S, g.id); S.game.bests[g.id] = Math.max(S.game.bests[g.id] || 0, g.score); ui().save();
       ui().award('game', ui().today(), Math.min(30, g.score));
       ui().render(); return;
     }
     if (el) el.textContent = left;
+  }
+  function gNext(g, ok) {
+    if (ok) { g.score++; g.ok++; } else { g.score = Math.max(0, g.score - (GAMES[g.id].typed ? 0 : 1)); g.bad++; }
+    g.fb = ok ? 'ok' : 'no'; g.task = GAMES[g.id].gen(g.r, g.lvl);
+    ui().render();
   }
 
   /* =================== ДЕЙСТВИЯ =================== */
@@ -529,14 +612,15 @@
       ui().render();
     },
     gLvl: function (el) { ui().mem.gLvl = +el.dataset.l; ui().render(); },
-    gStart: function () {
-      var m = ui().mem, r = U.rng(U.newSeed());
+    gStart: function (el) {
+      var m = ui().mem, r = U.rng(U.newSeed()), id = el.dataset.g || 'calc';
       if (m.game && m.game.timer) clearInterval(m.game.timer);
-      m.game = { r: r, lvl: m.gLvl || 2, score: 0, end: Date.now() + 60000, task: null, over: false };
-      m.game.task = gameTask(r, m.game.lvl);
+      m.game = { id: id, r: r, lvl: m.gLvl || 2, score: 0, ok: 0, bad: 0, end: Date.now() + 60000, task: null, over: false };
+      m.game.task = GAMES[id].gen(r, m.game.lvl);
       m.game.timer = setInterval(gameTick, 250);
       ui().render();
-    }
+    },
+    gPick: function (el) { var g = ui().mem.game; if (!g || g.over) return; gNext(g, +el.dataset.i === g.task.k); }
   };
   Z.viewForms = {
     signup: function (d) {
@@ -594,9 +678,7 @@
     },
     gAnswer: function (d) {
       var g = ui().mem.game; if (!g || g.over) return;
-      if (+String(d.get('a')).replace(',', '.').replace('−', '-') === g.task[1]) g.score++;
-      g.task = gameTask(g.r, g.lvl);
-      ui().render();
+      gNext(g, +String(d.get('a')).replace(',', '.').replace('−', '-') === g.task.a);
     }
   };
   Z.parentTips = parentTips;
