@@ -48,23 +48,16 @@
     return out;
   }
 
-  // Текстовые варианты с переводом (банк естествознания): ans_ru / wrong_ru → словарь kk → ru.
-  function ruMapOf(it) {
-    if (!it.ans_ru) return null;
-    var m = {}; m[it.ans] = it.ans_ru;
-    it.wrong.forEach(function (w, i) { m[w] = it.wrong_ru[i]; });
-    return m;
-  }
-
   function pickBank(bank, lvl, r, needInt) {
     var items = bank.filter(function (q) { return q.lvl === lvl && (!needInt || q.int); });
     if (!items.length) items = bank.filter(function (q) { return !needInt || q.int; });
     var it = r.pick(items);
-    return { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru, bankId: it.id, ruMap: ruMapOf(it) };
+    return { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru, bankId: it.id };
   }
 
   /* Собрать вопрос.
-   * mode: { answer: 'mc' | 'int', options: 4|5 }
+   * mode: { answer: 'mc' | 'int', options: 4|5 } — у БИЛ выбор из 4 вариантов; 'int' (ввод целого числа)
+   * движок поддерживает как общий тип ответа, но форматы сайта его сейчас не используют.
    * reading-вопросы собираются отдельно (buildReading), т.к. идут блоком к тексту. */
   /* Выбор формата: базовая задача темы или один из дополнительных форматов (gen_formats.js).
    * opts.vary = false — только базовый генератор и форматы без общих преобразований (для пробных). */
@@ -99,7 +92,7 @@
 
   /* Общие преобразования — меняют то, ЧТО спрашивают, а не только числа:
    *  ошибка ученика — «на сколько ошибся Асан?» (нужно решить и сравнить);
-   *  сравнение — две задачи темы, какая величина больше (как «Сандық сипаттама» НИШ);
+   *  сравнение — две задачи темы, какая величина больше;
    *  свойство — какое утверждение об ответе верно (чётность, делимость, границы). */
   function transform(t, lvl, r, needInt, raw) {
     var a = norm(raw.ans);
@@ -152,7 +145,7 @@
       raw = generate(t, lvl, r, needInt, vary, slot, fmt, avoid);
       var a = norm(raw.ans);
       if (!needInt || (typeof a === 'number' && a % 1 === 0)) break;
-      if (slot >= 0 && tries % 10 === 9) slot++;   // этот формат не даёт целого ответа (РФМШ) — следующий
+      if (slot >= 0 && tries % 10 === 9) slot++;   // этот формат не даёт целого ответа (режим 'int') — следующий
       if (++tries > 60) throw new Error('topic ' + topicId + ' lvl ' + lvl + ' cannot produce integer answers');
       s = (s * 31 + 7) % 2147483646 + 1;
     }
@@ -193,12 +186,9 @@
   }
 
   // Блок чтения: текст + его вопросы (по порядку, варианты перемешаны).
-  var PASSAGE_BANKS = ['reading', 'reading_ru', 'reading_en'];
   function findPassage(id) {
-    for (var i = 0; i < PASSAGE_BANKS.length; i++) {
-      var b = Z.bank[PASSAGE_BANKS[i]] || [];
-      for (var j = 0; j < b.length; j++) if (b[j].id === id) return b[j];
-    }
+    var b = Z.bank.reading || [];
+    for (var j = 0; j < b.length; j++) if (b[j].id === id) return b[j];
     return null;
   }
   function buildReading(passageId, seed, nOpts) {
@@ -273,7 +263,7 @@
     var items = Z.bank[t.bank].filter(function (q) { return mode.answer !== 'int' || q.int; });
     items = r.shuffle(items).slice(0, SESSION_LEN).sort(function (a, b) { return a.lvl - b.lvl; });   // большой банк — 20 случайных
     return items.map(function (it, k) {
-      var q = { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru, ruMap: ruMapOf(it) };
+      var q = { kk: it.kk, ru: it.ru, ans: it.ans, wrong: it.wrong.slice(), sol_kk: it.sol_kk, sol_ru: it.sol_ru };
       return finishQuestion(t.id, it.lvl, seed + k, mode, q, r);
     });
   }
@@ -378,7 +368,7 @@
       }
       if (sec.blueprint) { blueprintSection(sec, si, f, r, seed, mode, qs, seen); return; }
       // Темы раздаём по кругу из перемешанного списка — так в варианте нет перекоса в одну тему.
-      // kinds[0] — основная часть раздела, kinds[1] — доля logicShare (логика у БИЛ и РФМШ).
+      // kinds[0] — основная часть раздела, kinds[1] — доля logicShare (логика в разделе «Математика және логика»).
       var mPool = r.shuffle(Z.topicsFor(f.school, sec.kinds[0])), lPool = r.shuffle(Z.topicsFor(f.school, sec.kinds[1] || sec.kinds[0])), mi = 0, li = 0;
       [1, 2, 3, 4].forEach(function (lvl) {
         var n = sec.mix[lvl] || 0, nLogic = Math.round(n * (sec.logicShare || 0)), list = [];
@@ -393,16 +383,7 @@
         });
       });
     });
-    var ex = { format: formatId, seed: seed, questions: qs, answers: {}, flags: {}, startedAt: Date.now(), minutes: f.minutes };
-    // НИШ: у каждого раздела своё время; вернуться в закончившийся раздел нельзя.
-    if (f.sectionTimes) {
-      ex.secs = f.sections.map(function (sec, si) {
-        var idx = []; qs.forEach(function (q, i) { if (q.section === si) idx.push(i); });
-        return { from: idx[0], to: idx[idx.length - 1] + 1, minutes: sec.minutes };
-      });
-      ex.sec = 0; ex.secStartedAt = ex.startedAt;
-    }
-    return ex;
+    return { format: formatId, seed: seed, questions: qs, answers: {}, flags: {}, startedAt: Date.now(), minutes: f.minutes };
   }
 
   /* Раздел «по образцу экзамена»: задача № k варианта повторяет слот № k оригинала (тема, уровень,
@@ -438,7 +419,7 @@
     });
   }
 
-  // Подсчёт по правилам школы: БИЛ +4/−1/0, РФМШ 3/5/7 за верный.
+  // Подсчёт по правилам формата: scoring (БИЛ +4/−1/0) или points — баллы за верный по уровню (диагностика).
   function scoreExam(ex) {
     var f = Z.examFormats[ex.format], res = { score: 0, max: 0, correct: 0, wrong: 0, skipped: 0, byTopic: {}, byLevel: {}, bySection: {} };
     ex.questions.forEach(function (q, i) {

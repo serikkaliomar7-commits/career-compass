@@ -3,7 +3,7 @@
  * Каждый день: темы (видеоурок → домашка на 20 задач A → B → C → ★) и тест.
  * Незаконченная домашка переходит на следующий день и продолжается с того же места.
  * Полные пробные тесты 2 раза в неделю, а за 60 дней до экзамена — 3 раза.
- * В остальные дни — короткий тест (мини-тест или чтение для БИЛ).
+ * В остальные дни — короткий тест (мини-тест или чтение).
  * План дня фиксируется при первом открытии, чтобы задания не «прыгали». */
 (function (root) {
   'use strict';
@@ -45,14 +45,11 @@
   }
 
   function testFor(state, info) {
-    var sc = state.profile.school, mode = INTENSITY[state.profile.intensity || 'normal'];
-    // НИШ: пробные чередуют 1-й день (математика, сандық сипаттама, естествознание) и 2-й (языки).
-    if (!state.diag && info.idx === 0) return sc + '_diag';   // первый день — входная диагностика
-    if (info.mock) return sc === 'NIS' ? (mockDays(info.left).indexOf(info.idx % 7) % 2 ? 'NIS_full2' : 'NIS_full') : sc + '_full';
+    var mode = INTENSITY[state.profile.intensity || 'normal'];
+    if (!state.diag && info.idx === 0) return 'BIL_diag';   // первый день — входная диагностика
+    if (info.mock) return 'BIL_full';
     if (mode.short === 'none' || (mode.short === 'alt' && info.idx % 2 === 1)) return null;
-    if (sc === 'BIL') return info.idx % 4 < 2 ? 'BIL_read' : 'BIL_mini';
-    if (sc === 'NIS') return ['NIS_quant', 'NIS_mini', 'NIS_lang', 'NIS_sci'][info.idx % 4];
-    return sc + '_mini';
+    return info.idx % 4 < 2 ? 'BIL_read' : 'BIL_mini';
   }
 
   function planFor(state, date) {
@@ -61,9 +58,7 @@
     var tasks = [];
     var nl = mode.logic, nm = mode.math;
     if (mode.alternate) { if (info.idx % 2) nl = 0; else nm = 0; }
-    // У НИШ нет логики: второй слот по очереди — сандық сипаттама, естествознание, языки.
-    var second = state.profile.school === 'NIS' ? ['quant', 'science', 'reading'][info.idx % 3] : 'logic';
-    var logic = pickTopics(state, second, nl, []);
+    var logic = pickTopics(state, 'logic', nl, []);
     var math = pickTopics(state, 'math', nm, []);
     logic.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
     math.forEach(function (id) { tasks.push({ type: 'topic', topic: id, done: false, video: false }); });
@@ -156,7 +151,7 @@
    * с текстами (домашка или тест с чтением) поднимают уровень. Последняя домашка ниже 6/10 — ступень назад. */
   function readLevel(state) {
     var p = state.topics.r_read || {}, n = p.hw || 0;
-    state.exams.forEach(function (e) { if (/^(BIL_full|BIL_read|NIS_full2|NIS_lang)$/.test(e.format)) n++; });
+    state.exams.forEach(function (e) { if (/^(BIL_full|BIL_read)$/.test(e.format)) n++; });
     var lvl = 2 + Math.floor(n / 2);
     if (p.lastGrade && p.lastGrade < 6) lvl--;
     return Math.max(2, Math.min(4, lvl));
@@ -190,7 +185,7 @@
     return n;
   }
 
-  // Готовность: доля собранных звёзд по всем темам школы.
+  // Готовность: доля собранных звёзд по всем темам программы.
   function readiness(state) {
     var ts = Z.topicsFor(state.profile.school), got = 0;
     ts.forEach(function (t) { got += (state.topics[t.id] && state.topics[t.id].stars) || 0; });
@@ -202,11 +197,6 @@
     var full = state.exams.filter(function (e) { return Z.examFormats[e.format] && Z.examFormats[e.format].full && Z.examFormats[e.format].school === state.profile.school; });
     if (!full.length) return null;
     var last = full.slice(-3);
-    // НИШ: два разных дня с разными максимумами — прогноз в процентах.
-    if (state.profile.school === 'NIS') {
-      var pc = last.reduce(function (a, e) { return a + Math.max(0, e.score) / e.max; }, 0) / last.length;
-      return { score: Math.round(pc * 100), max: 100, pct: true, n: full.length };
-    }
     var s = last.reduce(function (a, e) { return a + e.score; }, 0) / last.length;
     return { score: Math.round(s), max: last[last.length - 1].max, n: full.length };
   }

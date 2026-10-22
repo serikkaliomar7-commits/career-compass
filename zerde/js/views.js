@@ -11,22 +11,22 @@
     kk: {
       'nav.pricing': 'Тарифтер', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточкалар', 'nav.game': 'Ойындар', 'nav.admin': 'Әкімші',
       'nav.kids': 'Балаларым', 'nav.secParent': 'Ата-ана', 'nav.secAcc': 'Аккаунт', 'role.parent': 'Ата-ана', 'role.student': 'Оқушы', 'role.admin': 'Әкімші', 'pts.unit': 'ұпай',
-      'l.login': 'Кіру', 'l.start': 'Дайындықты бастау', 'l.platform': 'Платформа', 'l.hero': 'Мақсатты мектепке бірінші талпыныстан түс',
-      'l.heroSub': '5–7 сынып оқушыларына БИЛ, РФМШ және НЗМ емтихандарына дайындық: күнделікті жоспар, сабақтар, үй жұмыстары және нақты форматтағы сынақтар — бір платформада.',
-      'l.max': 'БИЛ сынағының ең жоғары ұпайы', 'l.schools': 'Біз дайындайтын мектептер', 'l.inside': 'Платформаны іштен қара',
-      'l.facts': 'Сандармен', 'l.f1': 'тақырып: математика, логика, оқу, НЗМ бөлімдері', 'l.f2': 'деңгей: A → B → C → ★ олимпиада', 'l.f3': 'есеп әр тақырыпта: әр жолы жаңа сандар мен формат', 'l.f4': 'флеш-карточка формулалар мен ережелерге',
+      'l.login': 'Кіру', 'l.start': 'Дайындықты бастау', 'l.platform': 'Платформа', 'l.hero': 'БИЛ-ге бірінші талпыныстан түс',
+      'l.heroSub': '5–7 сынып оқушыларын Білім-инновация лицейіне түсу емтиханына дайындаймыз: күнделікті жоспар, сабақтар, үй жұмыстары және нақты БИЛ форматындағы сынақтар — бір платформада.',
+      'l.max': 'БИЛ сынағының ең жоғары ұпайы', 'l.schools': 'Біз дайындайтын мектеп', 'l.inside': 'Платформаны іштен қара',
+      'l.facts': 'Сандармен', 'l.f1': 'тақырып: математика, логика және оқу сауаттылығы', 'l.f2': 'деңгей: A → B → C → ★ олимпиада', 'l.f3': 'есеп әр тақырыпта: әр жолы жаңа сандар мен формат', 'l.f4': 'флеш-карточка формулалар мен ережелерге',
       'l.pricing': 'Тарифтер', 'l.trial': 'Тіркелгеннен кейін {n} күн — тегін', 'l.month': 'ай', 'l.months': 'ай', 'l.per': '₸', 'l.save': 'үнем {p}%', 'l.choose': 'Таңдау',
       'l.faq': 'Жиі қойылатын сұрақтар',
       'l.q1': 'Қалай төлеймін?', 'l.a1': 'Тарифті таңдаңыз — сайт Kaspi аударымының сомасы мен нөмірін көрсетеді. Төлегеннен кейін әкімші бір күн ішінде растайды, қолжетімділік автоматты түрде ашылады.',
       'l.q2': 'Ата-ана не көреді?', 'l.a2': 'Ата-ана жеке аккаунтпен кіріп, баласының кодын енгізеді. Содан кейін баланың белсенділігін, үй жұмыстарын, сынақ нәтижелерін, әлсіз тақырыптарын және болжамды ұпайын көреді.',
       'l.q3': 'Жазылым өздігінен ұзара ма?', 'l.a3': 'Жоқ. Мерзім біткенде қолжетімділік тоқтайды, келесі айды өзіңіз таңдайсыз.',
-      'l.q4': 'Қай тілде?', 'l.a4': 'Тапсырмалар қазақ және орыс тілдерінде (бірін немесе екеуін қатар көрсетуге болады), НЗМ-ге — ағылшын тілінің мәтіндері де бар.',
+      'l.q4': 'Қай тілде?', 'l.a4': 'Тапсырмалар қазақ және орыс тілдерінде — БИЛ сынағындағыдай. Бір тілді немесе екеуін қатар көрсетуге болады.',
       'l.q5': 'Промокод деген не?', 'l.a5': 'Промокод жеңілдік немесе тегін қолжетімділік береді. Оны тіркелу кезінде немесе «Аккаунт» бетінде енгізуге болады.',
       'l.t.plan': 'Жоспар', 'l.t.lessons': 'Сабақтар', 'l.t.hw': 'Үй жұмысы', 'l.t.mock': 'Сынақтар', 'l.t.cards': 'Карточкалар', 'l.t.game': 'Ойындар', 'l.t.rank': 'Рейтинг', 'l.t.parent': 'Ата-ана',
       'l.d.plan': 'Күн сайын не істеу керек екенін сайт өзі айтады: 1–2 тақырып, қайталау және шағын тест. Аптасына 2–3 рет — толық сынақ. Бастапқы диагностика әлсіз тақырыптардан бастайды.',
       'l.d.lessons': 'Әр тақырыпта: видеосабақ, ереже, жиі кездесетін қателер, A → B → C үш шешілген мысал және «Өзіңді тексер».',
       'l.d.hw': 'Әр тақырыпқа 20 есеп: A → B → C → ★. Қате жауаптан кейін — ұқсас есеп. Есептер шаблонды емес: суреттер, кестелер, кері есептер, «қатені тап».',
-      'l.d.mock': 'БИЛ (+4/−1), РФМШ (тек сан), НЗМ (бөлімдердің өз уақыты) форматтары. Қағазға басып шығарып, жауаптарды кейін енгізуге болады.',
+      'l.d.mock': 'Нақты БИЛ форматы: 60 сұрақ, 110 минут, +4 / −1. Өткен жылдардың үлгісімен құрастырылған нұсқалар. Қағазға басып шығарып, жауаптарды кейін енгізуге болады.',
       'l.d.cards': 'Формулалар мен ережелерге арналған флеш-карточкалар: «Білемін / Қайталау» — білмегендері жиірек шығады.',
       'l.d.game': 'Ойындар: жылдам есеп, бөлшек жекпе-жегі, тізбек, «шын ба, жалған ба?», формула викторинасы — әрқайсысы 60 секунд. Ұпай рейтингке қосылады.',
       'l.d.rank': 'Үй жұмысы, сынақ, карточка, ойын үшін ұпай беріледі. Ай сайын көшбасшыларға сыйлық.',
@@ -35,7 +35,7 @@
       'a.name': 'Аты-жөні', 'a.email': 'Электрондық пошта', 'a.pass': 'Құпиясөз', 'a.passNew': 'Құпиясөз ойлап табыңыз', 'a.show': 'Көрсету', 'a.hide': 'Жасыру',
       'a.passHint': 'Кемінде 8 таңба: әріп пен сан болсын', 'a.pw0': 'Тым қысқа', 'a.pw1': 'Әлсіз — сан мен әріп қосыңыз', 'a.pw2': 'Жарайды', 'a.pw3': 'Мықты құпиясөз',
       'a.promoQ': 'Промокод бар ма?', 'a.forgot': 'Құпиясөзді ұмыттыңыз ба?', 'a.resetSent': 'Құпиясөзді жаңарту сілтемесі поштаңызға жіберілді.', 'a.resetEmail': 'Алдымен поштаңызды жазыңыз.',
-      'a.terms': 'Тіркелу арқылы сіз деректеріңізді тек оқу үшін сақтауымызға келісесіз. 14 жасқа толмаған оқушыны ата-анасы тіркейді немесе ата-анасының рұқсатымен тіркеледі.', 'a.school': 'Мектеп', 'a.grade': 'Сынып', 'a.promo': 'Промокод (міндетті емес)',
+      'a.terms': 'Тіркелу арқылы сіз деректеріңізді тек оқу үшін сақтауымызға келісесіз. 14 жасқа толмаған оқушыны ата-анасы тіркейді немесе ата-анасының рұқсатымен тіркеледі.', 'a.grade': 'Сынып', 'a.promo': 'Промокод (міндетті емес)',
       'a.go': 'Тіркелу', 'a.enter': 'Кіру', 'a.have': 'Аккаунт бар ма?', 'a.no': 'Аккаунт жоқ па?', 'a.demo': 'Демо-режим: аккаунттар тек осы браузерде сақталады. Нақты іске қосу үшін сервер қосылады (README).',
       'e.exists': 'Бұл пошта тіркелген. Кіріп көріңіз.', 'e.weak': 'Пошта мен құпиясөзді енгізіңіз.', 'e.pass_short': 'Құпиясөз кемінде 8 таңба болуы керек.', 'e.pass_mix': 'Құпиясөзде әріп те, сан да болсын.',
       'e.pass_common': 'Бұл құпиясөз тым оңай (12345678 сияқты). Басқасын ойлап табыңыз.', 'e.bad_email': 'Пошта дұрыс емес. Мысалы: aigerim@mail.kz',
@@ -50,12 +50,12 @@
       'acc.title': 'Аккаунт', 'acc.code': 'Ата-анаға арналған код', 'acc.codeNote': 'Ата-анаңыз өз аккаунтында осы кодты енгізсе, сіздің нәтижелеріңізді көре алады.', 'acc.outAll': 'Барлық құрылғыдан шығу', 'acc.outAllQ': 'Барлық телефон мен компьютердегі аккаунттан шығасыз ба? Қайта кіру керек болады.', 'acc.safe': 'Қауіпсіздік: құпиясөзді ешкімге айтпаңыз. Бөтен біреу кіргенін байқасаңыз — «Барлық құрылғыдан шығу» батырмасын басып, құпиясөзді «Құпиясөзді ұмыттыңыз ба?» арқылы ауыстырыңыз.', 'acc.out': 'Шығу', 'acc.status': 'Жазылым',
       'k.title': 'Балаларым', 'k.cards': 'Карточкалар: {k} / {n} «білемін» белгіленген', 'k.cardsNote': '— бала өзі белгілейді, тексеріп көріңіз (төмендегі кеңесті қараңыз).', 'k.add': 'Баланың кодын енгізіңіз', 'k.addNote': 'Код баланың «Аккаунт» бетінде тұр.', 'k.link': 'Қосу', 'k.none': 'Әзірге бала қосылмаған.', 'k.noData': 'Бала әлі ештеңе шығармады немесе прогресс әлі сақталмады.',
       'k.active': 'Белсенді күн (7 күн)', 'k.hw': 'Үй жұмысы (7 күн)', 'k.mocks': 'Сынақтар (7 күн)', 'k.ready': 'Дайындық', 'k.fc': 'Болжам', 'k.target': 'өту межесі {v}', 'k.weak': 'Назар аударыңыз', 'k.lastMocks': 'Соңғы сынақтар', 'k.topics': 'Тақырыптар бойынша бағалар', 'k.upd': 'Жаңартылды: {d}',
-      'r.title': 'Ай рейтингі', 'r.sub': 'Ұпай: үй жұмысы, сынақтар, қайталау, карточкалар, ойын. Ай соңында көшбасшыларға сыйлық.', 'r.mine': 'Менің ұпайым осы айда', 'r.prizes': 'Сыйлықтар', 'r.noPrizes': 'Сыйлықтар жақында жарияланады.', 'r.all': 'Барлығы', 'r.empty': 'Бұл айда әзірге ұпай жоқ.', 'r.prev': 'Өткен ай', 'r.cur': 'Осы ай',
+      'r.title': 'Ай рейтингі', 'r.sub': 'Ұпай: үй жұмысы, сынақтар, қайталау, карточкалар, ойын. Ай соңында көшбасшыларға сыйлық.', 'r.mine': 'Менің ұпайым осы айда', 'r.prizes': 'Сыйлықтар', 'r.noPrizes': 'Сыйлықтар жақында жарияланады.', 'r.empty': 'Бұл айда әзірге ұпай жоқ.', 'r.prev': 'Өткен ай', 'r.cur': 'Осы ай',
       'r.how': 'Ұпай қалай жиналады', 'r.h.hw': 'Үй жұмысы — баға × 10 (100-ге дейін)', 'r.h.mock': 'Толық сынақ — 150-ге дейін', 'r.h.test': 'Шағын тест — 50-ге дейін', 'r.h.review': 'Қайталау — 30', 'r.h.cards': 'Карточкалар — 20-ға дейін', 'r.h.game': 'Ойын — 30-ға дейін', 'r.h.day': 'Күндік жоспар толық — +30', 'r.h.cap': 'Күніне ең көбі 500 ұпай.',
       'ad.title': 'Әкімші', 'ad.pay': 'Төлемдер', 'ad.users': 'Оқушылар',
       'ad.k.all': 'барлығы', 'ad.k.students': 'оқушы', 'ad.k.today': 'бүгін кірді', 'ad.k.week': '7 күнде кірді', 'ad.k.new': 'жаңа (7 күн)',
       'ad.f.student': 'Оқушылар', 'ad.f.parent': 'Ата-аналар', 'ad.f.admin': 'Админдер', 'ad.f.active': '7 күнде белсенді', 'ad.f.all': 'Барлығы', 'ad.none': 'Ешкім табылмады.',
-      'ad.c.name': 'Аты-жөні', 'ad.c.school': 'Мектеп · сынып', 'ad.c.seen': 'Соңғы рет', 'ad.c.topics': 'Тақырып меңгерді', 'ad.c.hw': 'Үй ж. (7 күн)', 'ad.c.mock': 'Соңғы сынақ', 'ad.c.ready': 'Дайындық', 'ad.c.access': 'Қолжетімділік',
+      'ad.c.name': 'Аты-жөні', 'ad.c.class': 'Сынып', 'ad.c.seen': 'Соңғы рет', 'ad.c.topics': 'Тақырып меңгерді', 'ad.c.hw': 'Үй ж. (7 күн)', 'ad.c.mock': 'Соңғы сынақ', 'ad.c.ready': 'Дайындық', 'ad.c.access': 'Қолжетімділік',
       'ad.reg': 'тіркелді', 'ad.hint': 'Жолды басыңыз — оқушының толық беті ашылады: тақырыптар, сынақтар, әрекеттер журналы.', 'ad.forever': 'тегін, мерзімсіз', 'ad.paidTo': 'төленген: {d} дейін', 'ad.trialTo': 'сынақ: {d} дейін', 'ad.noAccess': 'қолжетімділік жоқ',
       'ad.grade': 'сынып', 'ad.code2': 'Бала коды', 'ad.synced': 'Прогресс сақталды', 'ad.streak': 'күн қатарынан', 'ad.mist': 'қате дәптерінде',
       'ad.topics': 'Тақырыптар', 'ad.t.done': 'Меңгерді', 'ad.t.go': 'Өтіп жатыр', 'ad.t.no': 'Басталмаған', 'ad.c.topic': 'Тақырып', 'ad.c.status': 'Күйі', 'ad.c.grade': 'Үздік баға', 'ad.c.solved': 'Шығарды', 'ad.c.hwN': 'Үй ж.',
@@ -80,22 +80,22 @@
     ru: {
       'nav.pricing': 'Тарифы', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточки', 'nav.game': 'Игры', 'nav.admin': 'Админ',
       'nav.kids': 'Мои дети', 'nav.secParent': 'Родитель', 'nav.secAcc': 'Аккаунт', 'role.parent': 'Родитель', 'role.student': 'Ученик', 'role.admin': 'Админ', 'pts.unit': 'баллов',
-      'l.login': 'Войти', 'l.start': 'Начать подготовку', 'l.platform': 'Платформа', 'l.hero': 'Поступи в школу мечты с первой попытки',
-      'l.heroSub': 'Подготовка учеников 5–7 классов к экзаменам БИЛ, РФМШ и НИШ: план на каждый день, уроки, домашки и пробные тесты в настоящем формате — в одной платформе.',
-      'l.max': 'максимальный балл пробного БИЛ', 'l.schools': 'Готовим в', 'l.inside': 'Взгляни на платформу изнутри',
-      'l.facts': 'В цифрах', 'l.f1': 'тем: математика, логика, чтение, разделы НИШ', 'l.f2': 'уровня: A → B → C → ★ олимпиада', 'l.f3': 'задач на каждую тему: каждый раз новые числа и форматы', 'l.f4': 'флеш-карточек на формулы и правила',
+      'l.login': 'Войти', 'l.start': 'Начать подготовку', 'l.platform': 'Платформа', 'l.hero': 'Поступи в БИЛ с первой попытки',
+      'l.heroSub': 'Готовим учеников 5–7 классов к вступительному экзамену в Білім-инновация лицей: план на каждый день, уроки, домашки и пробные тесты в настоящем формате БИЛ — в одной платформе.',
+      'l.max': 'максимальный балл пробного БИЛ', 'l.schools': 'Готовим к поступлению в', 'l.inside': 'Взгляни на платформу изнутри',
+      'l.facts': 'В цифрах', 'l.f1': 'тем: математика, логика и грамотность чтения', 'l.f2': 'уровня: A → B → C → ★ олимпиада', 'l.f3': 'задач на каждую тему: каждый раз новые числа и форматы', 'l.f4': 'флеш-карточек на формулы и правила',
       'l.pricing': 'Тарифы', 'l.trial': 'После регистрации {n} дня — бесплатно', 'l.month': 'месяц', 'l.months': 'мес.', 'l.per': '₸', 'l.save': 'выгода {p}%', 'l.choose': 'Выбрать',
       'l.faq': 'Частые вопросы',
       'l.q1': 'Как оплатить?', 'l.a1': 'Выберите тариф — сайт покажет сумму и номер для перевода на Kaspi. После оплаты админ подтвердит её в течение дня, и доступ откроется сам.',
       'l.q2': 'Что видит родитель?', 'l.a2': 'Родитель входит в свой аккаунт и вводит код ребёнка. Дальше он видит активность, домашки, результаты пробных, слабые темы и прогноз балла.',
       'l.q3': 'Подписка продлевается сама?', 'l.a3': 'Нет. Когда срок закончится, доступ остановится — следующий период вы выбираете сами.',
-      'l.q4': 'На каком языке?', 'l.a4': 'Задания на казахском и русском (можно показывать один язык или оба), для НИШ — ещё тексты на английском.',
+      'l.q4': 'На каком языке?', 'l.a4': 'Задания на казахском и русском — как на пробном БИЛ. Можно показывать один язык или оба сразу.',
       'l.q5': 'Что такое промокод?', 'l.a5': 'Промокод даёт скидку или бесплатный доступ. Его можно ввести при регистрации или на странице «Аккаунт».',
       'l.t.plan': 'План', 'l.t.lessons': 'Уроки', 'l.t.hw': 'Домашка', 'l.t.mock': 'Пробники', 'l.t.cards': 'Карточки', 'l.t.game': 'Игры', 'l.t.rank': 'Рейтинг', 'l.t.parent': 'Родителям',
       'l.d.plan': 'Сайт сам говорит, что делать сегодня: 1–2 темы, повторение и короткий тест. 2–3 раза в неделю — полный пробник. Входная диагностика начинает со слабых тем.',
       'l.d.lessons': 'В каждой теме: видеоурок, правило, частые ошибки, три разобранных примера A → B → C и «Проверь себя».',
       'l.d.hw': '20 задач на тему: A → B → C → ★. После ошибки — похожая задача. Задачи не шаблонные: рисунки, таблицы, обратные задачи, «найди ошибку».',
-      'l.d.mock': 'Форматы БИЛ (+4/−1), РФМШ (только число), НИШ (своё время у каждого раздела). Можно распечатать и потом внести ответы.',
+      'l.d.mock': 'Настоящий формат БИЛ: 60 вопросов, 110 минут, +4 / −1. Варианты по образцу экзаменов прошлых лет. Можно распечатать и потом внести ответы.',
       'l.d.cards': 'Флеш-карточки на формулы и правила: «Знаю / Повторить» — незнакомые показываются чаще.',
       'l.d.game': 'Игры: быстрый счёт, дуэль дробей, последовательность, «правда или ложь», викторина формул — каждая по 60 секунд. Баллы идут в рейтинг.',
       'l.d.rank': 'Баллы за домашки, пробники, карточки и игры. Каждый месяц лидеры получают призы.',
@@ -104,7 +104,7 @@
       'a.name': 'Имя и фамилия', 'a.email': 'Электронная почта', 'a.pass': 'Пароль', 'a.passNew': 'Придумайте пароль', 'a.show': 'Показать', 'a.hide': 'Скрыть',
       'a.passHint': 'Не меньше 8 символов: буквы и цифры', 'a.pw0': 'Слишком короткий', 'a.pw1': 'Слабый — добавьте цифры и буквы', 'a.pw2': 'Нормальный', 'a.pw3': 'Надёжный пароль',
       'a.promoQ': 'Есть промокод?', 'a.forgot': 'Забыли пароль?', 'a.resetSent': 'Ссылка для смены пароля отправлена на вашу почту.', 'a.resetEmail': 'Сначала введите почту.',
-      'a.terms': 'Регистрируясь, вы соглашаетесь, что мы храним ваши данные только для обучения. Ученика младше 14 лет регистрирует родитель или ученик регистрируется с разрешения родителя.', 'a.school': 'Школа', 'a.grade': 'Класс', 'a.promo': 'Промокод (необязательно)',
+      'a.terms': 'Регистрируясь, вы соглашаетесь, что мы храним ваши данные только для обучения. Ученика младше 14 лет регистрирует родитель или ученик регистрируется с разрешения родителя.', 'a.grade': 'Класс', 'a.promo': 'Промокод (необязательно)',
       'a.go': 'Зарегистрироваться', 'a.enter': 'Войти', 'a.have': 'Уже есть аккаунт?', 'a.no': 'Нет аккаунта?', 'a.demo': 'Демо-режим: аккаунты хранятся только в этом браузере. Для настоящего запуска подключается сервер (README).',
       'e.exists': 'Эта почта уже зарегистрирована. Попробуйте войти.', 'e.weak': 'Введите почту и пароль.', 'e.pass_short': 'Пароль должен быть не короче 8 символов.', 'e.pass_mix': 'В пароле должны быть и буквы, и цифры.',
       'e.pass_common': 'Слишком простой пароль (как 12345678). Придумайте другой.', 'e.bad_email': 'Почта указана неверно. Пример: aigerim@mail.kz',
@@ -119,12 +119,12 @@
       'acc.title': 'Аккаунт', 'acc.code': 'Код для родителей', 'acc.codeNote': 'Если родитель введёт этот код в своём аккаунте, он увидит ваши результаты.', 'acc.outAll': 'Выйти на всех устройствах', 'acc.outAllQ': 'Выйти из аккаунта на всех телефонах и компьютерах? Понадобится войти заново.', 'acc.safe': 'Безопасность: никому не сообщайте пароль. Если заметили чужой вход — нажмите «Выйти на всех устройствах» и смените пароль через «Забыли пароль?».', 'acc.out': 'Выйти', 'acc.status': 'Подписка',
       'k.title': 'Мои дети', 'k.cards': 'Карточки: отмечено «знаю» {k} из {n}', 'k.cardsNote': '— отмечает сам ребёнок, проверьте (см. совет ниже).', 'k.add': 'Введите код ребёнка', 'k.addNote': 'Код есть у ребёнка на странице «Аккаунт».', 'k.link': 'Добавить', 'k.none': 'Пока нет привязанных детей.', 'k.noData': 'Ребёнок ещё ничего не решал или прогресс ещё не сохранился.',
       'k.active': 'Активных дней (7 дн.)', 'k.hw': 'Домашек (7 дн.)', 'k.mocks': 'Пробников (7 дн.)', 'k.ready': 'Готовность', 'k.fc': 'Прогноз', 'k.target': 'ориентир {v}', 'k.weak': 'Обратите внимание', 'k.lastMocks': 'Последние пробники', 'k.topics': 'Оценки по темам', 'k.upd': 'Обновлено: {d}',
-      'r.title': 'Рейтинг месяца', 'r.sub': 'Баллы: домашки, пробники, повторение, карточки, игра. В конце месяца лидеры получают призы.', 'r.mine': 'Мои баллы в этом месяце', 'r.prizes': 'Призы', 'r.noPrizes': 'Призы скоро объявим.', 'r.all': 'Все', 'r.empty': 'В этом месяце баллов пока нет.', 'r.prev': 'Прошлый месяц', 'r.cur': 'Этот месяц',
+      'r.title': 'Рейтинг месяца', 'r.sub': 'Баллы: домашки, пробники, повторение, карточки, игра. В конце месяца лидеры получают призы.', 'r.mine': 'Мои баллы в этом месяце', 'r.prizes': 'Призы', 'r.noPrizes': 'Призы скоро объявим.', 'r.empty': 'В этом месяце баллов пока нет.', 'r.prev': 'Прошлый месяц', 'r.cur': 'Этот месяц',
       'r.how': 'Как заработать баллы', 'r.h.hw': 'Домашка — оценка × 10 (до 100)', 'r.h.mock': 'Полный пробник — до 150', 'r.h.test': 'Мини-тест — до 50', 'r.h.review': 'Повторение — 30', 'r.h.cards': 'Карточки — до 20', 'r.h.game': 'Игра — до 30', 'r.h.day': 'Весь план дня — +30', 'r.h.cap': 'Не больше 500 баллов в день.',
       'ad.title': 'Админ', 'ad.pay': 'Оплаты', 'ad.users': 'Ученики',
       'ad.k.all': 'всего', 'ad.k.students': 'учеников', 'ad.k.today': 'заходили сегодня', 'ad.k.week': 'заходили за 7 дней', 'ad.k.new': 'новых (7 дней)',
       'ad.f.student': 'Ученики', 'ad.f.parent': 'Родители', 'ad.f.admin': 'Админы', 'ad.f.active': 'Активны 7 дней', 'ad.f.all': 'Все', 'ad.none': 'Никого не найдено.',
-      'ad.c.name': 'Имя', 'ad.c.school': 'Школа · класс', 'ad.c.seen': 'Последний раз', 'ad.c.topics': 'Тем освоено', 'ad.c.hw': 'Домашек (7 дн.)', 'ad.c.mock': 'Последний пробный', 'ad.c.ready': 'Готовность', 'ad.c.access': 'Доступ',
+      'ad.c.name': 'Имя', 'ad.c.class': 'Класс', 'ad.c.seen': 'Последний раз', 'ad.c.topics': 'Тем освоено', 'ad.c.hw': 'Домашек (7 дн.)', 'ad.c.mock': 'Последний пробный', 'ad.c.ready': 'Готовность', 'ad.c.access': 'Доступ',
       'ad.reg': 'регистрация', 'ad.hint': 'Нажмите на строку — откроется страница ученика: темы, пробные, журнал действий.', 'ad.forever': 'бесплатно, бессрочно', 'ad.paidTo': 'оплачено до {d}', 'ad.trialTo': 'пробный до {d}', 'ad.noAccess': 'нет доступа',
       'ad.grade': 'класс', 'ad.code2': 'Код ребёнка', 'ad.synced': 'Прогресс сохранён', 'ad.streak': 'дней подряд', 'ad.mist': 'в тетради ошибок',
       'ad.topics': 'Темы', 'ad.t.done': 'Освоил', 'ad.t.go': 'В процессе', 'ad.t.no': 'Не начинал', 'ad.c.topic': 'Тема', 'ad.c.status': 'Статус', 'ad.c.grade': 'Лучшая оценка', 'ad.c.solved': 'Решено', 'ad.c.hwN': 'Домашек',
@@ -191,7 +191,7 @@
     h += '<section class="hero"><div class="score">' + laurel(false) + '<b>240</b>' + laurel(true) + '</div><p class="score-cap">' + tt('l.max') + '</p>' +
       '<h1>' + tt('l.hero') + '</h1><p class="lead">' + tt('l.heroSub') + '</p>' +
       '<div class="row center"><a class="btn pill dark" href="#/auth/signup">' + tt('l.start') + '</a><a class="btn pill" href="#tour" data-act="scrollTour">' + tt('l.platform') + '</a></div>' +
-      '<p class="kicker">' + tt('l.schools') + '</p><div class="row center schools">' + ['BIL', 'RFMSH', 'NIS'].map(function (k) { return '<span class="school-chip"><b>' + Z.schools[k].name + '</b><small>' + esc(Z.schools[k].full) + '</small></span>'; }).join('') + '</div></section>';
+      '<p class="kicker">' + tt('l.schools') + '</p><div class="row center schools">' + '<span class="school-chip"><b>' + Z.schools.BIL.name + '</b><small>' + esc(Z.schools.BIL.full) + '</small></span>' + '</div></section>';
     h += '<section class="lnd-sec" id="tour"><h2>' + tt('l.inside') + '</h2><div class="seg">' + TABS.map(function (k) {
       return '<button class="' + (k === tab ? 'on' : '') + '" data-act="ltab" data-k="' + k + '">' + tt('l.t.' + k) + '</button>';
     }).join('') + '</div><div class="tour"><div class="phone">' + phone(tab) + '</div><p class="lead">' + tt('l.d.' + tab) + '</p></div>' +
@@ -202,7 +202,7 @@
     h += '<section class="lnd-sec"><h2>' + tt('l.faq') + '</h2><div class="faq">' + [1, 2, 3, 4, 5].map(function (i) {
       return '<details><summary>' + tt('l.q' + i) + '</summary><p>' + tt('l.a' + i) + '</p></details>';
     }).join('') + '</div></section>';
-    h += '<footer class="lnd-foot">' + LOGO + '<p class="small muted">© ' + new Date().getFullYear() + ' Зерде · БИЛ · РФМШ · НЗМ</p></footer>';
+    h += '<footer class="lnd-foot">' + LOGO + '<p class="small muted">© ' + new Date().getFullYear() + ' Зерде · БИЛ</p></footer>';
     return h;
   }
   // Мини-иллюстрация экрана в «телефоне» — из настоящих элементов интерфейса.
@@ -242,8 +242,7 @@
       }).join('') + '</div></div>' +
         '<label class="field"><span>' + tt('a.name') + '</span><input name="name" required maxlength="40" autocomplete="name"></label>';
       if (role === 'student') {
-        h += '<div class="row2"><label class="field"><span>' + tt('a.school') + '</span><select name="school">' + ['BIL', 'RFMSH', 'NIS'].map(function (k) { return '<option value="' + k + '">' + Z.schools[k].name + '</option>'; }).join('') + '</select></label>' +
-          '<label class="field"><span>' + tt('a.grade') + '</span><select name="grade">' + [4, 5, 6, 7].map(function (g) { return '<option' + (g === 6 ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label></div>';
+        h += '<label class="field"><span>' + tt('a.grade') + '</span><select name="grade">' + [4, 5, 6, 7].map(function (g) { return '<option' + (g === 6 ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select></label>';
       }
     }
     h += '<label class="field"><span>' + tt('a.email') + '</span><input name="email" type="email" required autocomplete="email" inputmode="email" maxlength="120" value="' + esc(m.aEmail || '') + '"></label>' +
@@ -270,7 +269,7 @@
   function pricing() {
     var u = ui().mem.user, m = ui().mem;
     var h = '<section class="sec"><h1>' + tt('p.title') + '</h1><p class="muted">' + tt('p.sub') + '</p></section>' + statusLine(u);
-    if (!B.hasAccess(u)) h += '<div class="note teal row"><span>' + tt('p.diag') + '</span><button class="btn pill sm dark" data-act="startExam" data-f="' + ui().S().profile.school + '_diag">' + tt('p.diagGo') + '</button></div>';
+    if (!B.hasAccess(u)) h += '<div class="note teal row"><span>' + tt('p.diag') + '</span><button class="btn pill sm dark" data-act="startExam" data-f="BIL_diag">' + tt('p.diagGo') + '</button></div>';
     h += later('settings', settings, function (s) { return plans(s, null); });
     if (m.payInfo) h += m.payInfo;
     h += promoForm();
@@ -355,13 +354,13 @@
     });
   }
   function kidCard(c) {
-    var x = c.summary, sc = Z.schools[c.school] || Z.schools.BIL, g = sc.target;
-    var h = '<section class="card kid"><div class="row between"><div><span class="label">' + sc.name + (c.grade ? ' · ' + I.t('ob.grade', { n: c.grade }) : '') + '</span><h2>' + esc(c.name) + '</h2></div>' +
+    var x = c.summary, g = Z.schools.BIL.target;
+    var h = '<section class="card kid"><div class="row between"><div><span class="label">' + (c.grade ? I.t('ob.grade', { n: c.grade }) : '') + '</span><h2>' + esc(c.name) + '</h2></div>' +
       (c.updatedAt ? '<small class="muted">' + tt('k.upd', { d: String(c.updatedAt).slice(0, 10) }) + '</small>' : '') + '</div>';
     if (!x) return h + '<p class="muted">' + tt('k.noData') + '</p></section>';
-    var fc = x.fc ? (x.fc.pct ? x.fc.score + '%' : x.fc.score + ' / ' + x.fc.max) : '—';
+    var fc = x.fc ? x.fc.score + ' / ' + x.fc.max : '—';
     h += '<dl class="kpis">' + [[x.active7 + '/7', 'k.active'], [x.hw7, 'k.hw'], [x.mocks7 || 0, 'k.mocks'], [x.ready + '%', 'k.ready'], [fc, 'k.fc']].map(function (k) { return '<div><dd>' + k[0] + '</dd><dt>' + tt(k[1]) + '</dt></div>'; }).join('') + '</dl>';
-    h += '<p class="small muted">' + tt('k.target', { v: g.pct ? g.pct + '%' : g.score + ' / ' + g.max }) + '</p>';
+    h += '<p class="small muted">' + tt('k.target', { v: g.score + ' / ' + g.max }) + '</p>';
     if ((x.weak || []).length) h += '<div><span class="label">' + tt('k.weak') + '</span><div class="row">' + x.weak.map(function (id) { return Z.topicById[id] ? '<span class="pill">' + esc(ui().tn(Z.topicById[id])) + '</span>' : ''; }).join('') + '</div></div>';
     var st = c.state || {}, ck = cardsKnown(st);
     if (ck.n) h += '<p class="small"><b>' + tt('k.cards', { k: ck.k, n: ck.n }) + '</b> <span class="muted">' + tt('k.cardsNote') + '</span></p>';
@@ -379,21 +378,20 @@
 
   /* =================== РЕЙТИНГ =================== */
   function leaders() {
-    var m = ui().mem, month = m.lbMonth || B.monthKey(), school = m.lbSchool || '';
+    var m = ui().mem, month = m.lbMonth || B.monthKey();
     var prev = new Date(); prev.setDate(1); prev.setMonth(prev.getMonth() - 1);
     var h = '<section class="sec"><h1>' + tt('r.title') + '</h1><p class="muted">' + tt('r.sub') + '</p></section>';
-    h += '<div class="row"><div class="seg">' + [[B.monthKey(), 'r.cur'], [B.monthKey(prev), 'r.prev']].map(function (x) { return '<button class="' + (x[0] === month ? 'on' : '') + '" data-act="lbMonth" data-m="' + x[0] + '">' + tt(x[1]) + '</button>'; }).join('') + '</div>' +
-      '<div class="seg">' + [['', tt('r.all')], ['BIL', 'БИЛ'], ['RFMSH', 'РФМШ'], ['NIS', 'НЗМ']].map(function (x) { return '<button class="' + (x[0] === school ? 'on' : '') + '" data-act="lbSchool" data-s="' + x[0] + '">' + x[1] + '</button>'; }).join('') + '</div></div>';
+    h += '<div class="row"><div class="seg">' + [[B.monthKey(), 'r.cur'], [B.monthKey(prev), 'r.prev']].map(function (x) { return '<button class="' + (x[0] === month ? 'on' : '') + '" data-act="lbMonth" data-m="' + x[0] + '">' + tt(x[1]) + '</button>'; }).join('') + '</div></div>';
     h += later('prizes', settings, function (s) {
       var pz = s && s.prizes && (s.prizes[I.lang()] || s.prizes.kk);
       return '<section class="card prize"><span class="label">' + tt('r.prizes') + '</span><p>' + (pz ? esc(pz).replace(/\n/g, '<br>') : '<span class="muted">' + tt('r.noPrizes') + '</span>') + '</p></section>';
     });
     if (m.user.role !== 'parent') h += later('mypts:' + month, function () { return B.myPoints(month); }, function (n) { return '<div class="note teal">' + tt('r.mine') + ': <b>' + money(n || 0) + '</b></div>'; });
-    h += later('lb:' + month + ':' + school, function () { return B.leaderboard(month, school); }, function (rows) {
+    h += later('lb:' + month, function () { return B.leaderboard(month); }, function (rows) {
       rows = rows || [];
       if (!rows.length) return '<p class="muted">' + tt('r.empty') + '</p>';
       return '<ol class="lboard">' + rows.map(function (r, i) {
-        return '<li class="' + (r.isMe ? 'me' : '') + (i < 3 ? ' top top' + (i + 1) : '') + '"><span class="rk">' + (i + 1) + '</span><b>' + esc(r.name || '—') + '</b><small>' + (Z.schools[r.school] ? Z.schools[r.school].name : '') + '</small><em>' + money(r.points) + '</em></li>';
+        return '<li class="' + (r.isMe ? 'me' : '') + (i < 3 ? ' top top' + (i + 1) : '') + '"><span class="rk">' + (i + 1) + '</span><b>' + esc(r.name || '—') + '</b><em>' + money(r.points) + '</em></li>';
       }).join('') + '</ol>';
     });
     h += '<section class="card"><span class="label">' + tt('r.how') + '</span><ul class="theory">' + ['hw', 'mock', 'test', 'review', 'cards', 'game', 'day', 'cap'].map(function (k) { return '<li>' + tt('r.h.' + k) + '</li>'; }).join('') + '</ul></section>';
@@ -436,13 +434,13 @@
         return f === 'all' || u.role === f;
       }).sort(function (a, b) { return seen(a) - seen(b); });
       if (!rows.length) return h + '<p class="muted">' + tt('ad.none') + '</p>';
-      return h + '<div class="tbl-wrap"><table class="tbl ad-tbl"><thead><tr><th>' + tt('ad.c.name') + '</th><th>' + tt('ad.c.school') + '</th><th>' + tt('ad.c.seen') + '</th><th class="num">' + tt('ad.c.topics') + '</th><th class="num">' + tt('ad.c.hw') + '</th><th class="num">' + tt('ad.c.mock') + '</th><th class="num">' + tt('ad.c.ready') + '</th><th>' + tt('ad.c.access') + '</th></tr></thead><tbody>' +
+      return h + '<div class="tbl-wrap"><table class="tbl ad-tbl"><thead><tr><th>' + tt('ad.c.name') + '</th><th>' + tt('ad.c.class') + '</th><th>' + tt('ad.c.seen') + '</th><th class="num">' + tt('ad.c.topics') + '</th><th class="num">' + tt('ad.c.hw') + '</th><th class="num">' + tt('ad.c.mock') + '</th><th class="num">' + tt('ad.c.ready') + '</th><th>' + tt('ad.c.access') + '</th></tr></thead><tbody>' +
         rows.map(function (u) {
-          var x = u.summary || {}, sc = Z.schools[u.school];
+          var x = u.summary || {};
           return '<tr class="click" data-act="adOpen" data-id="' + esc(u.id) + '"><td><b>' + esc(u.name || '—') + '</b><br><small class="muted">' + esc(u.email || '') + '</small></td>' +
-            '<td class="small">' + (sc ? sc.name : '—') + (u.grade ? ' · ' + u.grade : '') + '<br><small class="muted">' + tt('ad.reg') + ' ' + String(u.createdAt || '').slice(0, 10) + '</small></td>' +
+            '<td class="small">' + (u.grade ? I.t('ob.grade', { n: u.grade }) : '—') + '<br><small class="muted">' + tt('ad.reg') + ' ' + String(u.createdAt || '').slice(0, 10) + '</small></td>' +
             '<td class="small">' + ago(u.lastSeen || u.updatedAt) + '</td>' +
-            '<td class="num">' + (u.role === 'student' ? (x.mastered || 0) + ' / ' + (x.topicsTotal || Z.topicsFor(u.school || 'BIL').length) : '—') + '</td>' +
+            '<td class="num">' + (u.role === 'student' ? (x.mastered || 0) + ' / ' + (x.topicsTotal || Z.topicsFor('BIL').length) : '—') + '</td>' +
             '<td class="num">' + (x.hw7 != null ? x.hw7 : '—') + '</td>' +
             '<td class="num">' + (x.lastMock ? x.lastMock.score + '/' + x.lastMock.max : '—') + '</td>' +
             '<td class="num">' + (x.ready != null ? x.ready + '%' : '—') + '</td><td class="small">' + accessText(u) + '</td></tr>';
@@ -470,19 +468,19 @@
   function adUser(id) {
     return later('ad:user:' + id, function () { return B.admin.userDetail(id); }, function (d) {
       if (!d || !d.user) return '<p class="muted">' + tt('ad.none') + '</p>';
-      var u = d.user, st = d.state || {}, x = d.summary || {}, sc = Z.schools[u.school];
+      var u = d.user, st = d.state || {}, x = d.summary || {};
       var h = '<a class="back" href="#/admin/users">' + ui().ic('back') + tt('ad.users') + '</a>' +
-        '<section class="card"><span class="label">' + tt('role.' + u.role) + (sc ? ' · ' + sc.name : '') + (u.grade ? ' · ' + u.grade + '-' + tt('ad.grade') : '') + '</span><h1>' + esc(u.name || '—') + '</h1>' +
+        '<section class="card"><span class="label">' + tt('role.' + u.role) + (u.grade ? ' · ' + u.grade + '-' + tt('ad.grade') : '') + '</span><h1>' + esc(u.name || '—') + '</h1>' +
         '<p class="muted">' + esc(u.email || '') + '</p><dl class="kv">' +
         [['ad.reg', dt(u.createdAt)], ['ad.c.seen', ago(u.lastSeen) + ' · ' + dt(u.lastSeen)], ['ad.c.access', accessText(u)], ['ad.code2', esc(u.childCode || '—')], ['ad.synced', dt(d.updatedAt)]].map(function (k) {
           return '<div><dt>' + tt(k[0]) + '</dt><dd>' + k[1] + '</dd></div>'; }).join('') + '</dl>' +
         '<form class="row" data-form="adGrant" data-id="' + esc(u.id) + '"><input name="days" type="number" min="1" max="3650" value="30" style="width:80px"><button class="btn pill sm" type="submit">' + tt('ad.grant') + '</button></form></section>';
       if (u.role === 'student') {
-        var fc = x.fc ? (x.fc.pct ? x.fc.score + '%' : x.fc.score + ' / ' + x.fc.max) : '—';
+        var fc = x.fc ? x.fc.score + ' / ' + x.fc.max : '—';
         h += '<dl class="kpis">' + [[(x.ready != null ? x.ready : 0) + '%', 'k.ready'], [fc, 'k.fc'], [x.streak || 0, 'ad.streak'], [(x.mastered || 0) + ' / ' + (x.topicsTotal || 0), 'ad.c.topics'], [x.mistakes || 0, 'ad.mist']].map(function (k) {
           return '<div><dd>' + k[0] + '</dd><dt>' + tt(k[1]) + '</dt></div>'; }).join('') + '</dl>';
         // Темы: прошёл / в процессе / не начинал
-        var tps = Z.topicsFor(u.school || 'BIL'), T = st.topics || {}, cnt = { done: 0, go: 0, no: 0 };
+        var tps = Z.topicsFor('BIL'), T = st.topics || {}, cnt = { done: 0, go: 0, no: 0 };
         var rows = tps.map(function (t) {
           var p = T[t.id], s2 = !p || !(p.sessions || p.solved) ? 'no' : (p.grade || 0) >= 8 ? 'done' : 'go'; cnt[s2]++;
           return '<tr><td>' + ui().tn(t) + '</td><td><span class="st-' + s2 + '">' + tt('ad.t.' + s2) + '</span></td><td class="num">' + (p ? (p.grade || 0) + '/10' : '—') + '</td><td class="num">' + (p ? p.solved || 0 : 0) + '</td><td class="num">' + (p ? p.hw || 0 : 0) + '</td></tr>';
@@ -798,7 +796,6 @@
     adOpen: function (el) { ui().go('#/admin/user/' + el.dataset.id); },
     adRefresh: function () { refresh(); ui().render(); },
     lbMonth: function (el) { ui().mem.lbMonth = el.dataset.m; ui().render(); },
-    lbSchool: function (el) { ui().mem.lbSchool = el.dataset.s; ui().render(); },
     adPay: function (el) { after(B.admin.decidePayment(+el.dataset.id, el.dataset.ok === '1'), '✓', 'ad:pay'); },
     adDelPromo: function (el) { ui().ask(el.dataset.code + ' ?', '×', function () { after(B.admin.deletePromo(el.dataset.code), '', 'ad:promo'); }); },
     dkFlip: function () { var st = ui().mem.dk; st.flip = !st.flip; ui().render(); },
@@ -849,7 +846,8 @@
   Z.viewForms = {
     signup: function (d) {
       var m = ui().mem; m.aEmail = String(d.get('email') || '').trim();
-      var f = { role: d.get('role') || m.arole || 'student', name: String(d.get('name') || '').trim(), email: d.get('email'), password: d.get('password'), school: d.get('school'), grade: d.get('grade') ? +d.get('grade') : null };
+      var role = d.get('role') || m.arole || 'student';
+      var f = { role: role, name: String(d.get('name') || '').trim(), email: d.get('email'), password: d.get('password'), school: role === 'student' ? 'BIL' : null, grade: d.get('grade') ? +d.get('grade') : null };
       B.signUp(f).then(function (u) {
         var promo = String(d.get('promo') || '').trim();
         return (promo ? B.redeemPromo(promo).then(function () { return B.session(); }) : Promise.resolve(u));
@@ -859,7 +857,7 @@
         return ui().setUser(u).then(function () {
           var S = ui().S();
           if (u.role !== 'parent' && !S.profile) {
-            S.profile = { name: u.name || 'Оқушы', school: u.school || 'BIL', grade: u.grade || 6, examDate: U.addDays(ui().today(), 120), intensity: 'normal', qLang: 'both', uiLang: I.lang(), startDate: ui().today(), rid: 'r' + U.newSeed() };
+            S.profile = { name: u.name || 'Оқушы', school: 'BIL', grade: u.grade || 6, examDate: U.addDays(ui().today(), 120), intensity: 'normal', qLang: 'both', uiLang: I.lang(), startDate: ui().today(), rid: 'r' + U.newSeed() };
             ui().save();
           }
           ui().go(u.role === 'parent' ? '#/kids' : '#/today');

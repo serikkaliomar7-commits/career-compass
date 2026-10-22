@@ -13,7 +13,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users on delete cascade,
   role text not null default 'student' check (role in ('student', 'parent', 'admin')),
   name text not null default '',
-  school text check (school in ('BIL', 'RFMSH', 'NIS')),
+  school text default 'BIL' check (school = 'BIL'),   -- готовим только к БИЛ
   grade int,
   child_code text unique,                 -- код ребёнка: родитель вводит его, чтобы видеть результаты
   sub_until timestamptz,                  -- оплачено до
@@ -23,6 +23,21 @@ create table if not exists public.profiles (
 -- Для админки: почта (копия из auth.users) и когда пользователь был на сайте последний раз.
 alter table public.profiles add column if not exists email text;
 alter table public.profiles add column if not exists last_seen timestamptz;
+-- Школа — только БИЛ: старые значения переводим на 'BIL' и пересоздаём ограничение
+-- (имя старого ограничения ищем по определению — так скрипт можно запускать повторно).
+update public.profiles set school = 'BIL' where school is not null and school <> 'BIL';
+do $$
+declare c record;
+begin
+  for c in select con.conname from pg_constraint con
+           where con.conrelid = 'public.profiles'::regclass and con.contype = 'c'
+             and pg_get_constraintdef(con.oid) ilike '%school%'
+  loop
+    execute format('alter table public.profiles drop constraint %I', c.conname);
+  end loop;
+end $$;
+alter table public.profiles add constraint profiles_school_check check (school = 'BIL');
+alter table public.profiles alter column school set default 'BIL';
 
 create table if not exists public.settings (
   key text primary key,
@@ -61,7 +76,7 @@ begin
   if r not in ('student', 'parent') then r := 'student'; end if;
   insert into public.profiles (id, role, email, last_seen, name, school, grade, child_code, trial_until)
   values (new.id, r, lower(new.email), now(), left(coalesce(new.raw_user_meta_data->>'name', ''), 40),
-          nullif(new.raw_user_meta_data->>'school', ''), nullif(new.raw_user_meta_data->>'grade', '')::int,
+          case when r = 'student' then 'BIL' end, nullif(new.raw_user_meta_data->>'grade', '')::int,
           upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 6)),
           case when r = 'student' then now() + make_interval(days => days) end)
   on conflict (id) do nothing;

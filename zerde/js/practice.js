@@ -24,7 +24,7 @@
     S('l_visual', 3, 'bil.net_remove'), S('m_percent', 2, 'bil.pie_table'), S('m_geom', 2, 'bil.grid_areas'), S('m_frac', 1, null, ['m_dec', 'm_order']),
     S('l_cal', 3, 'bil.clock_hands'), S('m_angles', 3, 'bil.fold'), S('l_count', 3, 'bil.beads'), S('m_geom', 2, 'bil.l_shape'),
     S('m_volume', 3, 'bil.slab_holes'), S('m_order', 2, 'bil.alt_sum'), S('l_seq', 2, 'bil.odd_squares'), S('m_volume', 3, 'bil.box_paint'),
-    S('m_ratio', 2, null, ['m_percent']), S('l_visual', 3, 'vis.odd'), S('m_word', 2, null, ['m_setup']), S('l_fig', 3, 'bil.table_rule'),
+    S('m_ratio', 2, null, ['m_percent']), S('l_visual', 3, 'vis.odd'), S('m_word', 2, null, ['m_eq']), S('l_fig', 3, 'bil.table_rule'),
     S('m_time', 3, 'bil.units_chain'), S('l_op', 2, 'bil.triangle_op'), S('l_fig', 2, 'ktl.pyramid'), S('l_visual', 3, 'vis.squares'),
     S('l_digits', 3, 'ktl.last_digit'), S('l_visual', 4, 'vis.overlay')
   ] };

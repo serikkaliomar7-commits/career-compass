@@ -5,98 +5,81 @@
   var Z = root.Z;
 
   Z.schools = {
-    BIL: { id: 'BIL', name: 'БИЛ', full: 'Білім-инновация лицейі', color: '#1D7874', answer: 'mc', options: 4, active: true },
-    RFMSH: { id: 'RFMSH', name: 'РФМШ', full: 'Республикалық физика-математика мектебі', color: '#C0392B', answer: 'int', active: true },
-    NIS: { id: 'NIS', name: 'НЗМ', full: 'Назарбаев Зияткерлік мектептері', color: '#2E5AAC', answer: 'mc', options: 4, active: true }
+    BIL: { id: 'BIL', name: 'БИЛ', full: 'Білім-инновация лицейі', color: '#1D7874', answer: 'mc', options: 4, active: true }
   };
 
-  /* Проходной ориентир (materials/CUTOFFS.md): БИЛ — по данным 2024 г. (низкая достоверность),
-   * РФМШ — официальные проходные 2025–2026 по Астане/Алматы, НИШ — % верных (шкала Cito нелинейна). */
+  /* Проходной ориентир (materials/CUTOFFS.md): по данным 2024 г. (низкая достоверность). */
   Z.schools.BIL.target = { score: 190, min: 160, max: 240 };
-  Z.schools.RFMSH.target = { score: 115, min: 90, max: 150 };
-  Z.schools.NIS.target = { pct: 85, minPct: 75 };
 
-  var BOTH = ['BIL', 'RFMSH'], ALL = ['BIL', 'RFMSH', 'NIS'], NIS = ['NIS'];
+  var BIL = ['BIL'];
   /* kind: math | logic | reading. gen — генератор в Z.gen, bank — банк задач.
    * theory — короткая памятка перед практикой (что нужно знать). */
   Z.topics = [
-    { id: 'm_order', kind: 'math', gen: 'm_order', schools: ALL, kk: 'Амалдар реті', ru: 'Порядок действий',
+    { id: 'm_order', kind: 'math', gen: 'm_order', schools: BIL, kk: 'Амалдар реті', ru: 'Порядок действий',
       video: 'амалдардың орындалу реті 5 сынып математика', theory: ['Алдымен жақша, сосын дәреже, көбейту мен бөлу, соңында қосу мен азайту.', 'Бір деңгейдегі амалдар солдан оңға қарай орындалады.'] },
-    { id: 'm_neg', kind: 'math', gen: 'm_neg', schools: ALL, kk: 'Бүтін сандар (оң және теріс)', ru: 'Целые числа',
+    { id: 'm_neg', kind: 'math', gen: 'm_neg', schools: BIL, kk: 'Бүтін сандар (оң және теріс)', ru: 'Целые числа',
       video: 'теріс сандарды қосу азайту 6 сынып', theory: ['a − (−b) = a + b.', 'Таңбалары бірдей екі санның көбейтіндісі оң, әртүрлі болса — теріс.'] },
-    { id: 'm_divis', kind: 'math', gen: 'm_divis', schools: ALL, kk: 'Бөлінгіштік белгілері', ru: 'Признаки делимости',
+    { id: 'm_divis', kind: 'math', gen: 'm_divis', schools: BIL, kk: 'Бөлінгіштік белгілері', ru: 'Признаки делимости',
       video: 'бөлінгіштік белгілері 2 3 4 5 9 математика', theory: ['3-ке және 9-ға: цифрлар қосындысы бөлінеді.', '4-ке: соңғы екі цифр бөлінеді. 6-ға: жұп және 3-ке бөлінеді. 12-ге: 3-ке және 4-ке бөлінеді.'] },
-    { id: 'm_gcdlcm', kind: 'math', gen: 'm_gcdlcm', schools: ALL, kk: 'ЕҮОБ және ЕКОЕ', ru: 'НОД и НОК',
+    { id: 'm_gcdlcm', kind: 'math', gen: 'm_gcdlcm', schools: BIL, kk: 'ЕҮОБ және ЕКОЕ', ru: 'НОД и НОК',
       video: 'ЕҮОБ ЕКОЕ табу есептер 6 сынып', theory: ['«Бірге қайта кездеседі», «бір мезгілде» — ЕКОЕ.', '«Бірдей бөліктерге, артық қалдырмай, ең көп» — ЕҮОБ.', 'ЕҮОБ(a; b) · ЕКОЕ(a; b) = a · b.'] },
-    { id: 'm_frac', kind: 'math', gen: 'm_frac', schools: ALL, kk: 'Жай бөлшектер', ru: 'Обыкновенные дроби',
+    { id: 'm_frac', kind: 'math', gen: 'm_frac', schools: BIL, kk: 'Жай бөлшектер', ru: 'Обыкновенные дроби',
       video: 'жай бөлшектерді қосу азайту көбейту 6 сынып', theory: ['Санның p/q бөлігі: (сан · p)/q.', 'Бөлігі бойынша санды табу: (бөлік · q)/p.', 'Әр түрлі бөлімді бөлшектерді ортақ бөлімге келтіреміз.'] },
-    { id: 'm_dec', kind: 'math', gen: 'm_dec', schools: ALL, kk: 'Ондық бөлшектер', ru: 'Десятичные дроби',
+    { id: 'm_dec', kind: 'math', gen: 'm_dec', schools: BIL, kk: 'Ондық бөлшектер', ru: 'Десятичные дроби',
       video: 'ондық бөлшектерге амалдар 5 сынып', theory: ['Қосқанда үтірді үтірдің астына жазамыз.', 'Пропорция: a : b = c : d ⇒ a · d = b · c.'] },
-    { id: 'm_percent', kind: 'math', gen: 'm_percent', schools: ALL, kk: 'Пайыз', ru: 'Проценты',
+    { id: 'm_percent', kind: 'math', gen: 'm_percent', schools: BIL, kk: 'Пайыз', ru: 'Проценты',
       video: 'пайызға есептер шығару 6 сынып', theory: ['1% — санның жүзден бір бөлігі.', 'p%-ға арттыру: · (1 + p/100); азайту: · (1 − p/100).', 'Тізбектей өзгерістердің пайыздарын жай қосуға болмайды!'] },
-    { id: 'm_ratio', kind: 'math', gen: 'm_ratio', schools: ALL, kk: 'Қатынас, пропорция, масштаб', ru: 'Отношения, пропорции, масштаб',
+    { id: 'm_ratio', kind: 'math', gen: 'm_ratio', schools: BIL, kk: 'Қатынас, пропорция, масштаб', ru: 'Отношения, пропорции, масштаб',
       video: 'қатынас пропорция масштаб есептер', theory: ['a : b қатынасында бөлу: барлығы a + b үлес.', 'Масштаб 1 : 100 000 — 1 см картада = 1 км.'] },
-    { id: 'm_eq', kind: 'math', gen: 'm_eq', schools: ALL, kk: 'Теңдеулер', ru: 'Уравнения',
+    { id: 'm_eq', kind: 'math', gen: 'm_eq', schools: BIL, kk: 'Теңдеулер', ru: 'Уравнения',
       video: 'сызықтық теңдеулер шешу 6 сынып', theory: ['Белгісіздерді бір жаққа, сандарды екінші жаққа жинаймыз.', 'Мүшені екінші жаққа шығарғанда таңбасы өзгереді.'] },
-    { id: 'm_motion', kind: 'math', gen: 'm_motion', schools: ALL, kk: 'Қозғалысқа есептер', ru: 'Задачи на движение',
+    { id: 'm_motion', kind: 'math', gen: 'm_motion', schools: BIL, kk: 'Қозғалысқа есептер', ru: 'Задачи на движение',
       video: 'қозғалысқа есептер қарсы бағытта бір бағытта', theory: ['S = v · t.', 'Қарсы қозғалыс: жылдамдықтар қосылады; қуып жету: азайтылады.', 'Ағыспен: v + ағыс; ағысқа қарсы: v − ағыс.'] },
-    { id: 'm_work', kind: 'math', gen: 'm_work', schools: ALL, kk: 'Бірлескен жұмыс', ru: 'Совместная работа',
+    { id: 'm_work', kind: 'math', gen: 'm_work', schools: BIL, kk: 'Бірлескен жұмыс', ru: 'Совместная работа',
       video: 'бірлескен жұмысқа есептер құбыр бассейн', theory: ['Барлық жұмысты 1 деп аламыз.', 'Өнімділік = 1/(уақыт). Бірге жұмыс істегенде өнімділіктер қосылады.'] },
-    { id: 'm_time', kind: 'math', gen: 'm_time', schools: ALL, kk: 'Уақыт және өлшем бірліктері', ru: 'Время и единицы измерения',
+    { id: 'm_time', kind: 'math', gen: 'm_time', schools: BIL, kk: 'Уақыт және өлшем бірліктері', ru: 'Время и единицы измерения',
       video: 'уақыт өлшем бірліктері сағат минут есептер', theory: ['1 сағ = 60 мин, 1 тәулік = 24 сағ.', 'n рет қайталанатын оқиғаның арасында n − 1 аралық бар.'] },
-    { id: 'm_geom', kind: 'math', gen: 'm_geom', schools: ALL, kk: 'Периметр және аудан', ru: 'Периметр и площадь',
+    { id: 'm_geom', kind: 'math', gen: 'm_geom', schools: BIL, kk: 'Периметр және аудан', ru: 'Периметр и площадь',
       video: 'тіктөртбұрыш периметрі ауданы шеңбер ауданы', theory: ['Тіктөртбұрыш: P = 2(a + b), S = a · b.', 'Дөңгелек: S = π r² (тестте көбіне π = 3).'] },
-    { id: 'm_volume', kind: 'math', gen: 'm_volume', schools: ALL, kk: 'Көлем', ru: 'Объём',
+    { id: 'm_volume', kind: 'math', gen: 'm_volume', schools: BIL, kk: 'Көлем', ru: 'Объём',
       video: 'тікбұрышты параллелепипед көлемі текше', theory: ['V = a · b · c; текше: V = a³.', 'Боялған текше n × n × n: 8 бұрыш, 12(n − 2) қыр, 6(n − 2)² жақ ортасы.'] },
-    { id: 'm_angles', kind: 'math', gen: 'm_angles', schools: ALL, kk: 'Бұрыштар', ru: 'Углы',
+    { id: 'm_angles', kind: 'math', gen: 'm_angles', schools: BIL, kk: 'Бұрыштар', ru: 'Углы',
       video: 'сыбайлас бұрыштар үшбұрыш бұрыштарының қосындысы', theory: ['Сыбайлас бұрыштар: 180°. Үшбұрыш бұрыштары: 180°.', 'Сағат: минут тілі 6°/мин, сағат тілі 0,5°/мин.'] },
-    { id: 'm_avg', kind: 'math', gen: 'm_avg', schools: ALL, kk: 'Арифметикалық орта', ru: 'Среднее арифметическое',
+    { id: 'm_avg', kind: 'math', gen: 'm_avg', schools: BIL, kk: 'Арифметикалық орта', ru: 'Среднее арифметическое',
       video: 'арифметикалық орта есептер', theory: ['Орта = (қосынды)/(саны).', 'Қосынды = орта · саны — көп есепті осылай шығарамыз.'] },
-    { id: 'm_word', kind: 'math', gen: 'm_word', schools: ALL, kk: 'Мәтінді есептер', ru: 'Текстовые задачи',
+    { id: 'm_word', kind: 'math', gen: 'm_word', schools: BIL, kk: 'Мәтінді есептер', ru: 'Текстовые задачи',
       video: 'мәтінді есептер жасқа қосынды айырма', theory: ['Үлкені = (қосынды + айырма)/2.', 'Жас айырмасы ешқашан өзгермейді.'] },
-    { id: 'm_setup', kind: 'math', gen: 'm_setup', schools: NIS, kk: 'Теңдеу құру', ru: 'Составление уравнений',
-      video: 'есепті теңдеу құру арқылы шығару 6 сынып НЗМ', theory: ['Белгісізді x деп алып, әр шаманы x арқылы жазыңыз.', 'Ағыспен: v + c, ағысқа қарсы: v − c; уақыт = (жол)/(жылдамдық).', '«Қалғанның бөлігі» — жалпының емес, қалған бөліктің бөлігі.'] },
-    { id: 'm_mix', kind: 'math', gen: 'm_mix', schools: NIS, kk: 'Қоспалар мен ерітінділер', ru: 'Смеси и растворы',
-      video: 'қоспа ерітінді пайыз есептер 6 сынып', theory: ['Зат массасы = ерітінді массасы · (пайыз)/100.', 'Су қосқанда тұздың (қанттың) массасы өзгермейді.', 'Пайыздарды жай орташалауға болмайды — массалармен есептеңіз.'] },
-    { id: 'm_abs', kind: 'math', gen: 'm_abs', schools: ['BIL', 'NIS'], kk: 'Модуль және координаталық түзу', ru: 'Модуль и координатная прямая',
+    { id: 'm_abs', kind: 'math', gen: 'm_abs', schools: BIL, kk: 'Модуль және координаталық түзу', ru: 'Модуль и координатная прямая',
       video: 'санның модулі координаталық түзу 6 сынып', theory: ['|a| — a нүктесінен 0-ге дейінгі қашықтық, ол теріс болмайды.', '|x − a| — x пен a нүктелерінің арақашықтығы.', 'Қарама-қарсы сандардың қосындысы 0.'] },
-    { id: 'q_compare', kind: 'quant', gen: 'q_compare', schools: NIS, kk: 'Сандық сипаттама', ru: 'Количественные характеристики',
-      video: 'сандық сипаттама НЗМ А және В бағандары', theory: ['A — А бағанында үлкен, B — В бағанында үлкен, C — тең, D — ақпарат жеткіліксіз.', 'Айнымалы бар болса, бірнеше мәнді тексеріңіз: 0, 1, теріс сан, бөлшек. Нәтижелер әртүрлі болса — D.', 'Есептемей салыстыруға тырысыңыз: ортақ көбейткіштерді алып тастаңыз.', '60 сұраққа 30 минут — бір сұраққа 30 секунд.'] },
-    { id: 's_science', kind: 'science', bank: 'science', schools: NIS, kk: 'Жаратылыстану', ru: 'Естествознание',
-      video: 'жаратылыстану 6 сынып НЗМ тест', theory: ['Тәжірибеде өзгертілетін шаманы, өлшенетін шаманы және тұрақты қалдырылатын шамаларды ажыратыңыз.', 'Қорытынды тек кестедегі деректерге сүйенуі керек.', 'Әділ тәжірибеде тек бір шама өзгереді.'] },
 
-    { id: 'l_seq', kind: 'logic', gen: 'l_seq', schools: BOTH, kk: 'Сан тізбектері', ru: 'Числовые последовательности',
+    { id: 'l_seq', kind: 'logic', gen: 'l_seq', schools: BIL, kk: 'Сан тізбектері', ru: 'Числовые последовательности',
       video: 'сан тізбегі заңдылығын табу логика', theory: ['Алдымен көрші мүшелердің айырмасын қараңыз.', 'Айырмалар да тізбек құрауы мүмкін; кейде екі тізбек аралас жазылады.'] },
-    { id: 'l_fig', kind: 'logic', gen: 'l_fig', schools: BOTH, kk: 'Сандық фигуралар', ru: 'Числовые фигуры',
+    { id: 'l_fig', kind: 'logic', gen: 'l_fig', schools: BIL, kk: 'Сандық фигуралар', ru: 'Числовые фигуры',
       video: 'сандық фигуралар логика сұрақ белгісі', theory: ['Заңдылық барлық фигурада бірдей.', 'Тексеру реті: қосынды → айырма → көбейтінді → ЕҮОБ.'] },
-    { id: 'l_op', kind: 'logic', gen: 'l_op', schools: BOTH, kk: 'Жаңа амалдар', ru: 'Новые операции',
+    { id: 'l_op', kind: 'logic', gen: 'l_op', schools: BIL, kk: 'Жаңа амалдар', ru: 'Новые операции',
       video: 'жаңа амал a b логикалық есеп', theory: ['Формулаға сандарды дәл орнымен қойыңыз: a — бірінші, b — екінші.', 'Жақшадағы амалды бірінші есептеңіз.'] },
-    { id: 'l_count', kind: 'logic', gen: 'l_count', schools: BOTH, kk: 'Санау және комбинаторика', ru: 'Подсчёт и комбинаторика',
+    { id: 'l_count', kind: 'logic', gen: 'l_count', schools: BIL, kk: 'Санау және комбинаторика', ru: 'Подсчёт и комбинаторика',
       video: 'комбинаторика қол алысу есептері', theory: ['Қол алысу: (n(n − 1))/2.', 'Реті маңызды емес таңдау: көбейтіп, қайталанатын реттер санына бөлеміз.'] },
-    { id: 'l_digits', kind: 'logic', gen: 'l_digits', schools: BOTH, kk: 'Цифрлар мен ребустар', ru: 'Цифры и ребусы',
+    { id: 'l_digits', kind: 'logic', gen: 'l_digits', schools: BIL, kk: 'Цифрлар мен ребустар', ru: 'Цифры и ребусы',
       video: 'математикалық ребустар цифрлар есептері', theory: ['Цифрлар қосындысы берілгенде ең кіші сан: цифрлар саны аз, кіші цифрлар алда.', 'CCC = 111 · C.'] },
-    { id: 'l_cal', kind: 'logic', gen: 'l_cal', schools: BOTH, kk: 'Күнтізбе және сағат', ru: 'Календарь и часы',
+    { id: 'l_cal', kind: 'logic', gen: 'l_cal', schools: BIL, kk: 'Күнтізбе және сағат', ru: 'Календарь и часы',
       video: 'апта күндері күнтізбе логикалық есептер', theory: ['7 күн сайын апта күні қайталанады — 7-ге бөлгендегі қалдықты қараңыз.', 'Сағатты алдымен тәулікке айналдырыңыз: 24 сағ = 1 тәулік.'] },
-    { id: 'l_balance', kind: 'logic', gen: 'l_balance', schools: BOTH, kk: 'Таразы және алмастыру', ru: 'Весы и замены',
+    { id: 'l_balance', kind: 'logic', gen: 'l_balance', schools: BIL, kk: 'Таразы және алмастыру', ru: 'Весы и замены',
       video: 'таразы логикалық есептер', theory: ['Бір затты екіншісімен біртіндеп алмастырыңыз.', 'Бірліктерді (кг, г) бірдей етіп алыңыз.'] },
-    { id: 'l_visual', kind: 'logic', gen: 'l_visual', schools: ['BIL'], kk: 'Көрнекі логика', ru: 'Визуальная логика',
+    { id: 'l_visual', kind: 'logic', gen: 'l_visual', schools: BIL, kk: 'Көрнекі логика', ru: 'Визуальная логика',
       video: 'логика фигуралар заңдылық тест БИЛ КТЛ', theory: ['Фигуралар кестесінде әр жолда және әр бағанда бір мезгілде бірнеше белгі өзгереді: пішін, саны, бояуы, бағыты. Әр белгіні жеке тексеріңіз.', 'Бұру мен айналы бейнелеуді ажыратыңыз: бұрғанда фигура «өзіне ұқсас» қалады, айнада — оңы мен солы ауысады.', 'Үстінен, алдынан, бүйірінен көрініс: әр бағандағы ең биік мұнара көрінеді.'] },
-    { id: 'l_puzzles', kind: 'logic', bank: 'logic', schools: BOTH, kk: 'Логикалық есептер', ru: 'Логические задачи',
+    { id: 'l_puzzles', kind: 'logic', bank: 'logic', schools: BIL, kk: 'Логикалық есептер', ru: 'Логические задачи',
       video: 'логикалық есептер шындық өтірік кім қайда', theory: ['Шартты кестеге түсіріңіз.', '«Ең жаман жағдай» туралы ойлаңыз (Дирихле принципі).'] },
 
-    { id: 'r_ru', kind: 'reading', bank: 'reading_ru', schools: NIS, kk: 'Орыс тілі: мәтінмен жұмыс', ru: 'Русский язык: работа с текстом',
-      video: 'русский язык тип речи стиль речи 6 класс', theory: ['Тип речи: повествование (события по порядку), описание (признаки), рассуждение (тезис → доказательства → вывод).', 'Стиль: научный, публицистический, художественный, разговорный, официально-деловой.', 'Слово в пропуске должно подходить и по смыслу, и по связи с соседними предложениями.'] },
-    { id: 'r_en', kind: 'reading', bank: 'reading_en', schools: NIS, kk: 'Ағылшын тілі: Reading', ru: 'Английский язык: Reading',
-      video: 'English reading comprehension A2 B1 practice', theory: ['Read the questions first, then scan the text for key words.', '«According to the text» — the answer must be stated in the text, not just true in real life.', 'Pronouns (it, they, this) usually refer to the nearest noun before them.'] },
-    { id: 'r_read', kind: 'reading', bank: 'reading', schools: ['BIL', 'NIS'], kk: 'Оқу сауаттылығы', ru: 'Грамотность чтения',
+    { id: 'r_read', kind: 'reading', bank: 'reading', schools: BIL, kk: 'Оқу сауаттылығы', ru: 'Грамотность чтения',
       video: 'оқу сауаттылығы мәтінмен жұмыс тест', theory: ['Алдымен сұрақтарды оқыңыз, сосын мәтінді.', 'Жауапты мәтіннен дәлелдеп табыңыз — өз ойыңыздан емес.'] }
   ];
   Z.topicById = {};
   Z.topics.forEach(function (t) { Z.topicById[t.id] = t; });
 
   /* Форматы пробных тестов.
-   * mix — сколько вопросов каждого уровня (4 — олимпиадный); points — баллы по уровням (РФМШ:
-   * олимпиадные задачи идут в блоке C и стоят 7, как в официальном пробном тесте). */
+   * mix — сколько вопросов каждого уровня (4 — олимпиадный); scoring — баллы за верный / неверный / пропуск;
+   * points — баллы по уровням (если задано вместо scoring, как у диагностики). */
   Z.examFormats = {
     BIL_full: { id: 'BIL_full', school: 'BIL', kk: 'БИЛ: толық сынақ', ru: 'БИЛ: полный пробный', minutes: 110, full: true,
       sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 15, 2: 22, 3: 9, 4: 4 } },
@@ -107,57 +90,24 @@
       answer: 'mc', options: 4, scoring: { correct: 4, wrong: -1, skip: 0 } },
     BIL_read: { id: 'BIL_read', school: 'BIL', kk: 'БИЛ: оқу сауаттылығы', ru: 'БИЛ: чтение', minutes: 20,
       sections: [{ kk: 'Оқу сауаттылығы', kinds: ['reading'], count: 10 }],
-      answer: 'mc', options: 4, scoring: { correct: 4, wrong: -1, skip: 0 } },
-    RFMSH_full: { id: 'RFMSH_full', school: 'RFMSH', kk: 'РФМШ: толық сынақ', ru: 'РФМШ: полный пробный', minutes: 120, full: true,
-      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 10, 2: 10, 3: 6, 4: 4 } }],
-      answer: 'int', points: { 1: 3, 2: 5, 3: 7, 4: 7 } },
-    RFMSH_mini: { id: 'RFMSH_mini', school: 'RFMSH', kk: 'РФМШ: шағын сынақ', ru: 'РФМШ: мини-тест', minutes: 35,
-      sections: [{ kk: 'Математика және логика', kinds: ['math', 'logic'], logicShare: 0.3, mix: { 1: 3, 2: 3, 3: 2, 4: 1 } }],
-      answer: 'int', points: { 1: 3, 2: 5, 3: 7, 4: 7 } }
+      answer: 'mc', options: 4, scoring: { correct: 4, wrong: -1, skip: 0 } }
   };
 
   Z.topicsFor = function (school, kind) {
     return Z.topics.filter(function (t) { return t.schools.indexOf(school) >= 0 && (!kind || t.kind === kind); });
   };
-  /* НИШ (памятка к комплексному тестированию, см. materials/EXAM_SPECS.md):
-   * 1 день — математика 40 / 60 мин, количественные характеристики 60 / 30 мин, естествознание 20 / 30 мин;
-   * у каждого раздела своё время (sectionTimes). 2 день — казахский, русский, английский по 20, всего 120 мин.
-   * Баллы у НИШ считает Cito по статистической трудности задания; у нас — условные веса по уровню. */
-  var NIS_PTS = { 1: 2, 2: 3, 3: 4, 4: 5 };
-  Z.examFormats.NIS_full = { id: 'NIS_full', school: 'NIS', kk: 'НЗМ: 1-күн (толық сынақ)', ru: 'НИШ: 1 день (полный пробный)', minutes: 120, full: true, sectionTimes: true,
-    sections: [{ kk: 'Математика', ru: 'Математика', kinds: ['math'], mix: { 1: 12, 2: 16, 3: 9, 4: 3 }, minutes: 60 },
-               { kk: 'Сандық сипаттама', ru: 'Количественные характеристики', kinds: ['quant'], mix: { 1: 20, 2: 24, 3: 12, 4: 4 }, minutes: 30 },
-               { kk: 'Жаратылыстану', ru: 'Естествознание', kinds: ['science'], mix: { 1: 5, 2: 7, 3: 6, 4: 2 }, minutes: 30 }],
-    answer: 'mc', options: 4, points: NIS_PTS };
-  Z.examFormats.NIS_full2 = { id: 'NIS_full2', school: 'NIS', kk: 'НЗМ: 2-күн (тілдер)', ru: 'НИШ: 2 день (языки)', minutes: 120, full: true,
-    sections: [{ kk: 'Қазақ тілі', ru: 'Казахский язык', kinds: ['reading'], bank: 'reading', count: 20 },
-               { kk: 'Орыс тілі', ru: 'Русский язык', kinds: ['reading'], bank: 'reading_ru', count: 20 },
-               { kk: 'Ағылшын тілі', ru: 'Английский язык', kinds: ['reading'], bank: 'reading_en', count: 20 }],
-    answer: 'mc', options: 4, points: NIS_PTS };
-  Z.examFormats.NIS_mini = { id: 'NIS_mini', school: 'NIS', kk: 'НЗМ: математика (шағын)', ru: 'НИШ: математика (мини)', minutes: 30,
-    sections: [{ kk: 'Математика', kinds: ['math'], mix: { 1: 6, 2: 8, 3: 5, 4: 1 } }], answer: 'mc', options: 4, points: NIS_PTS };
-  Z.examFormats.NIS_quant = { id: 'NIS_quant', school: 'NIS', kk: 'НЗМ: сандық сипаттама (шағын)', ru: 'НИШ: количественные характеристики (мини)', minutes: 15,
-    sections: [{ kk: 'Сандық сипаттама', kinds: ['quant'], mix: { 1: 10, 2: 12, 3: 6, 4: 2 } }], answer: 'mc', options: 4, points: NIS_PTS };
-  Z.examFormats.NIS_sci = { id: 'NIS_sci', school: 'NIS', kk: 'НЗМ: жаратылыстану (шағын)', ru: 'НИШ: естествознание (мини)', minutes: 15,
-    sections: [{ kk: 'Жаратылыстану', kinds: ['science'], mix: { 1: 3, 2: 3, 3: 3, 4: 1 } }], answer: 'mc', options: 4, points: NIS_PTS };
-  Z.examFormats.NIS_lang = { id: 'NIS_lang', school: 'NIS', kk: 'НЗМ: тілдер (шағын)', ru: 'НИШ: языки (мини)', minutes: 30,
-    sections: [{ kk: 'Қазақ тілі', kinds: ['reading'], bank: 'reading', count: 5 },
-               { kk: 'Орыс тілі', kinds: ['reading'], bank: 'reading_ru', count: 5 },
-               { kk: 'Ағылшын тілі', kinds: ['reading'], bank: 'reading_en', count: 5 }],
-    answer: 'mc', options: 4, points: NIS_PTS };
-
   /* Входная диагностика: по одной задаче уровня B на каждую тему (кроме чтения).
    * По её итогам планировщик начинает со слабых тем, а знакомые откладывает. */
-  ['BIL', 'RFMSH', 'NIS'].forEach(function (sc) {
-    var secs = [], n = 0;
-    [['math', 'Математика', 'Математика'], ['logic', 'Логика', 'Логика'], ['quant', 'Сандық сипаттама', 'Количественные характеристики'], ['science', 'Жаратылыстану', 'Естествознание']].forEach(function (k) {
-      var c = Z.topicsFor(sc, k[0]).length;
-      if (c) { secs.push({ kk: k[1], ru: k[2], kinds: [k[0]], mix: { 2: c * (k[0] === 'quant' || k[0] === 'science' ? 4 : 1) } }); n += c; }
+  (function () {
+    var secs = [];
+    [['math', 'Математика', 'Математика'], ['logic', 'Логика', 'Логика']].forEach(function (k) {
+      var c = Z.topicsFor('BIL', k[0]).length;
+      if (c) secs.push({ kk: k[1], ru: k[2], kinds: [k[0]], mix: { 2: c } });
     });
-    var f = Z.examFormats[sc + '_full'] || Z.examFormats.NIS_full;
-    Z.examFormats[sc + '_diag'] = { id: sc + '_diag', school: sc, diag: true, kk: Z.schools[sc].name + ': бастапқы диагностика', ru: Z.schools[sc].name + ': входная диагностика',
+    var f = Z.examFormats.BIL_full;
+    Z.examFormats.BIL_diag = { id: 'BIL_diag', school: 'BIL', diag: true, kk: 'БИЛ: бастапқы диагностика', ru: 'БИЛ: входная диагностика',
       minutes: 40, sections: secs, answer: f.answer, options: f.options, points: { 1: 1, 2: 1, 3: 1, 4: 1 } };
-  });
+  })();
 
   Z.formatsFor = function (school) {
     return Object.keys(Z.examFormats).map(function (k) { return Z.examFormats[k]; }).filter(function (f) { return f.school === school && !f.practice; });
@@ -174,12 +124,12 @@
     m_order: [['28N03GrlVT8', 'Амалдардың орындалу реті'], ['gsGbvH-JeEs', 'Өрнектің мәнін тап 2+5·3+4 — Альсейтов']],
     m_neg: [['_yDElD_R4rU', 'Таңбалары әртүрлі рационал сандарды қосу'], ['iiWlCdR_Elk', 'Рационал сандарды қосу мен көбейтудің қасиеттері']],
     m_divis: [['xfzdae7rG2k', 'Натурал сандардың бөлінгіштік белгілері'], ['TowSZblcvx4', '3 және 9 сандарына бөлінгіштік белгілері']],
-    m_gcdlcm: [['QmdZs-DdMCg', 'ЕҮОБ және ЕКОЕ табу'], ['mMXH06DoLqE', 'ЕКОЕ-ні 5 минутта оңай табу — НЗМ-ге дайындық']],
+    m_gcdlcm: [['QmdZs-DdMCg', 'ЕҮОБ және ЕКОЕ табу'], ['mMXH06DoLqE', 'ЕКОЕ-ні 5 минутта оңай табу']],
     m_frac: [['QgGqTwmQ6Wc', 'Жай бөлшектер: қосу, азайту, көбейту, бөлу'], ['kYYeFBF34Pc', 'Жай бөлшектерді қосу және азайту'], ['7B0r155thfw', 'Санның бөлігін және бөлігі бойынша санды табу']],
     m_dec: [['5WkcBWs8AIY', 'Ондық бөлшектерді қосу, азайту, көбейту және бөлу'], ['bHaPjeMGE9w', 'Ондық бөлшектерді көбейту және бөлу']],
     m_percent: [['EOIwTiYMG9g', 'Пайыз. Мәтіндік есептер шығару'], ['806bDymUfJ0', 'Пайызға байланысты мәселе есептер']],
     m_ratio: [['yofmkLMoZlw', 'Қатынас (6-сынып, 1.1)'], ['yczLz9fUyGQ', 'Масштабқа есеп']],
-    m_eq: [['veZT_M9SDJA', 'Бір айнымалы сызықтық теңдеулер'], ['mVJfrsvPmAE', 'Мәтін есептерді теңдеу құру арқылы шығару — НЗМ, БИЛ']],
+    m_eq: [['veZT_M9SDJA', 'Бір айнымалы сызықтық теңдеулер'], ['mVJfrsvPmAE', 'Мәтін есептерді теңдеу құру арқылы шығару — БИЛ']],
     m_motion: [['JMHqw6pGNSo', 'Қозғалысқа берілген мәтін есептер: негізгі түрлері — Альсейтов'], ['NjqoQUw3T6c', 'Қарама-қарсы бағыттағы қозғалыс']],
     m_work: [['4WnNwNXIH_s', 'Жұмысқа байланысты мәселе есептерді талдау'], ['-6fLbV_AC4s', 'Бірлесіп орындалатын жұмыс']],
     m_time: [],
@@ -195,7 +145,7 @@
     l_digits: [],
     l_cal: [],
     l_balance: [],
-    l_puzzles: [['_8WAgU4LEsE', 'КТЛ-де келетін логикадан 5 есеп'], ['JpwcKG7g12Y', 'Логикалық есеп. 5–6 класс, НИШ/БИЛ']],
+    l_puzzles: [['_8WAgU4LEsE', 'КТЛ-де келетін логикадан 5 есеп'], ['JpwcKG7g12Y', 'Логикалық есеп. 5–6 класс, БИЛ']],
     r_read: [['FU9yOqwXO0k', 'Оқу сауаттылығы: мәтінмен жұмыс'], ['Fc0Pv5W6-6c', 'Мәтін және оның түрлері']]
   };
   Z.topics.forEach(function (t) {

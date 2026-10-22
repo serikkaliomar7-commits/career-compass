@@ -278,12 +278,6 @@ ol.steps { margin: 10px 0; padding-left: 22px; display: grid; gap: 6px; }
 .svgfig .p1 { fill: var(--ink); } .svgfig .p2 { fill: var(--accent); } .svgfig .p3 { fill: var(--muted); } .svgfig .p4 { fill: var(--line-2); }
 .svgfig path.p1, .svgfig path.p2, .svgfig path.p3, .svgfig path.p4 { stroke: var(--card); stroke-width: 1.5; }
 /* «Сандық сипаттама»: колонки А и В */
-.qc { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line-2); margin: 14px 0 4px; font-weight: 400; }
-.qc-c { grid-column: 1 / -1; padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--soft); text-align: center; }
-.qc-col { padding: 12px 14px 16px; text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center; min-height: 92px; }
-.qc-col + .qc-col { border-left: 1px solid var(--line-2); }
-.qc-col > span { font: 600 11px var(--sans); letter-spacing: .1em; color: var(--muted); }
-.qc-col > div { font-size: 1.05rem; }
 .exh .title small { display: block; font: 400 13px var(--sans); color: var(--muted); }
 /* текст для чтения */
 .rsplit { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
@@ -350,14 +344,6 @@ body.focus #burger { display: none; }
 .field input:focus, .field select:focus { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); outline: none; }
 .form { display: flex; flex-direction: column; gap: 18px; }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.picks { display: grid; border: 1px solid var(--line-2); border-radius: 3px; }
-.pick { display: grid; grid-template-columns: auto 1fr; gap: 0 12px; align-items: center; padding: 11px 14px; cursor: pointer; }
-.pick + .pick { border-top: 1px solid var(--line); }
-.pick input { grid-row: span 2; accent-color: var(--accent); }
-.pick b { font: 700 15px var(--serif); }
-.pick small { color: var(--muted); }
-.pick:has(input:checked) { background: var(--soft); }
-.pick.off { opacity: .5; cursor: not-allowed; }
 .radio { display: flex; gap: 10px; align-items: flex-start; padding: 4px 0; cursor: pointer; }
 .radio input { accent-color: var(--accent); margin-top: 4px; }
 details.card > summary { cursor: pointer; list-style: none; }
@@ -503,10 +489,6 @@ a { color: var(--ink); }
 .field input, .field select, .field textarea, .int-in input, textarea.code { border-radius: 12px; border: 1px solid var(--line-2); min-height: 46px; background: var(--card); font-family: var(--sans); }
 .field textarea { padding: 10px 12px; font: inherit; color: var(--ink); }
 .field input:focus, .field select:focus, .field textarea:focus, .int-in input:focus { border-color: var(--ink); box-shadow: 0 0 0 3px var(--soft); }
-.picks { border: 0; gap: 8px; }
-.pick { border: 1px solid var(--line); border-radius: 14px; }
-.pick + .pick { border-top: 1px solid var(--line); }
-.pick:has(input:checked) { border-color: var(--ink); background: var(--soft); }
 
 /* главная */
 .dhead h1 { font-size: 2.3rem; }
@@ -549,7 +531,6 @@ a { color: var(--ink); }
 .sheet { border-radius: 16px; overflow: hidden; }
 .passage { border-radius: 18px; box-shadow: var(--sh); }
 .result-big b { font: 800 3.6rem/1 var(--serif); }
-.qc { border-radius: 16px; overflow: hidden; border-color: var(--line-2); }
 .cmp { border-radius: 14px; overflow: hidden; }
 
 /* ---------- лендинг ---------- */
@@ -643,7 +624,7 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .deck b { font: 800 16px var(--serif); }
 .deck small { color: var(--muted); }
 .dk-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--accent-bg); color: var(--accent); margin-bottom: 6px; }
-.dk-ico.logic { background: #EEF0FF; color: #4F46E5; } .dk-ico.reading { background: #F5ECFF; color: #8B3FD9; } .dk-ico.science { background: #E9F8EF; color: #16A34A; } .dk-ico.quant { background: #FFF6E0; color: #C27C00; }
+.dk-ico.logic { background: #EEF0FF; color: #4F46E5; } .dk-ico.reading { background: #F5ECFF; color: #8B3FD9; }
 .dk-foot { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); margin-top: 6px; }
 .tag { background: var(--soft); border-radius: 999px; padding: 2px 10px; font-weight: 800; color: var(--ink); font-size: 12px; }
 .dk-head { display: flex; justify-content: space-between; align-items: center; }

@@ -93,7 +93,7 @@
   function go(h) { if (location.hash === h) render(); else location.hash = h; }
   function tn(tp) { return I.lang() === 'ru' ? tp.ru : tp.kk; }
   function fname(f) { return I.lang() === 'ru' ? f.ru : f.kk; }
-  function school() { return Z.schools[S.profile.school]; }
+  function school() { return Z.schools[S.profile.school] || Z.schools.BIL; }
   // Освоение темы: три деления (0–3), без «звёздочек».
   function stars(n) { var s = ''; for (var i = 0; i < 3; i++) s += '<i' + (i < n ? ' class="on"' : '') + '></i>'; return '<span class="mast" title="' + n + ' / 3" aria-label="' + n + ' / 3">' + s + '</span>'; }
   function qCount(f) { return f.sections.reduce(function (a, s) { return a + (s.count || [1, 2, 3, 4].reduce(function (x, l) { return x + (s.mix[l] || 0); }, 0)); }, 0); }
@@ -116,8 +116,6 @@
     var ru = q.ru, blocks = q.kk.match(/<div class="expr">[\s\S]*?<\/div>/g) || [];
     var fi = q.kk.indexOf('<div class="figs">');
     if (fi >= 0) blocks.push(q.kk.slice(fi));   // блок фигур всегда в конце текста
-    var ci = q.kk.indexOf('<div class="qc">');
-    if (ci >= 0) blocks.push(q.kk.slice(ci));   // колонки А/В — тоже в конце; убираем, если по-русски они те же
     blocks.forEach(function (b) { ru = ru.split(b).join(''); });
     return '<div class="q-main">' + q.kk + '</div><div class="q-alt">' + ru + '</div>';
   }
@@ -146,7 +144,7 @@
       return '<a href="#/' + id + '" class="' + (cur === id ? 'on' : '') + '">' + ic(id) + t('nav.' + id) + (cnt ? '<span class="cnt">' + cnt + '</span>' : '') + '</a>';
     }
     var u = mem.user || {};
-    document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('cards') + link('game') + (S.profile.school === 'BIL' ? link('mocks') : '') + link('tests') +
+    document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('cards') + link('game') + link('mocks') + link('tests') +
       '<div class="label">' + t('nav.secCheck') + '</div>' + link('mistakes', mc) + link('progress') + link('leaders') + link('report') +
       '<div class="label">' + t('nav.secAcc') + '</div>' + link('account') + link('settings') + (u.role === 'admin' ? link('admin') + link('class') : '');
     var p = S.profile;
@@ -230,16 +228,10 @@
   /* =================== ОНБОРДИНГ =================== */
   function vOnboarding() {
     var def = U.addDays(today(), 120), mu = mem.user || {};
-    var sch = Object.keys(Z.schools).map(function (k, i) {
-      var s = Z.schools[k];
-      return '<label class="pick' + (s.active ? '' : ' off') + '"><input type="radio" name="school" value="' + k + '"' + ((mu.school ? mu.school === k : i === 0) ? ' checked' : '') + (s.active ? '' : ' disabled') + '>' +
-        '<b>' + s.name + '</b><small>' + t('sch.' + k) + (s.active ? '' : ' — ' + t('ob.soon')) + '</small></label>';
-    }).join('');
     var grades = [4, 5, 6, 7].map(function (g) { return '<option value="' + g + '"' + (g === (mu.grade || 6) ? ' selected' : '') + '>' + t('ob.grade', { n: g }) + '</option>'; }).join('');
     return '<form class="card form onb" data-form="onboard"><span class="brand"><span class="brand-mark">З</span><span class="brand-name">Зерде</span><span class="brand-tag">EDU</span></span>' +
       '<div><h1>' + t('ob.title') + '</h1><p class="muted">' + t('ob.sub') + '</p></div>' +
       '<label class="field"><span>' + t('set.name') + '</span><input id="ob-name" name="name" required maxlength="30" autocomplete="given-name" value="' + esc(mu.name || '') + '"></label>' +
-      '<div class="field"><span>' + t('set.school') + '</span><div class="picks">' + sch + '</div></div>' +
       '<div class="row2"><label class="field"><span>' + t('set.grade') + '</span><select id="ob-grade" name="grade">' + grades + '</select></label>' +
       '<label class="field"><span>' + t('set.date') + '</span><input id="ob-date" type="date" name="examDate" value="' + def + '" min="' + today() + '"></label></div>' +
       intensityField('normal') +
@@ -261,13 +253,13 @@
     function kpi(v, l) { return '<div><dd>' + v + '</dd><dt>' + l + '</dt></div>'; }
     var done = plan.tasks.filter(function (x) { return x.done; }).length;
     var stats = (left !== null && left >= 0 ? kpi(left, t('today.stLeft')) : '') + kpi(done + '<small>/' + plan.tasks.length + '</small>', t('today.tasks')) +
-      kpi(streak, t('today.streak')) + kpi(pct(ready), t('today.ready')) + (fc ? kpi(fc.score + '<small>' + (fc.pct ? '%' : '/' + fc.max) + '</small>', t('today.forecast') + ' · ' + t('tgt.short', { v: tgtText() })) : '');
+      kpi(streak, t('today.streak')) + kpi(pct(ready), t('today.ready')) + (fc ? kpi(fc.score + '<small>/' + fc.max + '</small>', t('today.forecast') + ' · ' + t('tgt.short', { v: tgtText() })) : '');
     var h = '<section class="dhead"><div><span class="label">' + longDate(d) + '</span><h1>' + t('today.hello', { name: esc(p.name) }) + '</h1><p class="sub">' + t('today.sub', { school: school().name }) + '</p></div>' +
       '<dl class="kpis">' + stats + '</dl></section>';
     if (S.activeExam) h += resumeBanner();
     if (!S.diag && !plan.tasks.some(function (x) { return x.format && Z.examFormats[x.format].diag; }))
-      h += '<div class="note teal row"><span>' + t('diag.note') + '</span><button class="btn primary sm" data-act="startExam" data-f="' + S.profile.school + '_diag">' + t('diag.go') + '</button></div>';
-    if (plan.mock) h += '<div class="note amber"><b>' + t('today.mockBadge') + '.</b> ' + rulesText(school().id) + '</div>';
+      h += '<div class="note teal row"><span>' + t('diag.note') + '</span><button class="btn primary sm" data-act="startExam" data-f="BIL_diag">' + t('diag.go') + '</button></div>';
+    if (plan.mock) h += '<div class="note amber"><b>' + t('today.mockBadge') + '.</b> ' + rulesText() + '</div>';
     if (done === plan.tasks.length && done > 0) h += '<div class="note ok">' + t('today.allDone') + '</div>';
     h += '<section class="sec"><div class="sec-h"><h2>' + t('today.tasks') + '</h2><span class="muted small">' + done + ' / ' + plan.tasks.length + '</span></div>' +
       '<ol class="tasks">' + plan.tasks.map(taskCard).join('') + '</ol></section>';
@@ -306,7 +298,7 @@
       '<div class="tk-body"><span class="label">' + t('kind.' + tp.kind) + '</span><b><a href="#/topic/' + tp.id + '">' + tn(tp) + '</a></b><span class="meta">' + meta + '</span></div>' +
       '<div class="tk-act">' + act + '</div></li>';
   }
-  function sessionLen(tp) { return tp.kind === 'reading' ? 20 : tp.bank ? Math.min(E.SESSION_LEN, Z.bank[tp.bank].filter(function (q) { return school().answer !== 'int' || q.int; }).length) : E.SESSION_LEN; }
+  function sessionLen(tp) { return tp.kind === 'reading' ? 20 : tp.bank ? Math.min(E.SESSION_LEN, Z.bank[tp.bank].length) : E.SESSION_LEN; }
   function weekStrip() {
     var wk = P.weekPreview(S, today()), names = I.lang() === 'ru' ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : ['Дс', 'Сс', 'Ср', 'Бс', 'Жм', 'Сн', 'Жс'];
     return '<section class="sec"><h2>' + t('today.week') + '</h2><div class="week">' + wk.map(function (d, i) {
@@ -324,7 +316,7 @@
 
   /* =================== ТАҚЫРЫПТАР / ТЕМЫ =================== */
   function vTopics() {
-    return ['math', 'quant', 'logic', 'science', 'reading'].map(function (k) {
+    return ['math', 'logic', 'reading'].map(function (k) {
       var list = Z.topicsFor(S.profile.school, k);
       if (!list.length) return '';
       return '<section class="sec"><h2>' + t('kind.' + k) + '</h2><div class="topics-grid">' + list.map(function (tp) {
@@ -527,10 +519,9 @@
   }
 
   function vTests() {
-    var sc = S.profile.school;
-    var h = '<div class="sec"><h1>' + t('tests.title') + '</h1><p class="muted">' + t('tests.sub') + '</p></div><div class="note">' + rulesText(sc) + '</div>';
+    var h = '<div class="sec"><h1>' + t('tests.title') + '</h1><p class="muted">' + t('tests.sub') + '</p></div><div class="note">' + rulesText() + '</div>';
     if (S.activeExam) h += resumeBanner();
-    h += '<div class="formats">' + Z.formatsFor(sc).map(function (f) {
+    h += '<div class="formats">' + Z.formatsFor('BIL').map(function (f) {
       var n = S.exams.filter(function (e) { return e.format === f.id; }).length;
       return '<div class="card fmt' + (f.full ? ' full' : '') + '"><span class="label">' + (f.diag ? t('diag.label') : f.full ? t('today.mock') : t('today.short')) + '</span><h3>' + fname(f) + '</h3><p class="muted">' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</p>' +
         '<small class="muted">' + t('tests.done', { n: n }) + '</small><div class="row"><button class="btn ' + (f.full ? 'primary' : 'line') + '" data-act="startExam" data-f="' + f.id + '">' + t('c.start') + '</button><a class="btn line" href="#/print/' + f.id + '" title="' + t('print.go') + '">' + t('print.short') + '</a></div></div>';
@@ -544,38 +535,27 @@
   }
 
   // Проходной ориентир: сколько не хватает (или запас).
-  function tgtText() { var g = school().target; return g.pct ? g.pct + '%' : g.score + '/' + g.max; }
-  function gapNote(score, pctv) {
-    var g = school().target, have = g.pct ? pctv : score, need = g.pct ? g.pct : g.score, low = g.pct ? g.minPct : g.min;
-    if (have === null || have === undefined) return '';
-    var unitS = g.pct ? '%' : '', cls = have >= need ? 'ok' : have >= low ? 'amber' : '';
-    return '<div class="note ' + cls + '">' + t('tgt.line', { v: tgtText() }) + ' ' + (have >= need ? t('tgt.above', { d: (have - need) + unitS }) : t('tgt.below', { d: (need - have) + unitS })) + '</div>';
+  function tgtText() { var g = school().target; return g.score + '/' + g.max; }
+  function gapNote(score) {
+    var g = school().target;
+    if (score === null || score === undefined) return '';
+    var cls = score >= g.score ? 'ok' : score >= g.min ? 'amber' : '';
+    return '<div class="note ' + cls + '">' + t('tgt.line', { v: tgtText() }) + ' ' + (score >= g.score ? t('tgt.above', { d: score - g.score }) : t('tgt.below', { d: g.score - score })) + '</div>';
   }
-  function rulesText(sc) { return sc === 'BIL' ? t('ex.rulesBIL') : sc === 'NIS' ? t('ex.rulesNIS') : t('ex.rulesRFMSH', { max: 150 }); }
-  // Границы вопросов, доступных сейчас: у НИШ — только текущий раздел.
-  function secRange(ex) { return ex.secs ? ex.secs[ex.sec] : { from: 0, to: ex.questions.length }; }
-  function nextSection() {
-    var ex = S.activeExam;
-    readExamInput();
-    if (!ex.secs || ex.sec >= ex.secs.length - 1) { finishExam(false); return; }
-    ex.sec++; ex.secStartedAt = Date.now(); ex.cur = ex.secs[ex.sec].from; mem.sheet = false;
-    save(); render();
-  }
+  function rulesText() { return t('ex.rulesBIL'); }
   function answered(ex, i) { return ex.answers[i] !== undefined && ex.answers[i] !== ''; }
   function vExam() {
     var ex = S.activeExam;
     if (!ex) return vTests();
     var f = Z.examFormats[ex.format], q = ex.questions[ex.cur], n = ex.questions.length;
     var cnt = ex.questions.filter(function (qq, i) { return answered(ex, i); }).length;
-    var rg = secRange(ex), sec = f.sections[q.section || 0], lastQ = ex.cur === rg.to - 1, moreSecs = ex.secs && ex.sec < ex.secs.length - 1;
-    var title = (ex.practice ? t('mk.test', { n: U.pad2(ex.practice) }) + ' · ' : '') + fname(f) + (ex.secs ? '<small>' + t('ex.section', { i: ex.sec + 1, n: ex.secs.length }) + ' · ' + (I.lang() === 'ru' && sec.ru ? sec.ru : sec.kk) + '</small>' : '');
-    var h = (mem.secNote ? '<div class="note amber">' + t('ex.secTimeout') + '</div>' : '') +
-      '<div class="exh"><span class="title">' + title + '</span><span class="timer" id="timer">--:--</span><span class="muted small">' + cnt + ' / ' + n + '</span>' +
+    var lastQ = ex.cur === n - 1;
+    var title = (ex.practice ? t('mk.test', { n: U.pad2(ex.practice) }) + ' · ' : '') + fname(f);
+    var h = '<div class="exh"><span class="title">' + title + '</span><span class="timer" id="timer">--:--</span><span class="muted small">' + cnt + ' / ' + n + '</span>' +
       '<button class="btn line sm" data-act="sheet">' + t('ex.sheet') + '</button><button class="btn primary sm" data-act="finishExam">' + t('c.finish') + '</button></div>';
     if (mem.sheet) {
       h += '<div class="sheet">' + ex.questions.map(function (qq, i) {
-        var off = i < rg.from || i >= rg.to;
-        return '<button class="' + (i === ex.cur ? 'c' : '') + (ex.flags[i] ? ' f' : '') + '" data-act="goto" data-i="' + i + '"' + (off ? ' disabled' : '') + '>' + (i + 1) + ' <span class="bub' + (answered(ex, i) ? ' on' : '') + '"></span></button>';
+        return '<button class="' + (i === ex.cur ? 'c' : '') + (ex.flags[i] ? ' f' : '') + '" data-act="goto" data-i="' + i + '">' + (i + 1) + ' <span class="bub' + (answered(ex, i) ? ' on' : '') + '"></span></button>';
       }).join('') + '</div>';
     }
     if (q.passage) h += '<div class="rsplit">' + passageBox(q.passage);
@@ -589,9 +569,9 @@
         return '<button class="opt' + (ex.answers[ex.cur] === o.key ? ' sel' : '') + '" data-act="exPick" data-key="' + esc(o.key) + '"><span class="L">' + LETTERS[i] + '</span><span class="ot">' + optText(o) + '</span></button>';
       }).join('') + '</div>';
     }
-    h += '<div class="exnav"><button class="btn line" data-act="exPrev"' + (ex.cur === rg.from ? ' disabled' : '') + '>' + t('ex.prev') + '</button>' +
+    h += '<div class="exnav"><button class="btn line" data-act="exPrev"' + (ex.cur === 0 ? ' disabled' : '') + '>' + t('ex.prev') + '</button>' +
       '<button class="btn line" data-act="exFlag">' + (ex.flags[ex.cur] ? t('ex.flagged') : t('ex.flag')) + '</button>' +
-      '<button class="btn primary" data-act="exNext">' + (lastQ ? (moreSecs ? t('ex.nextSec') : t('c.finish')) : t('c.next')) + '</button></div></section>';
+      '<button class="btn primary" data-act="exNext">' + (lastQ ? t('c.finish') : t('c.next')) + '</button></div></section>';
     h += q.passage ? '</div>' : '';
     // «Практика»: вид бумажного буклета (Times, «A) …», бланк с кружками сбоку).
     return ex.look === 'paper' ? '<div class="paperx' + (mem.sheet ? ' withsheet' : '') + '">' + h + '</div>' : h;
@@ -601,11 +581,11 @@
     function tick() {
       var ex = S.activeExam, el = document.getElementById('timer');
       if (!ex) { clearInterval(mem.timer); return; }
-      var end = ex.secs ? ex.secStartedAt + ex.secs[ex.sec].minutes * 60000 : ex.startedAt + ex.minutes * 60000;
+      var end = ex.startedAt + ex.minutes * 60000;
       var left = Math.round((end - Date.now()) / 1000);
       if (left <= 0) {
         clearInterval(mem.timer); mem.timer = null;
-        if (ex.secs && ex.sec < ex.secs.length - 1) { mem.secNote = true; nextSection(); } else finishExam(true);
+        finishExam(true);
         return;
       }
       if (el) { el.textContent = U.pad2(Math.floor(left / 60)) + ':' + U.pad2(left % 60); el.classList.toggle('low', left < 300); }
@@ -669,10 +649,10 @@
       '<a class="btn line" href="#/paper/' + pp.id + '">' + t('print.enter') + '</a><button class="btn primary" data-act="print">' + t('print.go') + '</button></div>' +
       '<p class="noprint note">' + t('print.how', { id: pp.id.slice(1, 7) }) + '</p>';
     h += '<article class="pdoc' + (pp.practice ? ' booklet' : '') + '"><header class="ph-h"><div><b>Зерде · ' + (pp.practice ? t('mk.test', { n: U.pad2(pp.practice) }) + ' · ' : '') + fname(f) + '</b><br><span>' + t('print.variant') + ' ' + (pp.practice ? U.pad2(pp.practice) : pp.id.slice(1, 7)) + ' · ' + qCount(f) + ' ' + t('c.q') + ' · ' + f.minutes + ' ' + t('c.min') + '</span></div>' +
-      '<div class="ph-name">' + t('print.name') + ' ____________________</div></header><p class="small">' + rulesText(f.school) + '</p>';
+      '<div class="ph-name">' + t('print.name') + ' ____________________</div></header><p class="small">' + rulesText() + '</p>';
     var curSec = -1;
     ex.questions.forEach(function (q, i) {
-      if (f.sections.length > 1 && q.section !== curSec) { curSec = q.section; var sc = f.sections[curSec]; h += '<h3 class="psec">' + (I.lang() === 'ru' && sc.ru ? sc.ru : sc.kk) + (sc.minutes ? ' · ' + sc.minutes + ' ' + t('c.min') : '') + '</h3>'; }
+      if (f.sections.length > 1 && q.section !== curSec) { curSec = q.section; var sc = f.sections[curSec]; h += '<h3 class="psec">' + (I.lang() === 'ru' && sc.ru ? sc.ru : sc.kk) + '</h3>'; }
       if (q.passage && !seenP[q.passage]) { seenP[q.passage] = 1; h += passageBox(q.passage); }
       h += '<div class="pq"><span class="pn">' + (i + 1) + '.</span><div>' + qText(q) + (q.type === 'mc' ? '<ol class="popts">' + q.options.map(function (o, k) { return '<li><b>' + LETTERS[k] + ')</b> ' + optText(o) + '</li>'; }).join('') + '</ol>' : '<p class="small">' + t('pr.input') + ': ________</p>') + '</div></div>';
     });
@@ -714,7 +694,7 @@
       var ok = E.check(q, ex.answers[i]), li = function (k) { var j = (q.options || []).map(function (o) { return o.key; }).indexOf(k); return j >= 0 ? LETTERS[j] : '—'; };
       return '<span class="' + (ok === true ? 'ok' : ok === false ? 'no' : 'sk') + '" title="' + esc(t('mk.cell', { r: li(q.ansKey), y: li(ex.answers[i]) })) + '">' + (i + 1) + '<small>' + li(q.ansKey) + '</small></span>';
     }).join('') + '</div></section>';
-    if (f.full) h += f.school === 'NIS' ? gapNote(null, Math.round(Math.max(0, r.score) / r.max * 100)) : gapNote(r.score, null);
+    if (f.full) h += gapNote(r.score);
     if (r.lostBySkipping > 0) h += '<div class="note amber">' + t('res.guess', { n: r.skipped, ev: U.fmt(r.guessEV), lost: U.fmt(r.lostBySkipping) }) + '</div>';
     if (f.sections.length > 1 && r.bySection) {
       h += '<section class="sec"><h2>' + t('res.bySection') + '</h2><div class="tbl-wrap"><table class="tbl"><tbody>' + f.sections.map(function (sec, si) {
@@ -746,7 +726,7 @@
   function vProgress() {
     var fc = P.forecast(S);
     var h = '<section class="card"><span class="label">' + t('prog.forecast') + '</span>' +
-      (fc ? '<div class="result-big"><b>' + fc.score + '</b><span>' + (fc.pct ? '%' : '/ ' + fc.max) + '</span></div><p class="muted">' + t('prog.forecastNote', { n: Math.min(3, fc.n) }) + '</p>' + gapNote(fc.pct ? null : fc.score, fc.pct ? fc.score : null) : '<p class="muted">' + t('prog.noMocks') + '</p>') + '<p class="small muted">' + t('tgt.about') + '</p></section>';
+      (fc ? '<div class="result-big"><b>' + fc.score + '</b><span>/ ' + fc.max + '</span></div><p class="muted">' + t('prog.forecastNote', { n: Math.min(3, fc.n) }) + '</p>' + gapNote(fc.score) : '<p class="muted">' + t('prog.noMocks') + '</p>') + '<p class="small muted">' + t('tgt.about') + '</p></section>';
     h += chart();
     var weak = P.weakTopics(S);
     if (weak.length) h += '<section class="sec"><h2>' + t('prog.weak') + '</h2><div class="row">' + weak.map(function (w) { return '<a class="btn line sm" href="#/topic/' + w.topic + '">' + tn(Z.topicById[w.topic]) + ' · ' + pct(w.acc) + '</a>'; }).join('') + '</div></section>';
@@ -780,14 +760,10 @@
   /* =================== БАПТАУЛАР / НАСТРОЙКИ =================== */
   function vSettings() {
     var p = S.profile;
-    var sch = Object.keys(Z.schools).filter(function (k) { return Z.schools[k].active; }).map(function (k) {
-      return '<option value="' + k + '"' + (p.school === k ? ' selected' : '') + '>' + Z.schools[k].name + ' — ' + t('sch.' + k) + '</option>';
-    }).join('');
     var grades = [4, 5, 6, 7].map(function (g) { return '<option value="' + g + '"' + (+p.grade === g ? ' selected' : '') + '>' + t('ob.grade', { n: g }) + '</option>'; }).join('');
     function sel(name, cur, opts) { return '<select id="set-' + name + '" name="' + name + '">' + opts.map(function (o) { return '<option value="' + o[0] + '"' + (cur === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select>'; }
     return '<form class="card form" data-form="settings"><h2>' + t('set.profile') + '</h2>' +
       '<label class="field"><span>' + t('set.name') + '</span><input id="set-name" name="name" value="' + esc(p.name) + '" maxlength="30"></label>' +
-      '<label class="field"><span>' + t('set.school') + '</span><select id="set-school" name="school">' + sch + '</select></label>' +
       '<div class="row2"><label class="field"><span>' + t('set.grade') + '</span><select id="set-grade" name="grade">' + grades + '</select></label>' +
       '<label class="field"><span>' + t('set.date') + '</span><input id="set-date" type="date" name="examDate" value="' + (p.examDate || '') + '"></label></div>' +
       intensityField(p.intensity || 'normal') +
@@ -808,13 +784,13 @@
 
   /* =================== ЕСЕП / ОТЧЁТ И СЫНЫП / КЛАСС =================== */
   function sumRow(x) {
-    var sc = Z.schools[x.school] || Z.schools.BIL, g = sc.target, left = x.examDate ? U.daysBetween(today(), x.examDate) : null;
-    var fcTxt = x.fc ? (x.fc.pct ? x.fc.score + '%' : x.fc.score + '/' + x.fc.max) : '—';
-    var risk = !x.fc ? 1 : (x.fc.pct ? x.fc.score < g.minPct : x.fc.score < g.min) ? 2 : (x.fc.pct ? x.fc.score < g.pct : x.fc.score < g.score) ? 1 : 0;
+    var g = Z.schools.BIL.target, left = x.examDate ? U.daysBetween(today(), x.examDate) : null;
+    var fcTxt = x.fc ? x.fc.score + '/' + x.fc.max : '—';
+    var risk = !x.fc ? 1 : x.fc.score < g.min ? 2 : x.fc.score < g.score ? 1 : 0;
     var weak = (x.weak || []).map(function (id) { return Z.topicById[id] ? tn(Z.topicById[id]) : id; }).join(', ');
-    return { risk: risk, html: '<td><b>' + esc(x.name || '—') + '</b><br><small class="muted">' + sc.name + (x.grade ? ' · ' + t('ob.grade', { n: x.grade }) : '') + (left !== null ? ' · ' + left + ' ' + t('c.days') : '') + '</small></td>' +
+    return { risk: risk, html: '<td><b>' + esc(x.name || '—') + '</b><br><small class="muted">' + [x.grade ? t('ob.grade', { n: x.grade }) : '', left !== null ? left + ' ' + t('c.days') : ''].filter(Boolean).join(' · ') + '</small></td>' +
       '<td class="num">' + x.active7 + '/7</td><td class="num">' + x.hw7 + '</td><td class="num">' + (x.mocks7 || 0) + '</td><td class="num">' + x.ready + '%</td>' +
-      '<td class="num"><span class="' + (risk === 2 ? 'no' : risk === 1 ? '' : 'yes') + '">' + fcTxt + '</span><br><small class="muted">' + t('tgt.short', { v: g.pct ? g.pct + '%' : g.score + '/' + g.max }) + '</small></td>' +
+      '<td class="num"><span class="' + (risk === 2 ? 'no' : risk === 1 ? '' : 'yes') + '">' + fcTxt + '</span><br><small class="muted">' + t('tgt.short', { v: g.score + '/' + g.max }) + '</small></td>' +
       '<td class="small">' + (weak || '—') + '</td><td class="num">' + x.mistakes + '</td><td class="small muted">' + new Date(x.updatedAt).toISOString().slice(0, 10) + '</td>' };
   }
   // Отчёт ученика за неделю — для родителей (можно распечатать) и код для учителя.
@@ -829,12 +805,12 @@
     return h;
   }
   function repAdvice(x) {
-    var out = [], g = (Z.schools[x.school] || Z.schools.BIL).target;
+    var out = [], g = Z.schools.BIL.target;
     if (x.active7 < 5) out.push(t('rep.a.active', { n: x.active7 }));
     if (!x.mocks7) out.push(t('rep.a.mock'));
     if (x.mistakes > 20) out.push(t('rep.a.mist', { n: x.mistakes }));
     if ((x.weak || []).length) out.push(t('rep.a.weak', { list: x.weak.map(function (id) { return Z.topicById[id] ? tn(Z.topicById[id]) : id; }).join(', ') }));
-    if (x.fc && (x.fc.pct ? x.fc.score >= g.pct : x.fc.score >= g.score)) out.push(t('rep.a.good'));
+    if (x.fc && x.fc.score >= g.score) out.push(t('rep.a.good'));
     if (!out.length) out.push(t('rep.a.keep'));
     return out;
   }
@@ -936,15 +912,13 @@
     },
     exNext: function () {
       readExamInput();
-      var ex = S.activeExam, rg = secRange(ex);
-      mem.secNote = false;
-      if (ex.cur < rg.to - 1) { ex.cur++; save(); render(); }
-      else if (ex.secs && ex.sec < ex.secs.length - 1) ask(t('ex.nextSecAsk'), t('ex.nextSec'), nextSection);
+      var ex = S.activeExam;
+      if (ex.cur < ex.questions.length - 1) { ex.cur++; save(); render(); }
       else A.finishExam();
     },
-    exPrev: function () { readExamInput(); var ex = S.activeExam; mem.secNote = false; if (ex.cur > secRange(ex).from) { ex.cur--; save(); render(); } },
+    exPrev: function () { readExamInput(); var ex = S.activeExam; if (ex.cur > 0) { ex.cur--; save(); render(); } },
     exFlag: function () { var ex = S.activeExam; ex.flags[ex.cur] = !ex.flags[ex.cur]; save(); render(); },
-    goto: function (el) { readExamInput(); var ex = S.activeExam, i = +el.dataset.i, rg = secRange(ex); if (i >= rg.from && i < rg.to) { ex.cur = i; save(); render(); } },
+    goto: function (el) { readExamInput(); var ex = S.activeExam, i = +el.dataset.i; if (i >= 0 && i < ex.questions.length) { ex.cur = i; save(); render(); } },
     sheet: function () { readExamInput(); mem.sheet = !mem.sheet; render(); },
     finishExam: function () {
       readExamInput();
@@ -994,7 +968,7 @@
     if (el.id === 'importFile' && el.files[0]) {
       var rd = new FileReader();
       rd.onload = function () {
-        try { var data = JSON.parse(rd.result); if (!data.profile) throw new Error('no profile'); S = data; save(); I.setLang(S.profile.uiLang || 'kk'); go('#/today'); }
+        try { var data = JSON.parse(rd.result); if (!data.profile) throw new Error('no profile'); S = Z.store.migrate(data); save(); I.setLang(S.profile.uiLang || 'kk'); go('#/today'); }
         catch (err) { ask(t('set.importBad'), 'OK', null, false); }
       };
       rd.readAsText(el.files[0]);
@@ -1035,7 +1009,7 @@
     if (form === 'applyTransfer') {
       var code = d.get('code');
       ask(t('sync.applyQ'), t('sync.apply'), function () {
-        if (Z.cloud.applyTransfer(S, code)) { S.hw = {}; S.activeExam = null; save(); I.setLang((S.profile && S.profile.uiLang) || I.lang()); go('#/today'); }
+        if (Z.cloud.applyTransfer(S, code)) { S.hw = {}; S.activeExam = null; Z.store.migrate(S); save(); I.setLang((S.profile && S.profile.uiLang) || I.lang()); go('#/today'); }
         else ask(t('sync.bad'), 'OK', null, false);
       });
       return;
@@ -1052,18 +1026,17 @@
       return;
     }
     if (form === 'onboard') {
-      S.profile = { name: String(d.get('name')).trim() || 'Оқушы', school: d.get('school'), grade: +d.get('grade'), examDate: d.get('examDate') || null,
+      S.profile = { name: String(d.get('name')).trim() || 'Оқушы', school: 'BIL', grade: +d.get('grade'), examDate: d.get('examDate') || null,
         intensity: d.get('intensity') || 'normal', qLang: 'both', uiLang: I.lang(), startDate: today(), rid: 'r' + U.newSeed() };
       if (mem.user) B.updateProfile({ name: S.profile.name, school: S.profile.school, grade: S.profile.grade }).then(function (u) { mem.user = u; }).catch(function () {});
       save(); go('#/today');
     } else if (form === 'settings') {
-      var p = S.profile, oldSchool = p.school, oldInt = p.intensity;
-      p.name = String(d.get('name')).trim() || p.name; p.school = d.get('school'); p.grade = +d.get('grade');
+      var p = S.profile, oldInt = p.intensity;
+      p.name = String(d.get('name')).trim() || p.name; p.school = 'BIL'; p.grade = +d.get('grade');
       p.examDate = d.get('examDate') || null; p.intensity = d.get('intensity'); p.qLang = d.get('qLang'); p.uiLang = d.get('uiLang');
       I.setLang(p.uiLang);
-      // Сменили школу или нагрузку — план на сегодня пересобираем.
-      if (oldSchool !== p.school || oldInt !== p.intensity) delete S.plans[today()];
-      if (oldSchool !== p.school) { S.activeExam = null; S.hw = {}; }
+      // Сменили нагрузку — план на сегодня пересобираем.
+      if (oldInt !== p.intensity) delete S.plans[today()];
       if (mem.user) B.updateProfile({ name: p.name, school: p.school, grade: p.grade }).then(function (u) { mem.user = u; }).catch(function () {});
       save(); render();
       var s2 = document.getElementById('saved'); if (s2) s2.textContent = t('c.saved');
@@ -1083,7 +1056,7 @@
     return B.loadProgress().then(function (remote) {
       if (remote && (remote.savedAt || 0) > (S.savedAt || 0) && remote.profile) {
         Object.keys(remote).forEach(function (k) { S[k] = remote[k]; });
-        Z.store.save(S);
+        Z.store.migrate(S); Z.store.save(S);
       }
       if (S.profile && S.profile.uiLang) I.setLang(S.profile.uiLang);
     }).catch(function () { /* офлайн */ }).then(render);

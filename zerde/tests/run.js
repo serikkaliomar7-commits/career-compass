@@ -7,7 +7,7 @@ var path = require('path'), fs = require('fs'), vm = require('vm');
 var ctx = { console: console, Math: Math, Date: Date };
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_nis.js', 'gen_figs.js', 'gen_ktl.js', 'gen_visual.js', 'gen_bil.js', 'gen_bil24.js', 'gen_bil25.js', 'banks.js', 'reading.js', 'reading_ru.js', 'reading_en.js', 'science.js', 'curriculum.js', 'practice.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
+['util.js', 'gen_math.js', 'gen_logic.js', 'gen_olymp.js', 'gen_formats.js', 'gen_abs.js', 'gen_figs.js', 'gen_ktl.js', 'gen_visual.js', 'gen_bil.js', 'gen_bil24.js', 'gen_bil25.js', 'banks.js', 'reading.js', 'curriculum.js', 'practice.js', 'lessons_m1.js', 'lessons_m2.js', 'lessons_other.js', 'engine.js'].forEach(function (f) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f });
 });
 var Z = ctx.Z, E = Z.engine;
@@ -20,8 +20,7 @@ Z.topics.forEach(function (t) {
   if (t.kind === 'reading') return;
   if (t.gen && !Z.gen4[t.gen]) fail(t.id + ': no level-4 generator');
   [1, 2, 3, 4].forEach(function (lvl) {
-    [{ answer: 'mc', options: 4 }, { answer: 'mc', options: 5 }, { answer: 'int' }].forEach(function (mode) {
-      if (mode.answer === 'int' && t.schools.indexOf('RFMSH') < 0) return;
+    [{ answer: 'mc', options: 4 }, { answer: 'mc', options: 5 }].forEach(function (mode) {
       for (var s = 1; s <= SEEDS; s++) {
         var tag = t.id + ' L' + lvl + ' ' + mode.answer + (mode.options || '') + ' seed=' + s;
         var q;
@@ -29,10 +28,7 @@ Z.topics.forEach(function (t) {
         checks++;
         if (bad(q.kk) || bad(q.ru)) fail(tag + ': bad text ' + q.kk.slice(0, 120));
         if (bad(q.sol_kk) || bad(q.sol_ru)) fail(tag + ': bad solution ' + q.sol_kk.slice(0, 120));
-        if (mode.answer === 'int') {
-          if (typeof q.ansValue !== 'number' || q.ansValue % 1 !== 0) fail(tag + ': non-integer answer ' + q.ansValue);
-          if (E.check(q, String(q.ansValue)) !== true) fail(tag + ': own answer rejected');
-        } else {
+        {
           var keys = q.options.map(function (o) { return o.key; });
           // Банк логики хранит 3 неверных ответа, поэтому в режиме 5 вариантов допускаем 4.
           var minOpts = (t.bank || q.ansKey.indexOf('s:') === 0) ? Math.min(4, mode.options) : mode.options;   // у текстовых ответов (сравнение, утверждения) по смыслу 4 варианта
@@ -50,8 +46,8 @@ Z.topics.forEach(function (t) {
   });
 });
 
-// Чтение: у каждого вопроса 4 разных варианта и ровно один верный (казахский, русский, английский).
-var PASSAGES = Z.bank.reading.concat(Z.bank.reading_ru, Z.bank.reading_en);
+// Чтение: у каждого вопроса 4 разных варианта и ровно один верный.
+var PASSAGES = Z.bank.reading;
 PASSAGES.forEach(function (p) {
   E.buildReading(p.id, 5, 4).forEach(function (q, i) {
     checks++;
@@ -61,7 +57,10 @@ PASSAGES.forEach(function (p) {
 });
 
 // Пробные тесты: число вопросов и подсчёт баллов.
-var expectCount = { BIL_P2023: 60, BIL_P2024: 60, BIL_P2025: 60, BIL_diag: 27, RFMSH_diag: 25, NIS_diag: 28, BIL_full: 60, BIL_mini: 15, BIL_read: 10, RFMSH_full: 30, RFMSH_mini: 9, NIS_full: 120, NIS_full2: 60, NIS_mini: 20, NIS_quant: 30, NIS_sci: 10, NIS_lang: 15 };
+var expectCount = { BIL_P2023: 60, BIL_P2024: 60, BIL_P2025: 60, BIL_diag: 27, BIL_full: 60, BIL_mini: 15, BIL_read: 10 };
+if (Object.keys(Z.schools).join() !== 'BIL') fail('only BIL must remain: ' + Object.keys(Z.schools));
+Object.keys(Z.examFormats).forEach(function (fid) { if (!(fid in expectCount)) fail('unexpected format ' + fid); if (Z.examFormats[fid].school !== 'BIL') fail(fid + ' is not BIL'); });
+Z.topics.forEach(function (t) { if (t.schools.join() !== 'BIL') fail('topic ' + t.id + ' schools ' + t.schools); });
 Object.keys(Z.examFormats).forEach(function (fid) {
   for (var s = 1; s <= 60; s++) {
     var ex = E.buildExam(fid, s * 13);
@@ -80,7 +79,6 @@ if (r0.score !== 0 || r0.skipped !== 60) fail('BIL empty sheet must score 0');
 bil.questions.forEach(function (q, i) { ex2(q, i); });
 function ex2(q, i) { bil.answers[i] = q.options.filter(function (o) { return o.key !== q.ansKey; })[0].key; }
 if (E.scoreExam(bil).score !== -60) fail('BIL all wrong must score −60');
-if (E.buildExam('BIL_full', 1).questions.length && E.scoreExam(E.buildExam('RFMSH_full', 3)).max !== 150) fail('RFMSH max must be 150');
 if (E.scoreExam(E.buildExam('BIL_full', 3)).max !== 240) fail('BIL max must be 240');
 
 // Домашка: 20 задач лесенкой A→B→C→★, всё верно — 10/10 и ★★★.
@@ -92,10 +90,10 @@ if (hr.grade !== 10 || hr.stars !== 3 || hr.total !== 20) fail('homework all-cor
 if (hr.byLevel[4].n !== 4) fail('homework must end with 4 olympiad problems');
 
 // Ошибка в домашке → следующая задача «повторная» того же уровня и темы, в оценку не идёт.
-var hw2 = E.newSession('m_frac', 'RFMSH'), lvl0 = hw2.current.lvl;
-E.answer(hw2, '-99999'); E.advance(hw2);
+var hw2 = E.newSession('m_frac', 'BIL'), lvl0 = hw2.current.lvl;
+E.answer(hw2, hw2.current.options.filter(function (o) { return o.key !== hw2.current.ansKey; })[0].key); E.advance(hw2);
 if (!hw2.current.isRetry || hw2.current.lvl !== lvl0 || hw2.idx !== 0) fail('wrong answer must give a retry problem');
-E.answer(hw2, String(hw2.current.ansValue)); E.advance(hw2);
+E.answer(hw2, hw2.current.ansKey); E.advance(hw2);
 if (hw2.idx !== 1 || hw2.current.isRetry) fail('after retry the homework must continue');
 var hr2 = E.sessionResult(hw2);
 if (hr2.total !== 1 || hr2.correct !== 0) fail('retries must not count in the grade');
@@ -106,8 +104,7 @@ Z.topics.forEach(function (t) {
   if (!t.gen) return;
   t.schools.forEach(function (sc) {
     var ss = E.newSession(t.id, sc), kinds = {};
-    // У «Сандық сипаттама» общая первая фраза — смотрим на содержимое колонок.
-    for (var i = 0; i < ss.n; i++) kinds[ss.current ? ss.current.kk.replace('А және В бағандарын салыстырыңыз.', '').replace(/<[^>]+>/g, '').replace(/[\d−,.\s]+/g, ' ').slice(0, 22) : ''] = 1, E.advance(ss);
+    for (var i = 0; i < ss.n; i++) kinds[ss.current ? ss.current.kk.replace(/<[^>]+>/g, '').replace(/[\d−,.\s]+/g, ' ').slice(0, 22) : ''] = 1, E.advance(ss);
     var nk = Object.keys(kinds).length;
     if (nk < 4) fail('variety: ' + t.id + ' ' + sc + ' has only ' + nk + ' problem types in a 20-problem homework');
   });
@@ -140,44 +137,20 @@ PASSAGES.forEach(function (p) {
   var full = E.buildExam('BIL_full', 7 + rl, { readLevel: rl }).questions.filter(function (q) { return q.passage; });
   if (full.length !== 10 || full[0].lvl < 2) fail('full mock reading must be ≥ B');
 });
-// НИШ.
-// «Сандық сипаттама»: варианты всегда в порядке A, B, C (равны), D (нет информации), встречаются все четыре.
-var qcSeen = {};
-for (var s3 = 1; s3 <= 600; s3++) {
-  var qc = E.buildQuestion('q_compare', 1 + s3 % 4, s3, E.modeFor('NIS'));
-  if (!qc.fixed || qc.options[2].kk !== 'Екі шама тең' || qc.options[3].ru !== 'Недостаточно информации') fail('q_compare options must be fixed A/B/C/D');
-  qcSeen[qc.options.map(function (o) { return o.key; }).indexOf(qc.ansKey)] = 1;
-}
-if (Object.keys(qcSeen).length !== 4) fail('q_compare must use all four answers');
-// Естествознание: русские варианты на месте.
-var sq = E.buildQuestion('s_science', 2, 11, E.modeFor('NIS'));
-if (sq.options.some(function (o) { return !o.ru || o.ru === o.kk && /[әіңғүұқөһ]/i.test(o.kk); })) fail('science options must have Russian text');
-if (E.newSession('s_science', 'NIS').n !== 20) fail('science homework must be 20 problems');
-// 1-й день: три раздела со своим временем, вопросы раздела идут подряд.
-var d1 = E.buildExam('NIS_full', 5);
-if (!d1.secs || d1.secs.length !== 3 || d1.secs[0].to !== 40 || d1.secs[1].to !== 100 || d1.secs[2].to !== 120 || d1.secs[1].minutes !== 30) fail('NIS day 1 sections: ' + JSON.stringify(d1.secs));
-if (d1.questions.slice(40, 100).some(function (q) { return q.topic !== 'q_compare'; })) fail('NIS day 1 section 2 must be q_compare');
-if (d1.questions.slice(100).some(function (q) { return q.topic !== 's_science'; })) fail('NIS day 1 section 3 must be science');
-var d1s = E.scoreExam(d1);
-if (Object.keys(d1s.bySection).length !== 3 || d1s.bySection[1].n !== 60) fail('NIS bySection');
-// 2-й день: казахский, русский, английский по 20.
-var d2 = E.buildExam('NIS_full2', 9, { readLevel: 3 });
-['r_read', 'r_ru', 'r_en'].forEach(function (tp, k) {
-  if (d2.questions.slice(k * 20, k * 20 + 20).some(function (q) { return q.topic !== tp; })) fail('NIS day 2 section ' + k + ' must be ' + tp);
-});
-// Планировщик НИШ: без логики, второй слот — сандық сипаттама / естествознание / языки.
+// Планировщик: темы логики и математики, первый день — диагностика, тесты только БИЛ.
 ['planner.js', 'cloud.js'].forEach(function (f) { vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f }); });
-var st = { profile: { school: 'NIS', intensity: 'normal', startDate: '2026-01-05', examDate: '2026-12-01' }, topics: {}, plans: {}, exams: [], activity: {}, mistakes: [] };
+var st = { profile: { school: 'BIL', intensity: 'normal', startDate: '2026-01-05', examDate: '2026-12-01' }, topics: {}, plans: {}, exams: [], activity: {}, mistakes: [] };
 var kindsSeen = {}, testsSeen = {};
 for (var dd = 0; dd < 14; dd++) {
   var pl = Z.planner.planFor(st, Z.util.addDays('2026-01-05', dd));
   pl.tasks.forEach(function (tk) {
     if (tk.type === 'topic') kindsSeen[Z.topicById[tk.topic].kind] = 1;
-    else { testsSeen[tk.format] = 1; if (Z.examFormats[tk.format].school !== 'NIS') fail('NIS plan has foreign test ' + tk.format); }
+    else { testsSeen[tk.format] = 1; if (!Z.examFormats[tk.format]) fail('plan has unknown test ' + tk.format); }
   });
 }
-if (kindsSeen.logic || !kindsSeen.quant || !kindsSeen.science || !kindsSeen.reading || !kindsSeen.math) fail('NIS plan kinds: ' + Object.keys(kindsSeen));
-if (!testsSeen.NIS_diag) fail('first day must be the diagnostic');
+if (!kindsSeen.logic || !kindsSeen.math) fail('BIL plan kinds: ' + Object.keys(kindsSeen));
+if (!testsSeen.BIL_diag) fail('first day must be the diagnostic');
+if (!testsSeen.BIL_full || !testsSeen.BIL_mini || !testsSeen.BIL_read) fail('BIL plan tests: ' + Object.keys(testsSeen));
 // Диагностика: темы с ошибкой идут первыми.
 var st2 = { profile: { school: 'BIL', intensity: 'normal', startDate: '2026-01-05', examDate: '2026-12-01' }, topics: {}, plans: {}, exams: [], activity: {}, mistakes: [] };
 var dex = E.buildExam('BIL_diag', 3);
@@ -192,10 +165,6 @@ var p3 = Z.planner.planFor(st2, '2026-01-09');
 if (!p3.tasks.some(function (x) { return x.type === 'review' && x.topic === 'm_eq'; })) fail('review must appear after 3 days');
 Z.planner.recordPractice(st2, 'm_eq', { mode: 'quick', grade: 9, stars: 3, acc: 0.9, correct: 9, total: 10, nextLevel: 3 }, '2026-01-09');
 if (st2.topics.m_eq.reviews !== 1) fail('review must advance');
-if (!testsSeen.NIS_full || !testsSeen.NIS_full2) fail('NIS plan must have both mock days: ' + Object.keys(testsSeen));
-
-var rfq = E.newSession('l_puzzles', 'RFMSH');
-rfq.queue.forEach(function (q) { if (q.type !== 'int') fail('RFMSH bank queue must be integer-answer'); });
 
 // Короткое повторение: 10 задач, адаптивный уровень доходит до 4.
 var qs = E.newSession('m_eq', 'BIL', { mode: 'quick' });
@@ -243,6 +212,22 @@ if (Z.cloud.readReport('garbage') !== null) fail('bad report code must be reject
   Object.keys(Z.blueprints).forEach(function (k) {
     Z.blueprints[k].slots.forEach(function (sl, i) { checks++; if (sl.f && !E.hasFormat(sl.t, sl.f, sl.l)) fail(k + ' slot ' + (i + 1) + ': no format ' + sl.f + ' at level ' + sl.l); });
   });
+})();
+
+// Профиль с другой (больше не поддерживаемой) школой переводится на БИЛ; записи об удалённых форматах и темах убираются.
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', 'store.js'), 'utf8'), ctx, { filename: 'store.js' });
+(function () {
+  var old = { profile: { school: 'OLD', name: 'X' }, topics: { old_topic: { stars: 1 } }, plans: { '2026-01-05': { tasks: [{ type: 'test', format: 'OLD_full' }] } },
+    exams: [{ format: 'OLD_full', score: 10, max: 20 }, { format: 'BIL_full', score: 100, max: 240 }], activeExam: { format: 'OLD_full' }, hw: { m_eq: { school: 'OLD' } },
+    mistakes: [{ topic: 'old_topic' }, { topic: 'm_eq' }], paper: [{ fid: 'OLD_full' }], diag: { old_topic: 0 }, activity: {} };
+  var m = Z.store.migrate(old);
+  if (m.profile.school !== 'BIL' || m.activeExam || Object.keys(m.plans).length || Object.keys(m.hw).length || m.diag) fail('migration must reset a profile of another school');
+  if (m.exams.length !== 1 || m.mistakes.length !== 1 || m.paper.length) fail('migration must drop removed formats and topics');
+  var ok = { profile: { school: 'BIL' }, plans: { d: { tasks: [{ type: 'test', format: 'BIL_mini' }] } }, exams: [], hw: {}, diag: {} };
+  Z.store.migrate(ok);
+  if (!ok.plans.d || !ok.diag) fail('migration must keep a BIL profile as is');
+  var pf = Z.planner.forecast(m);
+  if (!pf || pf.score !== 100 || pf.max !== 240) fail('forecast after migration');
 })();
 
 console.log((fails ? 'FAILED ' + fails : 'OK') + ' — ' + checks + ' checks');

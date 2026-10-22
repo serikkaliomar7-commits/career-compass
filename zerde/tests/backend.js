@@ -27,7 +27,7 @@ function ok(c, m) { if (!c) { fails++; console.log('FAIL ' + m); } }
   await B.admin.saveSettings({ kaspi: { phone: '+7 700', name: 'Z' } });
   await B.signOut();
   // ученик: оплата со скидкой → подтверждение админом
-  var b = await B.signUp({ role: 'student', name: 'Ерлан', email: 'b@x.kz', password: 'kokzhiyek2', school: 'NIS', grade: 6 });
+  var b = await B.signUp({ role: 'student', name: 'Ерлан', email: 'b@x.kz', password: 'kokzhiyek2', school: 'BIL', grade: 6 });
   var pr = await B.requestPayment('m3', 'SALE20');
   ok(pr.ok && pr.amount === 60000 && pr.months === 3, 'discounted payment 75000 → 60000');
   ok((await B.admin.decidePayment(pr.id, true)).ok === false, 'student cannot approve payments');
