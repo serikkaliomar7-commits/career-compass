@@ -805,3 +805,14 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .g-res span { padding: 6px 14px; border-radius: 999px; font: 700 1rem var(--sans); }
 .g-res .ok { color: var(--ok); background: var(--ok-bg); }
 .g-res .no { color: var(--bad); background: var(--bad-bg); }
+/* Игра «24» */
+.g24-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%; max-width: 460px; }
+.g24-card { aspect-ratio: 1 / 1.15; border-radius: 18px; border: 2px solid var(--line-2); background: var(--card); color: var(--ink); font: 800 2rem var(--serif); cursor: pointer; display: grid; place-items: center; box-shadow: var(--sh-btn); }
+.g24-card .frac { font-size: .7em; }
+.g24-card.sel { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+.g24-ops { display: flex; gap: 10px; justify-content: center; }
+.g24-op { width: 58px; height: 52px; font: 800 1.4rem var(--sans); padding: 0; }
+.g-prev { font-size: .9rem; padding: 8px 12px; border-radius: 12px; background: var(--soft); text-align: center; }
+.g-prev.ok b { color: var(--ok); } .g-prev.no b { color: var(--bad); }
+.g-prev .label { margin-right: 4px; }
+@media (max-width: 420px) { .g24-cards { gap: 8px; } .g24-card { font-size: 1.6rem; } }

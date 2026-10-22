@@ -59,7 +59,7 @@
       'c.h.6': 'Колоданы соңына дейін өткенде рейтингке ұпай қосылады: әр «Білемін» — 1 ұпай, бір колодадан күніне 20 ұпайдан аспайды.',
       'c.h.7': '<b>Адал болыңыз:</b> білмей «Білемін» бассаңыз, карточка сирек шығып, формула ұмытылып қалады — емтиханда дәл сол жерде қателесесіз.', 'c.cards': '{n} карточка', 'c.known': '{k}/{n} білемін', 'c.back': 'Карточкаларға', 'c.show': 'Жауапты көру үшін басыңыз', 'c.q': 'Сұрақ', 'c.a': 'Жауап',
       'c.know': 'Білемін', 'c.again': 'Қайталау', 'c.restart': 'Қайтадан', 'c.done': 'Колода аяқталды: {k} карточканы білесіз.', 'c.none': 'Карточкалар жақында қосылады.',
-      'g.title': 'Ойындар', 'g.sub': 'Әр ойын — 60 секунд. Ойын таңдаңыз да, рекордыңызды жаңартыңыз. Күндегі бірінші ойын рейтингке ұпай береді.', 'g.start': 'Бастау', 'g.level': 'Деңгей', 'g.score': 'Нәтиже: {n}', 'g.best': 'Рекорд: {n}', 'g.ok': 'Верно: {n}', 'g.bad': 'Ошибок: {n}', 'g.ok': 'Дұрыс: {n}', 'g.bad': 'Қате: {n}', 'g.again': 'Тағы ойнау', 'g.time': 'уақыт'
+      'g.title': 'Ойындар', 'g.sub': 'Әр ойын — 60 секунд. Ойын таңдаңыз да, рекордыңызды жаңартыңыз. Күндегі бірінші ойын рейтингке ұпай береді.', 'g.start': 'Бастау', 'g.level': 'Деңгей', 'g.score': 'Нәтиже: {n}', 'g.best': 'Рекорд: {n}', 'g.prev': 'Алдыңғы', 'g.ok': 'Дұрыс: {n}', 'g.bad': 'Қате: {n}', 'g.again': 'Тағы ойнау', 'g.time': 'уақыт'
     },
     ru: {
       'nav.pricing': 'Тарифы', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточки', 'nav.game': 'Игры', 'nav.admin': 'Админ',
@@ -112,7 +112,7 @@
       'c.h.6': 'Когда колода пройдена до конца, начисляются баллы в рейтинг: 1 балл за каждое «Знаю», не больше 20 в день за одну колоду.',
       'c.h.7': '<b>Будьте честны:</b> если нажать «Знаю», не зная, карточка будет попадаться реже и формула забудется — и ошибка случится на экзамене.', 'c.cards': '{n} карточек', 'c.known': 'знаю {k}/{n}', 'c.back': 'К карточкам', 'c.show': 'Нажмите, чтобы увидеть ответ', 'c.q': 'Вопрос', 'c.a': 'Ответ',
       'c.know': 'Знаю', 'c.again': 'Повторить', 'c.restart': 'Заново', 'c.done': 'Колода пройдена: вы знаете {k} карточек.', 'c.none': 'Карточки скоро появятся.',
-      'g.title': 'Игры', 'g.sub': 'Каждая игра — 60 секунд. Выберите игру и побейте свой рекорд. Первая игра за день даёт баллы в рейтинг.', 'g.start': 'Начать', 'g.level': 'Уровень', 'g.score': 'Результат: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Ещё раз', 'g.time': 'время'
+      'g.title': 'Игры', 'g.sub': 'Каждая игра — 60 секунд. Выберите игру и побейте свой рекорд. Первая игра за день даёт баллы в рейтинг.', 'g.start': 'Начать', 'g.level': 'Уровень', 'g.score': 'Результат: {n}', 'g.prev': 'Предыдущий', 'g.ok': 'Верно: {n}', 'g.bad': 'Ошибок: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Ещё раз', 'g.time': 'время'
     }
   };
   // Добавляем тексты в общий словарь, чтобы t() в app.js тоже их видел.
@@ -530,7 +530,62 @@
         return { q: '<small class="muted">' + esc(ru ? pick.d.ru : pick.d.kk) + '</small><br>' + F(ru ? c.f_ru : c.f_kk), opts: opts.map(function (x) { return F(back(x)); }), k: opts.indexOf(c), long: true };
       } }
   };
-  var GAME_ORDER = ['calc', 'frac', 'seq', 'tf', 'formula'];
+  /* «24»: из четырёх чисел получить 24 с помощью + − × : (каждое число — ровно один раз).
+   * Ход: выбрать число → знак → второе число; два числа заменяются результатом. Решатель работает
+   * с обыкновенными дробями (n/d), поэтому знает и ответы вида 8 : (3 − 8 : 3). */
+  function q24(n, d) { var g = gcdG(Math.abs(n), Math.abs(d)) || 1; if (d < 0) { n = -n; d = -d; } return { n: n / g, d: d / g }; }
+  function op24(a, b, o) {
+    if (o === '+') return q24(a.n * b.d + b.n * a.d, a.d * b.d);
+    if (o === '−') return q24(a.n * b.d - b.n * a.d, a.d * b.d);
+    if (o === '×') return q24(a.n * b.n, a.d * b.d);
+    if (!b.n) return null; return q24(a.n * b.d, a.d * b.n);
+  }
+  function solve24(list, ops) {   // list: [{n, d, e}] → строка решения или null
+    if (list.length === 1) return list[0].n === 24 * list[0].d ? list[0].e : null;
+    for (var i = 0; i < list.length; i++) for (var j = 0; j < list.length; j++) {
+      if (i === j) continue;
+      var rest = list.filter(function (x, k) { return k !== i && k !== j; });
+      for (var o = 0; o < ops.length; o++) {
+        if ((ops[o] === '+' || ops[o] === '×') && j < i) continue;   // коммутативные — один порядок
+        var v = op24(list[i], list[j], ops[o]); if (!v) continue;
+        var e = '(' + list[i].e + ' ' + (ops[o] === ':' ? ':' : ops[o]) + ' ' + list[j].e + ')';
+        var s = solve24(rest.concat([{ n: v.n, d: v.d, e: e }]), ops); if (s) return s;
+      }
+    }
+    return null;
+  }
+  function trim24(e) { return e.length > 2 && e[0] === '(' && e[e.length - 1] === ')' ? e.slice(1, -1) : e; }
+  function make24(r, lvl) {
+    for (var t = 0; t < 2000; t++) {
+      var mx = lvl === 3 ? 13 : 9, nums = [r.int(1, mx), r.int(1, mx), r.int(1, mx), r.int(1, mx)];
+      var L = nums.map(function (x) { return { n: x, d: 1, e: String(x) }; });
+      var easy = solve24(L, ['+', '−', '×']), any = easy || solve24(L, ['+', '−', '×', ':']);
+      if (!any) continue;
+      if (lvl === 1 && !easy) continue;               // A: хватает + − ×
+      if (lvl === 3 && easy) continue;                // C: без деления не получится
+      if (lvl >= 2 && t < 1500 && solve24(L, ['+'])) continue;                        // B, C: не просто сумма
+      if (lvl === 2 && t < 1500 && nums.indexOf(1) >= 0 && r.chance(0.5)) continue;   // B: поменьше единиц
+      return { nums: nums, sol: trim24(easy || any) };
+    }
+    return { nums: [3, 3, 8, 8], sol: '8 : (3 − 8 : 3)' };
+  }
+  function show24(x) { return x.d === 1 ? String(x.n).replace('-', '−') : '<span class="frac"><span>' + String(x.n).replace('-', '−') + '</span><span>' + x.d + '</span></span>'; }
+  function new24(g) { var p = make24(g.r, g.lvl); g.task = { nums: p.nums, sol: p.sol }; g.cur = p.nums.map(function (x) { return { n: x, d: 1, e: String(x) }; }); g.hist = []; g.sel = -1; g.op = null; }
+  function g24html(g) {
+    var ru = I.lang() === 'ru';
+    var h = '<div class="g24-cards">' + g.cur.map(function (x, i) {
+      return '<button class="g24-card' + (g.sel === i ? ' sel' : '') + '" data-act="g24Num" data-i="' + i + '">' + show24(x) + '</button>';
+    }).join('') + '</div><div class="g24-ops">' + ['+', '−', '×', ':'].map(function (o) {
+      return '<button class="btn pill g24-op' + (g.op === o ? ' dark' : '') + '" data-act="g24Op" data-o="' + o + '">' + o + '</button>';
+    }).join('') + '</div><div class="row center"><button class="btn line sm" data-act="g24Undo"' + (g.hist.length ? '' : ' disabled') + '>↶ ' + (ru ? 'Назад' : 'Артқа') + '</button>' +
+      '<button class="btn line sm" data-act="g24Reset">↺ ' + (ru ? 'Сначала' : 'Басынан') + '</button><button class="btn line sm" data-act="g24Skip">' + (ru ? 'Пропустить' : 'Өткізу') + ' →</button></div>';
+    if (g.prev24) h += '<div class="g-prev ' + (g.prev24.ok ? 'ok' : 'no') + '"><span class="label">' + tt('g.prev') + '</span> ' + g.prev24.nums.join(', ') + ' → <b>' + g.prev24.sol + ' = 24</b> ' + (g.prev24.ok ? '✓' : '') + '</div>';
+    return h;
+  }
+  GAMES.g24 = { kk: '24 ойыны', ru: 'Игра «24»', ic: '24', secs: 180, custom: true,
+    skk: 'Төрт санның әрқайсысын бір реттен қолданып, + − × : арқылы 24 шығарыңыз. Санды, белгіні, сосын екінші санды басыңыз. 3 минут.',
+    sru: 'Получите 24 из четырёх чисел, используя каждое ровно один раз и знаки + − × :. Нажмите число, знак, затем второе число. 3 минуты.' };
+  var GAME_ORDER = ['calc', 'frac', 'seq', 'tf', 'formula', 'g24'];
   function gName(G) { return I.lang() === 'ru' ? G.ru : G.kk; }
   function gBest(S, id) { S.game = S.game || {}; if (typeof S.game.best === 'number') { S.game.bests = { calc: S.game.best }; delete S.game.best; } S.game.bests = S.game.bests || {}; return S.game.bests[id] || 0; }
   function game(id) {
@@ -539,7 +594,7 @@
       return '<section class="sec"><h1>' + tt('g.title') + '</h1><p class="muted">' + tt('g.sub') + '</p></section><div class="decks games">' + GAME_ORDER.map(function (k) {
         var G = GAMES[k];
         return '<a class="deck" href="#/game/' + k + '"><span class="dk-ico g-ico">' + G.ic + '</span><b>' + gName(G) + '</b><small>' + (ru ? G.sru : G.skk) + '</small>' +
-          '<span class="dk-foot"><span>60 ' + (ru ? 'сек' : 'сек') + '</span><span class="tag">' + tt('g.best', { n: gBest(S, k) }) + '</span></span></a>';
+          '<span class="dk-foot"><span>' + ((G.secs || 60) >= 120 ? (G.secs / 60) + ' мин' : (G.secs || 60) + ' сек') + '</span><span class="tag">' + tt('g.best', { n: gBest(S, k) }) + '</span></span></a>';
       }).join('') + '</div>';
     }
     var G = GAMES[id];
@@ -552,6 +607,7 @@
       return h;
     }
     var t = g.task;
+    if (G.custom) return h + '<div class="card center game' + (g.fb ? ' fb-' + g.fb : '') + '"><span class="timer" id="gTime">' + Math.max(0, Math.ceil((g.end - Date.now()) / 1000)) + '</span>' + g24html(g) + '<p class="muted">' + tt('g.score', { n: g.score }) + '</p></div>';
     h += '<div class="card center game' + (g.fb ? ' fb-' + g.fb : '') + '"><span class="timer" id="gTime">' + Math.max(0, Math.ceil((g.end - Date.now()) / 1000)) + '</span><b class="big g-q">' + t.q + '</b>';
     if (G.typed) h += '<form data-form="gAnswer" class="row center"><input name="a" id="gIn" inputmode="numeric" autocomplete="off" data-autofocus class="g-in"><button class="btn pill dark" type="submit">↵</button></form>';
     else h += '<div class="g-opts' + (t.long ? ' long' : '') + (t.opts.length === 2 ? ' two' : '') + '">' + t.opts.map(function (o, i) { return '<button class="btn pill g-opt" data-act="gPick" data-i="' + i + '">' + o + '</button>'; }).join('') + '</div>';
@@ -615,11 +671,32 @@
     gStart: function (el) {
       var m = ui().mem, r = U.rng(U.newSeed()), id = el.dataset.g || 'calc';
       if (m.game && m.game.timer) clearInterval(m.game.timer);
-      m.game = { id: id, r: r, lvl: m.gLvl || 2, score: 0, ok: 0, bad: 0, end: Date.now() + 60000, task: null, over: false };
-      m.game.task = GAMES[id].gen(r, m.game.lvl);
+      m.game = { id: id, r: r, lvl: m.gLvl || 2, score: 0, ok: 0, bad: 0, end: Date.now() + (GAMES[id].secs || 60) * 1000, task: null, over: false };
+      if (GAMES[id].custom) new24(m.game); else m.game.task = GAMES[id].gen(r, m.game.lvl);
       m.game.timer = setInterval(gameTick, 250);
       ui().render();
     },
+    // «24»: число → знак → число; результат заменяет два числа. Осталось одно число 24 — решено.
+    g24Num: function (el) {
+      var g = ui().mem.game, i = +el.dataset.i; if (!g || g.over) return;
+      if (g.sel < 0 || !g.op || g.sel === i) { g.sel = g.sel === i ? -1 : i; g.op = null; ui().render(); return; }
+      var a = g.cur[g.sel], b = g.cur[i], v = op24(a, b, g.op === ':' ? ':' : g.op);
+      if (!v) { g.op = null; ui().render(); return; }   // на 0 делить нельзя
+      g.hist.push(g.cur.slice());
+      var next = g.cur.filter(function (x, k) { return k !== g.sel && k !== i; });
+      next.splice(Math.min(g.sel, i), 0, { n: v.n, d: v.d, e: '(' + a.e + ' ' + g.op + ' ' + b.e + ')' });
+      g.cur = next; g.sel = Math.min(g.sel, i) >= next.length ? next.length - 1 : Math.min(g.sel, i); g.op = null;
+      if (g.cur.length === 1) {
+        var ok = g.cur[0].n === 24 * g.cur[0].d;
+        if (ok) { g.score++; g.ok++; g.fb = 'ok'; g.prev24 = { nums: g.task.nums, sol: trim24(g.cur[0].e), ok: true }; new24(g); }
+        else { g.fb = 'no'; g.bad++; g.hist.pop(); g.cur = g.hist.length ? g.hist[g.hist.length - 1] : g.cur; g.cur = g.task.nums.map(function (x) { return { n: x, d: 1, e: String(x) }; }); g.hist = []; g.sel = -1; }
+      }
+      ui().render();
+    },
+    g24Op: function (el) { var g = ui().mem.game; if (!g || g.over || g.sel < 0) return; g.op = el.dataset.o; ui().render(); },
+    g24Undo: function () { var g = ui().mem.game; if (!g || !g.hist.length) return; g.cur = g.hist.pop(); g.sel = -1; g.op = null; ui().render(); },
+    g24Reset: function () { var g = ui().mem.game; if (!g) return; g.cur = g.task.nums.map(function (x) { return { n: x, d: 1, e: String(x) }; }); g.hist = []; g.sel = -1; g.op = null; ui().render(); },
+    g24Skip: function () { var g = ui().mem.game; if (!g || g.over) return; g.prev24 = { nums: g.task.nums, sol: g.task.sol, ok: false }; g.fb = ''; new24(g); ui().render(); },
     gPick: function (el) { var g = ui().mem.game; if (!g || g.over) return; gNext(g, +el.dataset.i === g.task.k); }
   };
   Z.viewForms = {
