@@ -59,7 +59,7 @@
       'c.h.6': 'Колоданы соңына дейін өткенде рейтингке ұпай қосылады: әр «Білемін» — 1 ұпай, бір колодадан күніне 20 ұпайдан аспайды.',
       'c.h.7': '<b>Адал болыңыз:</b> білмей «Білемін» бассаңыз, карточка сирек шығып, формула ұмытылып қалады — емтиханда дәл сол жерде қателесесіз.', 'c.cards': '{n} карточка', 'c.known': '{k}/{n} білемін', 'c.back': 'Карточкаларға', 'c.show': 'Жауапты көру үшін басыңыз', 'c.q': 'Сұрақ', 'c.a': 'Жауап',
       'c.know': 'Білемін', 'c.again': 'Қайталау', 'c.restart': 'Қайтадан', 'c.done': 'Колода аяқталды: {k} карточканы білесіз.', 'c.none': 'Карточкалар жақында қосылады.',
-      'g.title': 'Ойындар', 'g.sub': 'Әр ойын — 60 секунд. Ойын таңдаңыз да, рекордыңызды жаңартыңыз. Күндегі бірінші ойын рейтингке ұпай береді.', 'g.start': 'Бастау', 'g.level': 'Деңгей', 'g.score': 'Нәтиже: {n}', 'g.best': 'Рекорд: {n}', 'g.again': 'Тағы ойнау', 'g.time': 'уақыт'
+      'g.title': 'Ойындар', 'g.sub': 'Әр ойын — 60 секунд. Ойын таңдаңыз да, рекордыңызды жаңартыңыз. Күндегі бірінші ойын рейтингке ұпай береді.', 'g.start': 'Бастау', 'g.level': 'Деңгей', 'g.score': 'Нәтиже: {n}', 'g.best': 'Рекорд: {n}', 'g.ok': 'Верно: {n}', 'g.bad': 'Ошибок: {n}', 'g.ok': 'Дұрыс: {n}', 'g.bad': 'Қате: {n}', 'g.again': 'Тағы ойнау', 'g.time': 'уақыт'
     },
     ru: {
       'nav.pricing': 'Тарифы', 'nav.account': 'Аккаунт', 'nav.leaders': 'Рейтинг', 'nav.cards': 'Карточки', 'nav.game': 'Игры', 'nav.admin': 'Админ',
@@ -546,7 +546,7 @@
     var h = '<a class="back" href="#/game">' + ui().ic('back') + tt('g.title') + '</a><section class="sec"><h1>' + gName(G) + '</h1><p class="muted">' + (ru ? G.sru : G.skk) + '</p></section>';
     if (!g || g.id !== id || g.over) {
       var fin = g && g.id === id && g.over;
-      h += (fin ? '<div class="card center"><b class="big">' + tt('g.score', { n: g.score }) + '</b><p class="muted">' + tt('g.best', { n: gBest(S, id) }) + (g.ok + g.bad ? ' · ✓ ' + g.ok + ' · ✗ ' + g.bad : '') + '</p></div>' : '<p class="muted">' + tt('g.best', { n: gBest(S, id) }) + '</p>') +
+      h += (fin ? '<div class="card center"><b class="big">' + tt('g.score', { n: g.score }) + '</b><p class="muted">' + tt('g.best', { n: gBest(S, id) }) + '</p>' + (g.ok + g.bad ? '<div class="g-res"><span class="ok">✓ ' + tt('g.ok', { n: g.ok }) + '</span><span class="no">✗ ' + tt('g.bad', { n: g.bad }) + '</span></div>' : '') + '</div>' : '<p class="muted">' + tt('g.best', { n: gBest(S, id) }) + '</p>') +
         (id === 'formula' ? '' : '<div class="row center"><span class="muted">' + tt('g.level') + ':</span>' + [1, 2, 3].map(function (l) { return '<button class="btn pill' + ((m.gLvl || 2) === l ? ' dark' : '') + '" data-act="gLvl" data-l="' + l + '">' + ['A', 'B', 'C'][l - 1] + '</button>'; }).join('') + '</div>') +
         '<div class="row center"><button class="btn pill dark" data-act="gStart" data-g="' + id + '">' + (fin ? tt('g.again') : tt('g.start')) + '</button></div>';
       return h;
