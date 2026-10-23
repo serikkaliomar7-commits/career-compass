@@ -283,7 +283,7 @@
         selfCheck: function () {
           var d = db(), u = me(d);
           return ok([{ k: 'mode', ok: false, v: 'demo' }, { k: 'url', ok: false }, { k: 'settings', ok: true, v: 'localStorage' },
-            { k: 'tables', ok: null }, { k: 'admin', ok: !!u && u.role === 'admin' }, { k: 'rpc', ok: null }, { k: 'schema', ok: null }]);
+            { k: 'tables', ok: null, na: true }, { k: 'admin', ok: !!u && u.role === 'admin' }, { k: 'rpc', ok: null, na: true }, { k: 'schema', ok: null, na: true }]);
         }
       }
     };

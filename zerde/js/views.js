@@ -86,7 +86,7 @@
       'e.payer_phone4': 'Телефонның соңғы 4 санын жазыңыз (тек цифрлар).', 'e.state': 'Бұл өтінім тексеріліп қойған.', 'e.plan': 'Мұндай тариф жоқ.', 'e.auth': 'Алдымен кіріңіз.',
       'p.legal': 'Төлей отырып, сіз {o} шарттарымен келісесіз (қайтару шарттары — 6-бөлімде).',
       'p.kaspiNo2': 'Төлем әзірге қабылданбайды: әкімші Kaspi нөмірін енгізбеген. Бізбен хабарласыңыз: {c}.',
-      'p.step1': 'Kaspi-ге аударыңыз', 'p.step1n': 'Kaspi → Аударымдар → Телефон нөмірі бойынша. Алушы: {name}.',
+      'p.step1': 'Kaspi-ге аударыңыз', 'p.step1n': 'Алушы: {name} · Kaspi → Аударымдар → Телефон нөмірі бойынша',
       'p.step2': 'Түсініктемеге кодты жазыңыз', 'p.step2n': 'Осы код бойынша әкімші сіздің аударымыңызды табады.',
       'p.step3': '«Төледім» басыңыз', 'p.step3n': 'Kaspi-де жіберушінің аты қалай көрінсе, солай жазыңыз — тексеру тезірек өтеді.',
       'p.payerName': 'Жіберушінің аты (Kaspi-де)', 'p.payerPhone4': 'Телефонның соңғы 4 саны', 'p.payerComment': 'Түсініктеме (міндетті емес)', 'p.paidBtn': 'Төледім',
@@ -101,7 +101,7 @@
       'ad.pend': 'Тексерілетін төлемдер', 'ad.decided': 'Соңғы шешімдер', 'ad.payer': 'Жіберуші (Kaspi)', 'ad.notMarked': 'әлі «Төледім» баспады', 'ad.created': 'Өтінім', 'ad.paidAt': '«Төледім»', 'ad.user': 'Пайдаланушы',
       'ad.reason': 'Бас тарту себебі (міндетті емес)', 'ad.approveQ': '{code} · {sum} ₸ — Kaspi-де осы аударым түскенін тексердіңіз бе? Растасаңыз, қолжетімділік {m} айға ашылады.', 'ad.comment': 'Түсініктеме',
       'ad.demoWarn': 'Демо-режим: сатуға болмайды — серверді қосыңыз (ЗАПУСК.md)',
-      'sys.title': 'Жүйені тексеру', 'sys.run': 'Қайта тексеру', 'sys.ok': 'Бәрі дайын — сатуға болады (заңгер құжаттарды тексергеннен кейін).', 'sys.bad': 'Түзету керек: {n}',
+      'sys.na': 'Демо-режимде тексерілмейді — сервер қосылғаннан кейін тексеріледі.', 'sys.title': 'Жүйені тексеру', 'sys.run': 'Қайта тексеру', 'sys.ok': 'Бәрі дайын — сатуға болады (заңгер құжаттарды тексергеннен кейін).', 'sys.bad': 'Түзету керек: {n}',
       'sys.mode': 'Режим: сервер (Supabase)', 'sys.mode.h': 'Қазір демо-режим. js/config.js файлына supabaseUrl мен supabaseKey жазыңыз (ЗАПУСК.md, 1-қадам).',
       'sys.url': 'Supabase адресі көрсетілген', 'sys.url.h': 'js/config.js → supabaseUrl: https://xxxx.supabase.co',
       'sys.settings': 'Баптауларды оқуға болады', 'sys.settings.h': 'settings кестесі жоқ немесе оқылмайды: supabase/schema.sql файлын SQL Editor-да қайта іске қосыңыз.',
@@ -195,7 +195,7 @@
       'e.payer_phone4': 'Укажите последние 4 цифры телефона (только цифры).', 'e.state': 'Эта заявка уже проверена.', 'e.plan': 'Такого тарифа нет.', 'e.auth': 'Сначала войдите.',
       'p.legal': 'Оплачивая, вы соглашаетесь с условиями {o} (возврат — раздел 6).',
       'p.kaspiNo2': 'Оплата пока не принимается: админ ещё не указал номер Kaspi. Свяжитесь с нами: {c}.',
-      'p.step1': 'Переведите на Kaspi', 'p.step1n': 'Kaspi → Переводы → По номеру телефона. Получатель: {name}.',
+      'p.step1': 'Переведите на Kaspi', 'p.step1n': 'Получатель: {name} · Kaspi → Переводы → По номеру телефона',
       'p.step2': 'Укажите код в комментарии', 'p.step2n': 'По этому коду админ найдёт ваш перевод.',
       'p.step3': 'Нажмите «Я оплатил(а)»', 'p.step3n': 'Имя отправителя пишите так, как оно видно в Kaspi, — проверка пройдёт быстрее.',
       'p.payerName': 'Имя отправителя (в Kaspi)', 'p.payerPhone4': 'Последние 4 цифры телефона', 'p.payerComment': 'Комментарий (необязательно)', 'p.paidBtn': 'Я оплатил(а)',
@@ -210,7 +210,7 @@
       'ad.pend': 'Оплаты на проверке', 'ad.decided': 'Последние решения', 'ad.payer': 'Отправитель (Kaspi)', 'ad.notMarked': 'ещё не нажал «Я оплатил»', 'ad.created': 'Заявка', 'ad.paidAt': '«Я оплатил»', 'ad.user': 'Пользователь',
       'ad.reason': 'Причина отказа (необязательно)', 'ad.approveQ': '{code} · {sum} ₸ — вы проверили, что этот перевод пришёл в Kaspi? После подтверждения доступ откроется на {m} мес.', 'ad.comment': 'Комментарий',
       'ad.demoWarn': 'Демо-режим: продавать нельзя — подключите сервер (ЗАПУСК.md)',
-      'sys.title': 'Проверка системы', 'sys.run': 'Проверить ещё раз', 'sys.ok': 'Всё готово — можно продавать (после проверки документов юристом).', 'sys.bad': 'Нужно исправить: {n}',
+      'sys.na': 'В демо-режиме не проверяется — проверится после подключения сервера.', 'sys.title': 'Проверка системы', 'sys.run': 'Проверить ещё раз', 'sys.ok': 'Всё готово — можно продавать (после проверки документов юристом).', 'sys.bad': 'Нужно исправить: {n}',
       'sys.mode': 'Режим: сервер (Supabase)', 'sys.mode.h': 'Сейчас демо-режим. Впишите supabaseUrl и supabaseKey в js/config.js (ЗАПУСК.md, шаг 1).',
       'sys.url': 'Адрес Supabase указан', 'sys.url.h': 'js/config.js → supabaseUrl: https://xxxx.supabase.co',
       'sys.settings': 'Настройки читаются', 'sys.settings.h': 'Таблицы settings нет или она не читается: выполните supabase/schema.sql в SQL Editor ещё раз.',
@@ -511,7 +511,7 @@
   };
   var LEGAL_FIELDS = ['name', 'bin', 'address', 'phone', 'email'];
   function legalMissing(s) { var lg = (s && s.legal) || {}; return LEGAL_FIELDS.filter(function (k) { return !String(lg[k] || '').trim(); }); }
-  function ph(lg, k) { return '<mark class="ph">' + LEGAL_PH[lg][k] + '</mark>'; }
+  function ph(lg, k) { return '<mark class="lph">' + LEGAL_PH[lg][k] + '</mark>'; }
   // Контакты одной строкой: почта, телефон, WhatsApp, Telegram (пустые — заглушкой, мессенджеры — только если указаны).
   function contactsHtml(s, lg) {
     var x = (s && s.legal) || {}, out = [];
@@ -952,7 +952,7 @@
       return '<div class="note ' + (bad ? 'amber' : 'ok') + '">' + (bad ? tt('sys.bad', { n: bad }) : tt('sys.ok')) + '</div><ul class="sys-list">' + rows.map(function (x) {
         var cls = x.ok === true ? 'ok' : x.ok === false ? 'bad' : 'skip';
         return '<li class="sys-row ' + cls + '" data-k="' + x.k + '"><span class="sys-ic">' + (x.ok === true ? '✓' : x.ok === false ? '✗' : '!') + '</span><div><b>' + tt('sys.' + x.k, { n: x.n }) + '</b>' +
-          (x.v ? ' <small class="muted">' + esc(x.v) + '</small>' : '') + (x.ok !== true ? '<p class="small muted">' + tt('sys.' + x.k + '.h', { f: x.f || '' }) + '</p>' : '') + '</div></li>';
+          (x.v ? ' <small class="muted">' + esc(x.v) + '</small>' : '') + (x.ok !== true ? '<p class="small muted">' + (x.na ? tt('sys.na') : tt('sys.' + x.k + '.h', { f: x.f || '' })) + '</p>' : '') + '</div></li>';
       }).join('') + '</ul>';
     });
   }
