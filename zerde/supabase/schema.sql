@@ -23,6 +23,9 @@ create table if not exists public.profiles (
 -- Для админки: почта (копия из auth.users) и когда пользователь был на сайте последний раз.
 alter table public.profiles add column if not exists email text;
 alter table public.profiles add column if not exists last_seen timestamptz;
+-- Согласие с офертой и политикой конфиденциальности: когда и с какой редакцией документов (ставит handle_new_user).
+alter table public.profiles add column if not exists consent_at timestamptz;
+alter table public.profiles add column if not exists consent_version text;
 -- Школа — только БИЛ: старые значения переводим на 'BIL' и пересоздаём ограничение
 -- (имя старого ограничения ищем по определению — так скрипт можно запускать повторно).
 update public.profiles set school = 'BIL' where school is not null and school <> 'BIL';
@@ -47,7 +50,8 @@ insert into public.settings (key, value) values
   ('prices', '{"m1": {"months": 1, "amount": 30000}, "m3": {"months": 3, "amount": 75000}, "m6": {"months": 6, "amount": 120000}}'),
   ('trial_days', '3'),
   ('kaspi', '{"phone": "", "name": ""}'),
-  ('prizes', '{"kk": "", "ru": ""}')
+  ('prizes', '{"kk": "", "ru": ""}'),
+  ('legal', '{"name": "", "bin": "", "address": "", "phone": "", "email": "", "whatsapp": "", "telegram": ""}')
 on conflict (key) do nothing;
 
 -- ---------- журнал активности (кто, что, когда) ----------
@@ -74,11 +78,14 @@ declare r text := coalesce(new.raw_user_meta_data->>'role', 'student');
         days int := coalesce((select (value)::text::int from public.settings where key = 'trial_days'), 3);
 begin
   if r not in ('student', 'parent') then r := 'student'; end if;
-  insert into public.profiles (id, role, email, last_seen, name, school, grade, child_code, trial_until)
+  insert into public.profiles (id, role, email, last_seen, name, school, grade, child_code, trial_until, consent_at, consent_version)
   values (new.id, r, lower(new.email), now(), left(coalesce(new.raw_user_meta_data->>'name', ''), 40),
           case when r = 'student' then 'BIL' end, nullif(new.raw_user_meta_data->>'grade', '')::int,
           upper(substr(encode(gen_random_bytes(6), 'hex'), 1, 6)),
-          case when r = 'student' then now() + make_interval(days => days) end)
+          case when r = 'student' then now() + make_interval(days => days) end,
+          -- согласие: страница присылает consent=true и версию документов; время — серверное
+          case when coalesce(new.raw_user_meta_data->>'consent', '') = 'true' then now() end,
+          left(nullif(new.raw_user_meta_data->>'consent_version', ''), 40))
   on conflict (id) do nothing;
   insert into public.activity (user_id, kind, info) values (new.id, 'signup', jsonb_build_object('role', r));
   return new;
@@ -93,6 +100,7 @@ begin
   if not public.is_admin() then
     new.role := old.role; new.sub_until := old.sub_until; new.trial_until := old.trial_until; new.child_code := old.child_code;
     new.email := old.email; new.created_at := old.created_at;
+    new.consent_at := old.consent_at; new.consent_version := old.consent_version;
     new.name := left(new.name, 40);
   end if;
   return new;
@@ -153,6 +161,13 @@ create table if not exists public.payments (
   decided_at timestamptz,
   decided_by uuid
 );
+-- «Төледім / Я оплатил»: имя отправителя в Kaspi и 4 последние цифры его телефона — чтобы админ нашёл перевод.
+-- Код платежа для комментария к переводу считается из id: 'ZRD-' || (1000 + id).
+alter table public.payments add column if not exists payer_name text;
+alter table public.payments add column if not exists payer_phone4 text;
+alter table public.payments add column if not exists paid_at timestamptz;
+alter table public.payments add column if not exists payer_comment text;
+create index if not exists payments_status on public.payments (status, created_at desc);
 
 -- ---------- баллы ----------
 create table if not exists public.points (
@@ -253,8 +268,37 @@ begin
     pct := coalesce(pct, 0);
   end if;
   amt := round(amt * (100 - pct) / 100.0);
+  -- Та же неоплаченная заявка уже есть — возвращаем её, а не создаём новую.
+  select id into pid from public.payments
+    where user_id = uid and status = 'pending' and plan = p_plan and amount = amt and paid_at is null
+    order by id desc limit 1;
+  if pid is not null then
+    return jsonb_build_object('ok', true, 'id', pid, 'code', 'ZRD-' || (1000 + pid), 'amount', amt, 'months', m, 'plan', p_plan);
+  end if;
+  if (select count(*) from public.payments where user_id = uid and status = 'pending') >= 5 then
+    return jsonb_build_object('ok', false, 'error', 'too_many');
+  end if;
   insert into public.payments (user_id, plan, months, amount, promo) values (uid, p_plan, m, amt, case when pct > 0 then upper(trim(p_promo)) end) returning id into pid;
-  return jsonb_build_object('ok', true, 'id', pid, 'amount', amt, 'months', m);
+  insert into public.activity (user_id, kind, info) values (uid, 'pay', jsonb_build_object('plan', p_plan, 'amount', amt, 'code', 'ZRD-' || (1000 + pid)));
+  return jsonb_build_object('ok', true, 'id', pid, 'code', 'ZRD-' || (1000 + pid), 'amount', amt, 'months', m, 'plan', p_plan);
+end $$;
+
+-- «Төледім / Я оплатил»: пользователь сообщает, от кого пришёл перевод. Только своя заявка и только пока она на проверке.
+-- (старая версия без комментария — удаляем, чтобы не было двух функций с одним именем)
+drop function if exists public.mark_paid(bigint, text, text);
+create or replace function public.mark_paid(p_id bigint, p_name text, p_phone4 text, p_comment text default null) returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare uid uuid := auth.uid(); pay public.payments; nm text := left(btrim(regexp_replace(coalesce(p_name, ''), '\s+', ' ', 'g')), 60);
+begin
+  if uid is null then return jsonb_build_object('ok', false, 'error', 'auth'); end if;
+  select * into pay from public.payments where id = p_id and user_id = uid for update;
+  if not found then return jsonb_build_object('ok', false, 'error', 'not_found'); end if;
+  if pay.status <> 'pending' then return jsonb_build_object('ok', false, 'error', 'state'); end if;
+  if nm = '' then return jsonb_build_object('ok', false, 'error', 'payer_name'); end if;
+  if coalesce(p_phone4, '') !~ '^[0-9]{4}$' then return jsonb_build_object('ok', false, 'error', 'payer_phone4'); end if;
+  update public.payments set payer_name = nm, payer_phone4 = p_phone4, payer_comment = nullif(left(btrim(coalesce(p_comment, '')), 200), ''), paid_at = now() where id = p_id;
+  insert into public.activity (user_id, kind, info) values (uid, 'pay', jsonb_build_object('act', 'paid', 'code', 'ZRD-' || (1000 + p_id), 'amount', pay.amount));
+  return jsonb_build_object('ok', true);
 end $$;
 
 -- Админ подтверждает или отклоняет оплату.
@@ -265,7 +309,7 @@ begin
   if not public.is_admin() then return jsonb_build_object('ok', false, 'error', 'forbidden'); end if;
   select * into pay from public.payments where id = p_id for update;
   if not found or pay.status <> 'pending' then return jsonb_build_object('ok', false, 'error', 'state'); end if;
-  update public.payments set status = case when p_ok then 'approved' else 'rejected' end, note = p_note, decided_at = now(), decided_by = auth.uid() where id = p_id;
+  update public.payments set status = case when p_ok then 'approved' else 'rejected' end, note = left(p_note, 200), decided_at = now(), decided_by = auth.uid() where id = p_id;
   insert into public.activity (user_id, kind, info) values (auth.uid(), 'admin', jsonb_build_object('act', case when p_ok then 'approve' else 'reject' end, 'payment', p_id, 'user', pay.user_id));
   if p_ok then
     select greatest(coalesce(sub_until, now()), now()) into base from public.profiles where id = pay.user_id;
@@ -375,4 +419,6 @@ update public.profiles p set email = lower(u.email) from auth.users u where u.id
 
 grant execute on function public.log_activity, public.touch_seen to authenticated;
 grant execute on function public.redeem_promo, public.request_payment, public.decide_payment, public.grant_access,
-  public.link_child, public.add_points, public.leaderboard to authenticated;
+  public.link_child, public.add_points, public.leaderboard, public.mark_paid, public.is_admin to authenticated;
+-- Гостям (не вошедшим) серверные действия не нужны: юридические страницы и тарифы читают только settings.
+revoke execute on function public.mark_paid from anon, public;

@@ -136,7 +136,7 @@
   function closeModal() { document.getElementById('modal').innerHTML = ''; mem.modalYes = null; }
 
   /* =================== ОБОЛОЧКА =================== */
-  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', mocks: 'nav.mocks', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings', pricing: 'nav.pricing', account: 'nav.account', leaders: 'nav.leaders', cards: 'nav.cards', deck: 'nav.cards', game: 'nav.game', admin: 'nav.admin', report: 'nav.report', class: 'nav.class', print: 'nav.tests', paper: 'nav.tests' };
+  var TITLES = { today: 'nav.today', topics: 'nav.topics', topic: 'nav.topics', practice: 'hw.title', tests: 'nav.tests', mocks: 'nav.mocks', exam: 'nav.tests', result: 'res.title', mistakes: 'nav.mistakes', progress: 'nav.progress', settings: 'nav.settings', pricing: 'nav.pricing', account: 'nav.account', leaders: 'nav.leaders', cards: 'nav.cards', deck: 'nav.cards', game: 'nav.game', admin: 'nav.admin', legal: 'nav.legal', report: 'nav.report', class: 'nav.class', print: 'nav.tests', paper: 'nav.tests' };
   function shell(route) {
     var cur = route === 'topic' || route === 'practice' ? 'topics' : route === 'exam' || route === 'result' ? 'tests' : route;
     var mc = (S.mistakes || []).length;
@@ -146,7 +146,7 @@
     var u = mem.user || {};
     document.getElementById('nav').innerHTML = '<div class="label">' + t('nav.secLearn') + '</div>' + link('today') + link('topics') + link('cards') + link('game') + link('mocks') + link('tests') +
       '<div class="label">' + t('nav.secCheck') + '</div>' + link('mistakes', mc) + link('progress') + link('leaders') + link('report') +
-      '<div class="label">' + t('nav.secAcc') + '</div>' + link('account') + link('settings') + (u.role === 'admin' ? link('admin') + link('class') : '');
+      '<div class="label">' + t('nav.secAcc') + '</div>' + link('account') + link('settings') + (u.role === 'admin' ? link('admin', Z.views && Z.views.adminBadge ? Z.views.adminBadge() : 0) + link('class') : '');
     var p = S.profile;
     document.getElementById('me').innerHTML = '<span class="avatar">' + esc(p.name.charAt(0).toUpperCase()) + '</span><span><b>' + esc(p.name) + '</b><small>' + school().name + ' · ' + t('ob.grade', { n: p.grade }) + '</small></span>';
     document.getElementById('page-title').textContent = t(TITLES[route] || 'nav.today');
@@ -176,7 +176,8 @@
     // Гость: лендинг и вход/регистрация.
     if (!u) {
       document.body.classList.add('bare', 'landing');
-      view.innerHTML = route === 'auth' ? V.auth(parts[1]) : V.landing();
+      // Документы (оферта, политика, правила рейтинга) открыты без входа.
+      view.innerHTML = route === 'auth' ? V.auth(parts[1]) : route === 'legal' ? V.legal(parts[1]) : V.landing();
       window.scrollTo(0, 0);
       return;
     }
@@ -184,7 +185,7 @@
     // Родитель: только просмотр результатов ребёнка, рейтинг и аккаунт.
     if (u.role === 'parent') {
       document.body.classList.remove('bare');
-      if (['kids', 'leaders', 'account'].indexOf(route) < 0) route = 'kids';
+      if (['kids', 'leaders', 'account', 'legal'].indexOf(route) < 0) route = 'kids';
       shellParent(route);
       view.innerHTML = V[route](parts[1]);
       window.scrollTo(0, 0);
@@ -193,11 +194,11 @@
     if (!S.profile) { document.body.classList.add('bare'); view.innerHTML = vOnboarding(); return; }
     document.body.classList.remove('bare');
     // Нет подписки: открыты тарифы, аккаунт, рейтинг и входная диагностика.
-    var FREE = ['pricing', 'account', 'leaders', 'result', 'settings'];
+    var FREE = ['pricing', 'account', 'leaders', 'result', 'settings', 'legal'];
     var diagOpen = route === 'exam' && S.activeExam && Z.examFormats[S.activeExam.format].diag;
     if (!B.hasAccess(u) && FREE.indexOf(route) < 0 && !diagOpen) route = 'pricing';
     switch (route) {
-      case 'pricing': case 'account': case 'leaders': case 'cards': case 'deck': case 'game': case 'admin':
+      case 'pricing': case 'account': case 'leaders': case 'cards': case 'deck': case 'game': case 'admin': case 'legal':
         if (route === 'admin' && u.role !== 'admin') { route = 'today'; html = vToday(); break; }
         html = V[route](parts[1], parts[2]); break;
       case 'topics': html = vTopics(); break;

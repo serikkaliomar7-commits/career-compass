@@ -6,7 +6,9 @@
  *   demo     — всё хранится в этом браузере, чтобы сайт работал без сервера и его можно было показать.
  *              Подходит для проверки и для близких; продавать в демо-режиме нельзя: код страницы открыт.
  *
- * Пользователь: { id, email, role: student|parent|admin, name, school, grade, childCode, subUntil, trialUntil } */
+ * Пользователь: { id, email, role: student|parent|admin, name, school, grade, childCode, subUntil, trialUntil, consentAt, consentVersion }
+ * Оплата: { id, code (ZRD-1042), userId, plan, months, amount, status: pending|approved|rejected, note (причина отказа),
+ *           payerName, payerPhone4 (что ввёл плательщик после перевода), paidAt, createdAt, decidedAt } */
 (function (root) {
   'use strict';
   var Z = root.Z;
@@ -15,8 +17,22 @@
   var POINT_CAPS = { hw: 100, quick: 20, review: 30, mock: 150, test: 50, diag: 50, day: 30, cards: 20, game: 30 };
   var DEFAULTS = {
     prices: { m1: { months: 1, amount: 30000 }, m3: { months: 3, amount: 75000 }, m6: { months: 6, amount: 120000 } },
-    trial_days: 3, kaspi: { phone: '', name: '' }, prizes: { kk: '', ru: '' }
+    trial_days: 3, kaspi: { phone: '', name: '' }, prizes: { kk: '', ru: '' },
+    // Реквизиты для оферты, политики и контактов (Админ → Баптаулар). Пусто — в документах видна заглушка.
+    legal: { name: '', bin: '', address: '', phone: '', email: '', whatsapp: '', telegram: '' }
   };
+  // Версия документов (оферта + политика). Меняете текст документов — меняйте версию: согласие хранится с ней.
+  var CONSENT_VERSION = '2026-10-draft';
+  // Код платежа для комментария к Kaspi-переводу: по нему админ находит заявку. id 42 → ZRD-1042.
+  function payCode(id) { return 'ZRD-' + (1000 + (+id || 0)); }
+  function cleanPayer(name, phone4) {
+    name = String(name || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+    phone4 = String(phone4 || '').replace(/\D/g, '');
+    if (!name) return { error: 'payer_name' };
+    if (!/^\d{4}$/.test(phone4)) return { error: 'payer_phone4' };
+    return { name: name, phone4: phone4 };
+  }
+  var MAX_PENDING = 5;   // больше открытых заявок у одного пользователя не даём — чтобы не засоряли список админа
 
   function hasAccess(u) {
     if (!u) return false;
@@ -54,6 +70,7 @@
         d.promos['ZERDE-ADMIN'] = { code: 'ZERDE-ADMIN', kind: 'admin', used: 0, note: 'демо' };
         d.promos['ZERDE-FREE'] = { code: 'ZERDE-FREE', kind: 'free', days: null, used: 0, note: 'демо: доступ навсегда' };
       }
+      if (!d.settings.legal) d.settings.legal = JSON.parse(JSON.stringify(DEFAULTS.legal));
       return d;
     }
     function put(d) { memDb = d; try { root.localStorage.setItem(KEY, JSON.stringify(d)); } catch (e) { /* приватный режим — живём на memDb */ } }
@@ -95,13 +112,15 @@
         var d = db(), email = String(f.email || '').trim().toLowerCase(), pi = passIssue(f.password);
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('bad_email');
         if (pi) return err(pi);
+        if (!f.consent) return err('consent');
         if (Object.keys(d.users).some(function (k) { return d.users[k].email === email; })) return err('exists');
         var id = 'u' + Date.now().toString(36) + code6(), role = f.role === 'parent' ? 'parent' : 'student';
         return pbkdf2(String(f.password), rnd(16)).then(function (h) {
           d = db();
           d.users[id] = { id: id, email: email, pass: h, role: role, name: String(f.name || '').slice(0, 40), school: f.school || null, grade: f.grade || null,
             childCode: code6(), subUntil: null, trialUntil: role === 'student' ? new Date(Date.now() + d.settings.trial_days * DAY).toISOString() : null,
-            createdAt: new Date().toISOString(), lastSeen: new Date().toISOString() };
+            createdAt: new Date().toISOString(), lastSeen: new Date().toISOString(),
+            consentAt: new Date().toISOString(), consentVersion: String(f.consentVersion || CONSENT_VERSION).slice(0, 40) };
           d.session = id; logAct(d, id, 'signup', { role: role }); put(d);
           return pub(d.users[id]);
         });
@@ -152,14 +171,33 @@
       },
       requestPayment: function (plan, promo) {
         var d = db(), u = me(d), pr = d.settings.prices[plan];
-        if (!u || !pr) return ok({ ok: false, error: 'plan' });
+        if (!u) return ok({ ok: false, error: 'auth' });
+        if (!pr) return ok({ ok: false, error: 'plan' });
         var pct = 0, pc = promo && d.promos[String(promo).trim().toUpperCase()];
         if (pc && pc.kind === 'discount') pct = pc.percent || 0;
-        var pay = { id: d.payments.length + 1, userId: u.id, email: u.email, name: u.name, plan: plan, months: pr.months, amount: Math.round(pr.amount * (100 - pct) / 100), status: 'pending', createdAt: new Date().toISOString() };
-        d.payments.push(pay); logAct(d, u.id, 'pay', { plan: plan, amount: pay.amount }); put(d);
-        return ok({ ok: true, id: pay.id, amount: pay.amount, months: pay.months });
+        var amount = Math.round(pr.amount * (100 - pct) / 100), mine = d.payments.filter(function (p) { return p.userId === u.id && p.status === 'pending'; });
+        // Та же неоплаченная заявка уже есть — отдаём её, а не плодим новые.
+        var same = mine.filter(function (p) { return p.plan === plan && p.amount === amount && !p.paidAt; })[0];
+        if (same) return ok({ ok: true, id: same.id, code: same.code, amount: same.amount, months: same.months, plan: plan });
+        if (mine.length >= MAX_PENDING) return ok({ ok: false, error: 'too_many' });
+        var id = d.payments.length + 1;
+        var pay = { id: id, code: payCode(id), userId: u.id, email: u.email, name: u.name, plan: plan, months: pr.months, amount: amount, status: 'pending', createdAt: new Date().toISOString() };
+        d.payments.push(pay); logAct(d, u.id, 'pay', { plan: plan, amount: pay.amount, code: pay.code }); put(d);
+        return ok({ ok: true, id: pay.id, code: pay.code, amount: pay.amount, months: pay.months, plan: plan });
       },
-      myPayments: function () { var d = db(), u = me(d); return ok(u ? d.payments.filter(function (p) { return p.userId === u.id; }) : []); },
+      // «Төледім / Я оплатил»: плательщик сообщает имя отправителя в Kaspi и 4 последние цифры телефона.
+      // Только своя заявка и только пока она на проверке.
+      markPaid: function (id, name, phone4, comment) {
+        var d = db(), u = me(d), p = d.payments.filter(function (x) { return x.id === +id; })[0];
+        if (!u) return ok({ ok: false, error: 'auth' });
+        if (!p || p.userId !== u.id) return ok({ ok: false, error: 'not_found' });
+        if (p.status !== 'pending') return ok({ ok: false, error: 'state' });
+        var c = cleanPayer(name, phone4); if (c.error) return ok({ ok: false, error: c.error });
+        p.payerName = c.name; p.payerPhone4 = c.phone4; p.payerComment = String(comment || '').trim().slice(0, 200) || null; p.paidAt = new Date().toISOString();
+        logAct(d, u.id, 'pay', { act: 'paid', code: p.code || payCode(p.id), amount: p.amount }); put(d);
+        return ok({ ok: true });
+      },
+      myPayments: function () { var d = db(), u = me(d); return ok(u ? d.payments.filter(function (p) { return p.userId === u.id; }).map(function (p) { var o = {}; for (var k in p) o[k] = p[k]; o.code = o.code || payCode(o.id); return o; }).reverse() : []); },
       saveProgress: function (state, summary) { var d = db(), u = me(d); if (!u) return ok(false); d.progress[u.id] = { state: state, summary: summary, updatedAt: new Date().toISOString() }; put(d); return ok(true); },
       loadProgress: function () { var d = db(), u = me(d); return ok(u && d.progress[u.id] ? d.progress[u.id].state : null); },
       linkChild: function (c) {
@@ -214,11 +252,17 @@
           var d = db(); q = String(q || '').toLowerCase();
           return ok(Object.keys(d.users).map(function (k) { return pub(d.users[k]); }).filter(function (u) { return !q || (u.email + ' ' + u.name).toLowerCase().indexOf(q) >= 0; }));
         },
-        payments: function (status) { var d = db(); return ok(d.payments.filter(function (p) { return !status || p.status === status; }).slice().reverse()); },
-        decidePayment: function (id, okv) {
-          var d = db(), u = me(d), p = d.payments.filter(function (x) { return x.id === id; })[0];
+        payments: function (status) {
+          var d = db(), u = me(d); if (!u || u.role !== 'admin') return ok([]);
+          return ok(d.payments.filter(function (p) { return !status || p.status === status; }).slice().reverse().map(function (p) {
+            var o = {}, su = d.users[p.userId] || {}; for (var k in p) o[k] = p[k]; o.code = o.code || payCode(o.id); o.name = su.name || o.name; o.email = su.email || o.email; return o;
+          }));
+        },
+        decidePayment: function (id, okv, note) {
+          var d = db(), u = me(d), p = d.payments.filter(function (x) { return x.id === +id; })[0];
           if (!u || u.role !== 'admin' || !p || p.status !== 'pending') return ok({ ok: false });
-          p.status = okv ? 'approved' : 'rejected'; p.decidedAt = new Date().toISOString(); logAct(d, u.id, 'admin', { act: okv ? 'approve' : 'reject', payment: id, user: p.userId });
+          p.status = okv ? 'approved' : 'rejected'; p.decidedAt = new Date().toISOString(); p.note = note ? String(note).slice(0, 200) : null;
+          logAct(d, u.id, 'admin', { act: okv ? 'approve' : 'reject', payment: id, user: p.userId });
           if (okv) { var su = d.users[p.userId], base = Math.max(Date.now(), su.subUntil ? +new Date(su.subUntil) : 0), dt = new Date(base); dt.setMonth(dt.getMonth() + p.months); su.subUntil = dt.toISOString(); }
           put(d); return ok({ ok: true });
         },
@@ -234,7 +278,13 @@
           logAct(d, u.id, 'admin', { act: 'promo', code: code, kind: p.kind }); put(d); return ok({ ok: true });
         },
         deletePromo: function (code) { var d = db(); delete d.promos[code]; put(d); return ok({ ok: true }); },
-        saveSettings: function (s) { var d = db(), u = me(d); if (!u || u.role !== 'admin') return ok({ ok: false }); for (var k in s) d.settings[k] = s[k]; put(d); return ok({ ok: true }); }
+        saveSettings: function (s) { var d = db(), u = me(d); if (!u || u.role !== 'admin') return ok({ ok: false }); for (var k in s) d.settings[k] = s[k]; put(d); return ok({ ok: true }); },
+        // Самопроверка настройки (Админ → Жүйе). В демо-режиме сервера нет — эти пункты не проходят.
+        selfCheck: function () {
+          var d = db(), u = me(d);
+          return ok([{ k: 'mode', ok: false, v: 'demo' }, { k: 'url', ok: false }, { k: 'settings', ok: true, v: 'localStorage' },
+            { k: 'tables', ok: null }, { k: 'admin', ok: !!u && u.role === 'admin' }, { k: 'rpc', ok: null }, { k: 'schema', ok: null }]);
+        }
       }
     };
   }
@@ -256,7 +306,12 @@
     function fail(e) { return Promise.reject({ code: (e && (e.code || e.message)) || 'error' }); }
     function prof(p, email) {
       return p ? { id: p.id, email: email || p.email || '', role: p.role, name: p.name, school: p.school, grade: p.grade, childCode: p.child_code, subUntil: p.sub_until, trialUntil: p.trial_until,
-        createdAt: p.created_at, lastSeen: p.last_seen } : null;
+        createdAt: p.created_at, lastSeen: p.last_seen, consentAt: p.consent_at || null, consentVersion: p.consent_version || null } : null;
+    }
+    function payRow(p) {
+      return { id: p.id, code: payCode(p.id), userId: p.user_id, name: p.profiles ? p.profiles.name : undefined, email: p.profiles ? p.profiles.email : undefined,
+        plan: p.plan, months: p.months, amount: p.amount, promo: p.promo, status: p.status, note: p.note, payerName: p.payer_name, payerPhone4: p.payer_phone4, payerComment: p.payer_comment,
+        paidAt: p.paid_at, createdAt: p.created_at, decidedAt: p.decided_at };
     }
     function loadMe(c) {
       return c.auth.getUser().then(function (r) {
@@ -271,8 +326,11 @@
       session: function () { return client().then(loadMe); },
       signUp: function (f) {
         var pi = passIssue(f.password); if (pi) return fail({ code: pi });
+        if (!f.consent) return fail({ code: 'consent' });
         return client().then(function (c) {
-          return c.auth.signUp({ email: f.email, password: f.password, options: { data: { role: f.role, name: f.name, school: f.school || '', grade: f.grade || '' } } });
+          // Согласие с офертой и политикой: версия уходит в raw_user_meta_data, время ставит сервер (handle_new_user → profiles.consent_at).
+          return c.auth.signUp({ email: f.email, password: f.password, options: { data: { role: f.role, name: f.name, school: f.school || '', grade: f.grade || '',
+            consent: true, consent_version: String(f.consentVersion || CONSENT_VERSION) } } });
         }).then(function (r) {
           if (r.error) return fail({ code: /already|registered|exists/i.test(r.error.message || '') ? 'exists' : /password/i.test(r.error.message || '') ? 'pass_short' : /email/i.test(r.error.message || '') ? 'bad_email' : (r.error.code || 'error') });
           if (!r.data.session) return fail({ code: 'confirm_email' });   // включено подтверждение почты
@@ -306,8 +364,15 @@
         });
       },
       redeemPromo: function (code) { return rpc('redeem_promo', { p_code: code }); },
-      requestPayment: function (plan, promo) { return rpc('request_payment', { p_plan: plan, p_promo: promo || null }); },
-      myPayments: function () { return client().then(function (c) { return c.from('payments').select('*').order('created_at', { ascending: false }); }).then(function (r) { return r.data || []; }); },
+      requestPayment: function (plan, promo) { return rpc('request_payment', { p_plan: plan, p_promo: promo || null }).then(function (r) { if (r && r.ok && !r.code) r.code = payCode(r.id); return r; }); },
+      markPaid: function (id, name, phone4, comment) {
+        var c = cleanPayer(name, phone4); if (c.error) return Promise.resolve({ ok: false, error: c.error });
+        return rpc('mark_paid', { p_id: +id, p_name: c.name, p_phone4: c.phone4, p_comment: String(comment || '').trim().slice(0, 200) || null });
+      },
+      myPayments: function () {
+        return client().then(function (c) { return c.from('payments').select('*').eq('user_id', cache.user.id).order('created_at', { ascending: false }); })
+          .then(function (r) { return (r.data || []).map(payRow); });
+      },
       saveProgress: function (state, summary) {
         return client().then(function (c) { return c.from('progress').upsert({ user_id: cache.user.id, state: state, summary: summary, updated_at: new Date().toISOString() }); });
       },
@@ -352,7 +417,7 @@
             var g = r[1].data || {};
             return { user: prof(r[0].data), state: g.state || null, summary: g.summary || null, updatedAt: g.updated_at || null,
               activity: (r[2].data || []).map(function (a) { return { kind: a.kind, info: a.info, at: a.at }; }),
-              payments: (r[3].data || []).map(function (p) { return { id: p.id, plan: p.plan, months: p.months, amount: p.amount, status: p.status, createdAt: p.created_at }; }) };
+              payments: (r[3].data || []).map(payRow) };
           });
         },
         users: function (q) {
@@ -360,10 +425,10 @@
             .then(function (r) { return (r.data || []).map(function (p) { return prof(p); }); });
         },
         payments: function (status) {
-          return client().then(function (c) { var x = c.from('payments').select('*, profiles(name)').order('created_at', { ascending: false }).limit(200); if (status) x = x.eq('status', status); return x; })
-            .then(function (r) { return (r.data || []).map(function (p) { return { id: p.id, userId: p.user_id, name: p.profiles && p.profiles.name, plan: p.plan, months: p.months, amount: p.amount, status: p.status, createdAt: p.created_at }; }); });
+          return client().then(function (c) { var x = c.from('payments').select('*, profiles(name, email)').order('created_at', { ascending: false }).limit(200); if (status) x = x.eq('status', status); return x; })
+            .then(function (r) { if (r.error) return fail(r.error); return (r.data || []).map(payRow); });
         },
-        decidePayment: function (id, ok) { return rpc('decide_payment', { p_id: id, p_ok: ok }); },
+        decidePayment: function (id, ok, note) { return rpc('decide_payment', { p_id: +id, p_ok: !!ok, p_note: note ? String(note).slice(0, 200) : null }); },
         grant: function (userId, days) { return rpc('grant_access', { p_user: userId, p_days: days }); },
         promos: function () { return client().then(function (c) { return c.from('promo_codes').select('*').order('created_at', { ascending: false }); }).then(function (r) { return (r.data || []).map(function (p) { return { code: p.code, kind: p.kind, days: p.days, percent: p.percent, maxUses: p.max_uses, used: p.used, note: p.note }; }); }); },
         createPromo: function (p) {
@@ -373,6 +438,37 @@
         deletePromo: function (code) { return client().then(function (c) { return c.from('promo_codes').delete().eq('code', code); }).then(function () { return { ok: true }; }); },
         saveSettings: function (s) {
           return client().then(function (c) { return c.from('settings').upsert(Object.keys(s).map(function (k) { return { key: k, value: s[k] }; })); }).then(function (r) { return r.error ? { ok: false } : { ok: true }; });
+        },
+        // Самопроверка: адрес, чтение настроек, таблицы, новые колонки, серверные функции (только безвредные вызовы).
+        selfCheck: function () {
+          var url = String(CFG.supabaseUrl || ''), out = [{ k: 'mode', ok: true, v: 'supabase' }, { k: 'url', ok: /^https:\/\/[^/]+/.test(url), v: url.replace(/^https:\/\//, '') }];
+          function safe(p) { return Promise.resolve(p).then(function (r) { return r; }, function (e) { return { error: e || { message: 'error' } }; }); }
+          function msg(e) { return e ? String(e.message || e.code || e).slice(0, 120) : ''; }
+          return client().then(function (c) {
+            var tables = ['profiles', 'progress', 'activity', 'payments', 'promo_codes', 'points', 'settings', 'parent_links'];
+            return Promise.all([
+              safe(c.from('settings').select('key')),
+              Promise.all(tables.map(function (t) { return safe(c.from(t).select('*', { count: 'exact', head: true })); })),
+              safe(c.from('profiles').select('consent_at, consent_version').limit(1)),
+              safe(c.from('payments').select('payer_name, payer_phone4, payer_comment, paid_at').limit(1)),
+              safe(c.rpc('is_admin')),
+              safe(c.rpc('leaderboard', { p_month: monthKey() + '-01', p_school: null })),
+              safe(c.rpc('mark_paid', { p_id: -1, p_name: 'check', p_phone4: '0000', p_comment: null })),           // заявки -1 нет → not_found, ничего не меняет
+              safe(c.rpc('decide_payment', { p_id: -1, p_ok: false, p_note: null })),               // то же: state / forbidden
+              safe(c.rpc('redeem_promo', { p_code: 'ZERDE-SELFCHECK-NONE' }))                         // такого кода нет → not_found
+            ]).then(function (r) {
+              var st = r[0];
+              out.push({ k: 'settings', ok: !st.error && (st.data || []).length > 0, v: st.error ? msg(st.error) : (st.data || []).length + ' keys' });
+              var bad = tables.filter(function (t, i) { return r[1][i].error; });
+              out.push({ k: 'tables', ok: !bad.length, v: bad.length ? bad.join(', ') + ' — ' + msg(r[1][tables.indexOf(bad[0])].error) : tables.join(', ') });
+              out.push({ k: 'admin', ok: !r[4].error && r[4].data === true && !!cache.user && cache.user.role === 'admin' });
+              var rpcs = [['is_admin', r[4]], ['leaderboard', r[5]], ['mark_paid', r[6]], ['decide_payment', r[7]], ['redeem_promo', r[8]]], miss = rpcs.filter(function (x) { return x[1].error; });
+              out.push({ k: 'rpc', ok: !miss.length, v: miss.length ? miss.map(function (x) { return x[0]; }).join(', ') + ' — ' + msg(miss[0][1].error) : rpcs.map(function (x) { return x[0]; }).join(', ') });
+              var sc = [r[2], r[3]].filter(function (x) { return x.error; });
+              out.push({ k: 'schema', ok: !sc.length, v: sc.length ? msg(sc[0].error) : 'profiles.consent_at, payments.payer_name' });
+              return out;
+            });
+          }, function (e) { out.push({ k: 'settings', ok: false, v: msg(e) }); return out; });
         }
       }
     };
@@ -384,6 +480,9 @@
   impl.monthKey = monthKey;
   impl.CAPS = POINT_CAPS;
   impl.passIssue = passIssue;
+  impl.payCode = payCode;
+  impl.CONSENT_VERSION = CONSENT_VERSION;
+  impl.DEFAULTS = DEFAULTS;
   if (!impl.signOutAll) impl.signOutAll = impl.signOut;
   Z.backend = impl;
 })(typeof window !== 'undefined' ? window : globalThis);

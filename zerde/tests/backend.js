@@ -13,11 +13,14 @@ function ok(c, m) { if (!c) { fails++; console.log('FAIL ' + m); } }
 
 (async function () {
   ok(B.mode === 'demo', 'demo mode without config');
-  var a = await B.signUp({ role: 'student', name: 'Әлия', email: 'a@x.kz', password: 'kokzhiyek1', school: 'BIL', grade: 6 });
+  var a = await B.signUp({ consent: true, role: 'student', name: 'Әлия', email: 'a@x.kz', password: 'kokzhiyek1', school: 'BIL', grade: 6 });
   ok(a.role === 'student' && B.hasAccess(a) && B.daysLeft(a) === 3, 'student gets 3 trial days');
   ok(!('pass' in a), 'password not exposed');
-  try { await B.signUp({ role: 'admin', email: 'a@x.kz', password: 'kokzhiyek1' }); ok(false, 'duplicate email'); } catch (e) { ok(e.code === 'exists', 'duplicate email code'); }
-  var adm = await B.signUp({ role: 'admin', name: 'X', email: 'adm@x.kz', password: 'kokzhiyek1' });
+  ok(a.consentAt && Math.abs(Date.now() - +new Date(a.consentAt)) < 60000 && a.consentVersion === B.CONSENT_VERSION, 'consent time and version stored');
+  try { await B.signUp({ role: 'student', name: 'NoConsent', email: 'nc@x.kz', password: 'kokzhiyek1' }); ok(false, 'signup without consent must fail'); } catch (e) { ok(e.code === 'consent', 'no consent → consent error, got ' + (e && e.code)); }
+  ok(B.payCode(42) === 'ZRD-1042' && B.payCode('7') === 'ZRD-1007', 'payment code from id');
+  try { await B.signUp({ consent: true, role: 'admin', email: 'a@x.kz', password: 'kokzhiyek1' }); ok(false, 'duplicate email'); } catch (e) { ok(e.code === 'exists', 'duplicate email code'); }
+  var adm = await B.signUp({ consent: true, role: 'admin', name: 'X', email: 'adm@x.kz', password: 'kokzhiyek1' });
   ok(adm.role === 'student', 'role admin cannot be chosen at signup');
   ok((await B.redeemPromo('zerde-admin')).ok, 'admin promo');
   ok((await B.session()).role === 'admin', 'became admin');
@@ -27,9 +30,19 @@ function ok(c, m) { if (!c) { fails++; console.log('FAIL ' + m); } }
   await B.admin.saveSettings({ kaspi: { phone: '+7 700', name: 'Z' } });
   await B.signOut();
   // ученик: оплата со скидкой → подтверждение админом
-  var b = await B.signUp({ role: 'student', name: 'Ерлан', email: 'b@x.kz', password: 'kokzhiyek2', school: 'BIL', grade: 6 });
+  var b = await B.signUp({ consent: true, role: 'student', name: 'Ерлан', email: 'b@x.kz', password: 'kokzhiyek2', school: 'BIL', grade: 6 });
   var pr = await B.requestPayment('m3', 'SALE20');
   ok(pr.ok && pr.amount === 60000 && pr.months === 3, 'discounted payment 75000 → 60000');
+  ok(pr.code === B.payCode(pr.id), 'payment has code ' + pr.code);
+  var pr2 = await B.requestPayment('m3', 'SALE20');
+  ok(pr2.ok && pr2.id === pr.id, 'same unpaid request is reused, not duplicated');
+  ok((await B.markPaid(pr.id, 'Ерлан Б.', '12a4')).error === 'payer_phone4', 'mark_paid: 4 digits required');
+  ok((await B.markPaid(pr.id, '  ', '1234')).error === 'payer_name', 'mark_paid: name required');
+  ok((await B.markPaid(pr.id, '  Ерлан   Б. ', '1234')).ok, 'mark_paid own pending');
+  var mp = (await B.myPayments())[0];
+  ok(mp.payerName === 'Ерлан Б.' && mp.payerPhone4 === '1234' && mp.paidAt && mp.code === pr.code && mp.status === 'pending', 'payer info saved on payment');
+  var prOther = await B.requestPayment('m1');
+  ok(prOther.ok && prOther.id !== pr.id, 'new plan → new request');
   ok((await B.admin.decidePayment(pr.id, true)).ok === false, 'student cannot approve payments');
   // баллы: лимит за действие, повтор не засчитывается, лимит в день
   ok((await B.addPoints('hw', 'm_eq:1', 999)).amount === 100, 'hw cap 100');
@@ -40,8 +53,9 @@ function ok(c, m) { if (!c) { fails++; console.log('FAIL ' + m); } }
   var code = b.childCode;
   await B.signOut();
   // родитель
-  var p = await B.signUp({ role: 'parent', name: 'Серік', email: 'p@x.kz', password: 'kokzhiyek3' });
+  var p = await B.signUp({ consent: true, role: 'parent', name: 'Серік', email: 'p@x.kz', password: 'kokzhiyek3' });
   ok(p.role === 'parent' && B.hasAccess(p), 'parent has access');
+  ok((await B.markPaid(pr.id, 'Hacker', '0000')).error === 'not_found', 'mark_paid: not for someone else\'s payment');
   ok((await B.linkChild('nope')).error === 'not_found', 'bad child code');
   ok((await B.linkChild(code.toLowerCase())).ok, 'link child by code');
   var kids = await B.children();
@@ -52,16 +66,29 @@ function ok(c, m) { if (!c) { fails++; console.log('FAIL ' + m); } }
   // админ подтверждает оплату → доступ на 3 месяца
   await B.signIn({ email: 'adm@x.kz', password: 'kokzhiyek1' });
   var pend = await B.admin.payments('pending');
-  ok(pend.length === 1, 'pending payment visible to admin');
-  ok((await B.admin.decidePayment(pend[0].id, true)).ok, 'approve');
+  ok(pend.length === 2, 'pending payments visible to admin: ' + pend.length);
+  var pp = pend.filter(function (x) { return x.id === pr.id; })[0];
+  ok(pp && pp.code === pr.code && pp.payerName === 'Ерлан Б.' && pp.payerPhone4 === '1234' && pp.email === 'b@x.kz' && pp.paidAt, 'admin sees code, payer name/phone4, email');
+  ok((await B.admin.decidePayment(pr.id, true)).ok, 'approve');
+  ok((await B.admin.decidePayment(prOther.id, false, 'Аударма табылмады')).ok, 'reject with reason');
+  ok((await B.admin.decidePayment(pr.id, false)).ok === false, 'decided payment cannot be decided again');
+  ok((await B.admin.payments('pending')).length === 0, 'no pending left');
+  var sc = await B.admin.selfCheck();
+  ok(sc.filter(function (x) { return x.k === 'mode'; })[0].ok === false, 'self-check flags demo mode');
   var users = await B.admin.users('ерлан');
   ok(users.length === 1 && B.daysLeft(users[0]) >= 89, 'subscription extended ~3 months');
+  await B.signOut(); await B.signIn({ email: 'b@x.kz', password: 'kokzhiyek2' });
+  var myp = await B.myPayments(), rej = myp.filter(function (x) { return x.id === prOther.id; })[0];
+  ok(rej && rej.status === 'rejected' && rej.note === 'Аударма табылмады', 'student sees rejection reason');
+  ok((await B.markPaid(pr.id, 'Ерлан', '1234')).error === 'state', 'mark_paid only while pending');
+  ok((await B.admin.payments()).length === 0, 'student cannot list all payments');
+  await B.signOut(); await B.signIn({ email: 'adm@x.kz', password: 'kokzhiyek1' });
   try { await B.signIn({ email: 'adm@x.kz', password: 'wrong' }); ok(false, 'bad password'); } catch (e) { ok(e.code === 'bad_login', 'bad password code'); }
   // Безопасность: пароли, хеш, блокировка подбора
   for (var w of [['short', 'ab1'], ['mix', 'onlyletters'], ['mix', '1234567890123'], ['common', 'password1']]) {
-    try { await B.signUp({ role: 'student', email: 'w' + w[0] + Math.random() + '@x.kz', password: w[1] }); ok(false, 'weak password accepted: ' + w[1]); } catch (e) { ok(e.code === 'pass_' + w[0], 'weak password code ' + w[0] + ' got ' + e.code); }
+    try { await B.signUp({ consent: true, role: 'student', email: 'w' + w[0] + Math.random() + '@x.kz', password: w[1] }); ok(false, 'weak password accepted: ' + w[1]); } catch (e) { ok(e.code === 'pass_' + w[0], 'weak password code ' + w[0] + ' got ' + e.code); }
   }
-  try { await B.signUp({ role: 'student', email: 'not-an-email', password: 'kokzhiyek9' }); ok(false, 'bad email'); } catch (e) { ok(e.code === 'bad_email', 'bad email code'); }
+  try { await B.signUp({ consent: true, role: 'student', email: 'not-an-email', password: 'kokzhiyek9' }); ok(false, 'bad email'); } catch (e) { ok(e.code === 'bad_email', 'bad email code'); }
   var raw = JSON.parse(store['zerde.accounts']), adU = Object.values(raw.users).filter(function (x) { return x.email === 'adm@x.kz'; })[0];
   ok(/^p2\$[0-9a-f]{32}\$[0-9a-f]{64}$/.test(adU.pass), 'password stored as PBKDF2 with salt');
   await B.signOut();

@@ -825,3 +825,70 @@ body.bare .auth { max-width: 480px; margin: 20px auto; }
 .pw-meter.s3 i { background: var(--ok); }
 .pw-meter.s0 span { color: var(--bad); } .pw-meter.s3 span, .pw-meter.s2 span { color: var(--ok); }
 .promo-d summary { cursor: pointer; color: var(--muted); font-size: .9rem; margin-bottom: 6px; }
+
+/* ---------- документы, согласие, оплата Kaspi, админ: оплаты и система ---------- */
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .02em; }
+.lang-sw { padding: 3px; box-shadow: none; }
+.lang-sw button { padding: 5px 10px; font-size: 12px; }
+.legal-links a { white-space: nowrap; }
+.legal-wrap { max-width: 780px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; padding: 8px 0 24px; }
+.legal-tabs { align-self: flex-start; }
+.legal-draft { font-size: 15px; }
+.legal-doc { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--sh); padding: 24px 26px; overflow-wrap: anywhere; }
+.legal-doc h1 { font-size: 1.6rem; margin: 6px 0 2px; }
+.legal-doc h2 { font-size: 1.05rem; margin: 22px 0 8px; }
+.legal-doc p, .legal-doc li { line-height: 1.6; color: var(--ink-2); }
+.legal-doc p { margin: 0 0 8px; }
+.legal-doc ul, .legal-doc ol { margin: 0 0 10px; padding-left: 22px; display: grid; gap: 4px; }
+.legal-doc + .legal-doc { margin-top: 4px; }
+mark.ph { background: var(--gold-bg); color: var(--ink); border: 1px dashed var(--gold); border-radius: 6px; padding: 0 4px; white-space: nowrap; }
+mark.todo { display: block; background: var(--bad-bg); color: var(--ink); border-left: 3px solid var(--bad); border-radius: 0 10px 10px 0; padding: 10px 12px; font-weight: 600; }
+.note.bad { background: var(--bad-bg); border-left: 3px solid var(--bad); }
+.sys-demo { font-size: 16px; line-height: 1.5; padding: 16px 18px; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; color: var(--ink-2); cursor: pointer; }
+.consent input { width: 20px; height: 20px; margin: 1px 0 0; flex: none; accent-color: var(--accent); }
+/* карточка оплаты */
+.pay-info { display: flex; flex-direction: column; gap: 14px; }
+.pay-amt { display: flex; flex-direction: column; gap: 2px; }
+.pay-amt small { color: var(--muted); font-size: 13px; }
+.pay-amt b { font: 800 clamp(2.2rem, 8vw, 3rem)/1.05 var(--serif); letter-spacing: -.02em; }
+.pay-steps { margin: 0; padding: 0; list-style: none; counter-reset: st; display: grid; gap: 14px; }
+.pay-steps > li { counter-increment: st; position: relative; padding: 0 0 0 42px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.pay-steps > li::before { content: counter(st); position: absolute; left: 0; top: -2px; width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font: 800 14px var(--sans); }
+.copyrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; background: var(--soft); border-radius: 14px; padding: 8px 10px 8px 14px; }
+.copyrow .mono { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.copyrow .big { font-size: 1.3rem; font-weight: 800; }
+.copyrow .code { color: var(--accent); letter-spacing: .06em; }
+.pay-form { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.pay-form .btn { align-self: flex-start; }
+.pst { display: inline-block; border-radius: 999px; padding: 1px 9px; font-size: 12px; font-weight: 800; background: var(--soft); white-space: nowrap; }
+.pst-pending { background: var(--gold-bg); color: var(--gold); }
+.pst-approved { background: var(--ok-bg); color: var(--ok); }
+.pst-rejected { background: var(--bad-bg); color: var(--bad); }
+.pst-unpaid { background: var(--soft); color: var(--muted); }
+/* админ: оплаты */
+.seg .cnt { display: inline-block; margin-left: 6px; background: var(--bad); color: #fff; border-radius: 999px; padding: 0 7px; font-size: 11px; line-height: 18px; vertical-align: 1px; }
+.ad-pays { display: grid; gap: 14px; }
+.ad-pay { display: flex; flex-direction: column; gap: 6px; }
+.ad-pay.paid { border: 2px solid var(--ok); }
+.ad-pay .big { font-size: 1.5rem; }
+.ad-pay .kv { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.ad-pay-act { align-items: stretch; }
+.ad-pay-act form { gap: 8px; min-width: 240px; }
+.ad-pay-act input { min-width: 0; }
+/* админ: система */
+.sys-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.sys-row { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: var(--card); }
+.sys-row p { margin: 4px 0 0; }
+.sys-row small { overflow-wrap: anywhere; }
+.sys-ic { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; }
+.sys-row.ok .sys-ic { background: var(--ok-bg); color: var(--ok); }
+.sys-row.bad { border-color: var(--bad); }
+.sys-row.bad .sys-ic { background: var(--bad-bg); color: var(--bad); }
+.sys-row.skip .sys-ic { background: var(--gold-bg); color: var(--gold); }
+.card.form h3 { font-size: 1rem; margin-top: 6px; }
+@media (max-width: 560px) {
+  .legal-doc { padding: 18px 16px; }
+  .lnd-top { flex-wrap: wrap; }
+  .pay-steps > li { padding-left: 36px; }
+}
