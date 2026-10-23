@@ -7,7 +7,9 @@ var ctx = { console: console, Math: Math, Date: Date, JSON: JSON, Promise: Promi
   localStorage: { getItem: function (k) { return k in store ? store[k] : null; }, setItem: function (k, v) { store[k] = String(v); }, removeItem: function (k) { delete store[k]; } } };
 ctx.globalThis = ctx; ctx.window = ctx; ctx.crypto = require('crypto').webcrypto; ctx.TextEncoder = TextEncoder;
 vm.createContext(ctx);
-['config.js', 'util.js', 'backend.js'].forEach(function (f) { vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f }); });
+// Тест всегда в демо-режиме: боевой js/config.js (с адресом сервера) не подключаем.
+ctx.Z = { config: { supabaseUrl: '', supabaseKey: '' } };
+['util.js', 'backend.js'].forEach(function (f) { vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8'), ctx, { filename: f }); });
 var B = ctx.Z.backend, fails = 0;
 function ok(c, m) { if (!c) { fails++; console.log('FAIL ' + m); } }
 
