@@ -1,0 +1,24 @@
+name: Зерде — тесты и сборка
+on:
+  push:
+    paths: ['zerde/**', '.github/workflows/zerde.yml']
+  pull_request:
+    paths: ['zerde/**']
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: zerde
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - name: Генераторы, движок, планировщик (400 сидов)
+        run: node tests/run.js
+      - name: Аккаунты, оплата, безопасность (демо)
+        run: node tests/backend.js
+      - name: Сборка для продакшена
+        run: npm run build

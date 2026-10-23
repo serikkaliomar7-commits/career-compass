@@ -1,0 +1,4 @@
+# Netlify: Base directory = zerde (в настройках сайта), сборка и публикация — ниже.
+[build]
+  command = "npm install --no-audit --no-fund && npm run build"
+  publish = "dist"

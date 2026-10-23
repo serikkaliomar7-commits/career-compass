@@ -1,0 +1,15 @@
+{
+  "name": "zerde",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Зерде — подготовка к вступительному экзамену БИЛ",
+  "scripts": {
+    "test": "node tests/run.js && node tests/backend.js",
+    "build": "node tools/build.js",
+    "serve": "node tools/serve.js"
+  },
+  "devDependencies": {
+    "esbuild": "0.24.0"
+  },
+  "engines": { "node": ">=18" }
+}
